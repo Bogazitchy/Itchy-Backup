@@ -1,0 +1,489 @@
+using System.Collections.ObjectModel;
+using System.IO;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using ItchyBackup.Models;
+using ItchyBackup.Services;
+
+namespace ItchyBackup.ViewModels;
+
+public enum ActivePanel { Backup, History, Scheduler, Settings }
+
+public partial class MainViewModel : ObservableObject
+{
+    public ObservableCollection<BackupCategory> Categories { get; } = new();
+    public ObservableCollection<BackupProfile> SavedProfiles { get; } = new();
+    public ObservableCollection<HotBackupWarning> HotWarnings { get; } = new();
+    public ObservableCollection<HistoryEntry> BackupHistory { get; } = new();
+
+    // Panel navigasyon
+    [ObservableProperty] private ActivePanel _activePanel = ActivePanel.Backup;
+    public bool IsPanelBackup    => ActivePanel == ActivePanel.Backup;
+    public bool IsPanelHistory   => ActivePanel == ActivePanel.History;
+    public bool IsPanelScheduler => ActivePanel == ActivePanel.Scheduler;
+    public bool IsPanelSettings  => ActivePanel == ActivePanel.Settings;
+
+    partial void OnActivePanelChanged(ActivePanel value)
+    {
+        OnPropertyChanged(nameof(IsPanelBackup));
+        OnPropertyChanged(nameof(IsPanelHistory));
+        OnPropertyChanged(nameof(IsPanelScheduler));
+        OnPropertyChanged(nameof(IsPanelSettings));
+        if (value == ActivePanel.History) LoadBackupHistory();
+    }
+
+    // Yedek seçenekleri
+    [ObservableProperty] private string _destinationPath = "";
+    [ObservableProperty] private bool _useZip = false;
+    [ObservableProperty] private bool _usePassword = false;
+    [ObservableProperty] private string _zipPassword = "";
+    [ObservableProperty] private bool _useVss = true;
+    [ObservableProperty] private bool _verifyChecksum = true;
+    [ObservableProperty] private CompressionLevel _compressionLevel = CompressionLevel.Normal;
+    [ObservableProperty] private bool _isBackingUp = false;
+    [ObservableProperty] private bool _showProgressPanel = false;
+
+    // Progress
+    [ObservableProperty] private double _progressPercent = 0;
+    [ObservableProperty] private string _progressText = "Hazır";
+    [ObservableProperty] private string _currentFile = "";
+    [ObservableProperty] private string _currentCategory = "";
+    [ObservableProperty] private string _speedText = "";
+    [ObservableProperty] private string _etaText = "--";
+    [ObservableProperty] private string _selectedSummary = "Hiç öğe seçilmedi";
+
+    // Ayarlar
+    [ObservableProperty] private bool _startWithWindows = false;
+    [ObservableProperty] private bool _minimizeToTray = false;
+    [ObservableProperty] private bool _autoChecksum = true;
+    [ObservableProperty] private bool _soundNotification = true;
+    [ObservableProperty] private bool _openFolderAfterBackup = false;
+    [ObservableProperty] private string _defaultDestination = "";
+
+    // Zamanlayıcı
+    [ObservableProperty] private bool _schedulerEnabled = false;
+    [ObservableProperty] private string _schedulerTime = "02:00";
+    [ObservableProperty] private string _schedulerProfile = "";
+    [ObservableProperty] private bool _schedMon = false;
+    [ObservableProperty] private bool _schedulerTue = false;
+    [ObservableProperty] private bool _schedWed = false;
+    [ObservableProperty] private bool _schedThu = false;
+    [ObservableProperty] private bool _schedFri = false;
+    [ObservableProperty] private bool _schedSat = false;
+    [ObservableProperty] private bool _schedSun = false;
+    [ObservableProperty] private string _schedulerStatus = "Zamanlayıcı kapalı";
+
+    private CancellationTokenSource? _cts;
+
+    public MainViewModel()
+    {
+        LoadCategories();
+        LoadCustomFolders();
+        LoadProfiles();
+        LoadLastDestination();
+        LoadSettings();
+    }
+
+    // ── Navigasyon ──────────────────────────────────────────────────────────
+    [RelayCommand] public void OpenBackup()    { ActivePanel = ActivePanel.Backup; }
+    [RelayCommand] public void OpenHistory()   { ActivePanel = ActivePanel.History; }
+    [RelayCommand] public void OpenScheduler() { ActivePanel = ActivePanel.Scheduler; }
+    [RelayCommand] public void OpenSettings()  { ActivePanel = ActivePanel.Settings; }
+
+    // ── Kategori yükleme ────────────────────────────────────────────────────
+    private void LoadCategories()
+    {
+        var cats = CategoryBuilder.BuildAll();
+        foreach (var c in cats)
+        {
+            foreach (var item in c.Items)
+                item.PropertyChanged += (_, _) => UpdateSummary();
+            Categories.Add(c);
+        }
+    }
+
+    private void LoadProfiles()
+    {
+        SavedProfiles.Clear();
+        foreach (var p in ProfileService.LoadAll())
+            SavedProfiles.Add(p);
+    }
+
+    private void LoadLastDestination()
+    {
+        var p = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "ItchyBackup", "last_dest.txt");
+        if (File.Exists(p)) DestinationPath = File.ReadAllText(p).Trim();
+    }
+
+    private void SaveLastDestination()
+    {
+        var dir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ItchyBackup");
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "last_dest.txt"), DestinationPath);
+    }
+
+    // ── Yedek seçim komutları ───────────────────────────────────────────────
+    [RelayCommand]
+    public void SelectAll()
+    {
+        foreach (var cat in Categories) cat.SetAllSelected(true);
+        UpdateSummary();
+    }
+
+    [RelayCommand]
+    public void ClearAll()
+    {
+        foreach (var cat in Categories) cat.SetAllSelected(false);
+        UpdateSummary();
+    }
+
+    [RelayCommand]
+    public void BrowseDestination()
+    {
+        using var d = new System.Windows.Forms.FolderBrowserDialog
+        {
+            Description = "Yedek hedef klasörünü seçin",
+            UseDescriptionForTitle = true,
+            SelectedPath = DestinationPath
+        };
+        if (d.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+        {
+            DestinationPath = d.SelectedPath;
+            SaveLastDestination();
+        }
+    }
+
+    // ── Yedekleme ───────────────────────────────────────────────────────────
+    [RelayCommand]
+    public async Task StartBackupAsync()
+    {
+        if (string.IsNullOrWhiteSpace(DestinationPath))
+        {
+            System.Windows.MessageBox.Show("Lütfen yedek hedef klasörünü seçin.", "Itchy Backup",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var selected = Categories.SelectMany(c => c.Items.Where(i => i.IsSelected)).ToList();
+        if (!selected.Any())
+        {
+            System.Windows.MessageBox.Show("Lütfen en az bir öğe seçin.", "Itchy Backup",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        if (UsePassword && string.IsNullOrWhiteSpace(ZipPassword))
+        {
+            System.Windows.MessageBox.Show("AES-256 için şifre girmeniz gerekiyor.", "Itchy Backup",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var warnings = HotBackupDetector.DetectRunningServices(selected.Select(i => i.Id));
+        if (warnings.Any())
+        {
+            var msg = string.Join("\n\n", warnings.Select(w => $"⚠ {w.Message}"));
+            var r = System.Windows.MessageBox.Show(
+                $"Çalışan servisler tespit edildi:\n\n{msg}\n\nDevam edilsin mi?",
+                "Hot Backup Uyarısı", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
+            if (r != System.Windows.MessageBoxResult.Yes) return;
+        }
+
+        IsBackingUp = true;
+        ShowProgressPanel = true;
+        ProgressPercent = 0;
+        ProgressText = "Başlıyor...";
+        CurrentFile = "";
+        CurrentCategory = "";
+        EtaText = "--";
+        SpeedText = "";
+        _cts = new CancellationTokenSource();
+
+        var options = new BackupOptions
+        {
+            DestinationRoot  = DestinationPath,
+            UseZip           = UseZip,
+            UsePassword      = UsePassword,
+            Password         = ZipPassword,
+            UseVss           = UseVss,
+            VerifyChecksum   = VerifyChecksum,
+            CompressionLevel = CompressionLevel,
+            SelectedItems    = selected
+        };
+
+        var progress = new Progress<BackupProgress>(p =>
+        {
+            ProgressPercent  = p.PercentComplete;
+            ProgressText     = $"{p.CompletedItems}/{p.TotalItems} kategori";
+            CurrentFile      = p.CurrentFile;
+            CurrentCategory  = p.CurrentCategory;
+            SpeedText        = p.SpeedMBps > 0 ? p.SpeedText : "";
+            EtaText          = p.EstimatedText;
+        });
+
+        try
+        {
+            var engine = new BackupEngine(options, progress, _cts.Token);
+            await engine.RunAsync();
+            ProgressPercent = 100;
+            ProgressText    = $"Tamamlandı! ({selected.Count} kategori)";
+            SaveLastDestination();
+        }
+        catch (OperationCanceledException)
+        {
+            ProgressText = "İptal edildi.";
+            ProgressPercent = 0;
+        }
+        catch (Exception ex)
+        {
+            ProgressText = $"Hata: {ex.Message}";
+            System.Windows.MessageBox.Show($"Yedekleme hatası:\n{ex.Message}",
+                "Hata", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsBackingUp = false;
+            _cts?.Dispose();
+        }
+
+        // Manuel yedek tamamlandıysa ve ayar açıksa klasörü aç
+        if (!IsBackingUp && OpenFolderAfterBackup && !string.IsNullOrEmpty(DestinationPath) 
+            && System.IO.Directory.Exists(DestinationPath))
+        {
+            // En son oluşturulan Yedek_ klasörünü aç
+            var latest = System.IO.Directory.GetDirectories(DestinationPath, "Yedek_*")
+                .OrderByDescending(d => d).FirstOrDefault();
+            if (latest != null)
+                System.Diagnostics.Process.Start("explorer.exe", latest);
+            else
+                System.Diagnostics.Process.Start("explorer.exe", DestinationPath);
+        }
+    }
+
+    [RelayCommand] public void CancelBackup() => _cts?.Cancel();
+
+    [RelayCommand]
+    public void SaveProfile()
+    {
+        var name = Microsoft.VisualBasic.Interaction.InputBox(
+            "Profil adını girin:", "Profil Kaydet", "Teknik Servis Profili");
+        if (string.IsNullOrWhiteSpace(name)) return;
+
+        var profile = new BackupProfile
+        {
+            ProfileName      = name,
+            CreatedAt        = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            DefaultDestination = DestinationPath,
+            UseZip           = UseZip,
+            UsePassword      = UsePassword,
+            UseVss           = UseVss,
+            VerifyChecksum   = VerifyChecksum,
+            CompressionLevel = CompressionLevel,
+            SelectedItemIds  = Categories.SelectMany(c => c.Items.Where(i => i.IsSelected).Select(i => i.Id)).ToList()
+        };
+        ProfileService.Save(profile);
+        LoadProfiles();
+    }
+
+    [RelayCommand]
+    public void LoadProfile(BackupProfile profile)
+    {
+        DestinationPath  = profile.DefaultDestination;
+        UseZip           = profile.UseZip;
+        UsePassword      = profile.UsePassword;
+        UseVss           = profile.UseVss;
+        VerifyChecksum   = profile.VerifyChecksum;
+        CompressionLevel = profile.CompressionLevel;
+        var ids = new HashSet<string>(profile.SelectedItemIds);
+        foreach (var cat in Categories)
+            foreach (var item in cat.Items)
+                item.IsSelected = ids.Contains(item.Id);
+        UpdateSummary();
+    }
+
+    [RelayCommand]
+    public void OpenLogFolder()
+    {
+        var p = LogService.GetLogPath();
+        if (!string.IsNullOrEmpty(p) && File.Exists(p))
+            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{p}\"");
+        else
+            System.Diagnostics.Process.Start("explorer.exe",
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ItchyBackup", "Logs"));
+    }
+
+    // ── Geçmiş ──────────────────────────────────────────────────────────────
+    private void LoadBackupHistory()
+    {
+        BackupHistory.Clear();
+        if (string.IsNullOrEmpty(DestinationPath) || !Directory.Exists(DestinationPath)) return;
+        var dirs = Directory.GetDirectories(DestinationPath, "Yedek_*")
+            .OrderByDescending(d => d).Take(50);
+        foreach (var dir in dirs)
+        {
+            var name = Path.GetFileName(dir);
+            var logFile = Directory.GetFiles(dir, "backup_log_*.txt").FirstOrDefault();
+            bool hasErrors = false;
+            string summary = "Detay yok";
+            if (logFile != null)
+            {
+                var lines = File.ReadAllLines(logFile);
+                hasErrors = lines.Any(l => l.Contains("[ERROR]"));
+                var okCount = lines.Count(l => l.Contains("OK:"));
+                summary = $"{okCount} kategori yedeklendi";
+            }
+            BackupHistory.Add(new HistoryEntry
+            {
+                FolderName = name,
+                Date = name.Replace("Yedek_", "").Replace("_", " "),
+                Summary = summary,
+                HasErrors = hasErrors,
+                DestinationPath = dir
+            });
+        }
+    }
+
+    // ── Zamanlayıcı ─────────────────────────────────────────────────────────
+    [RelayCommand]
+    public void SaveScheduler()
+    {
+        if (!SchedulerEnabled)
+        {
+            RemoveScheduledTask();
+            SchedulerStatus = "Zamanlayıcı kapalı";
+            return;
+        }
+
+        var days = new List<string>();
+        if (SchedMon) days.Add("MON");
+        if (SchedulerTue) days.Add("TUE");
+        if (SchedWed) days.Add("WED");
+        if (SchedThu) days.Add("THU");
+        if (SchedFri) days.Add("FRI");
+        if (SchedSat) days.Add("SAT");
+        if (SchedSun) days.Add("SUN");
+
+        if (!days.Any())
+        {
+            System.Windows.MessageBox.Show("En az bir gün seçin.", "Zamanlayıcı",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(SchedulerProfile))
+        {
+            System.Windows.MessageBox.Show("Bir profil seçin.", "Zamanlayıcı",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        CreateScheduledTask(days, SchedulerTime, SchedulerProfile);
+        SchedulerStatus = $"Aktif — {string.Join(", ", days)} saat {SchedulerTime}";
+        System.Windows.MessageBox.Show(
+            $"Zamanlayıcı oluşturuldu!\n\nGünler: {string.Join(", ", days)}\nSaat: {SchedulerTime}\nProfil: {SchedulerProfile}",
+            "Zamanlayıcı", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+    }
+
+    private void CreateScheduledTask(List<string> days, string time, string profile)
+    {
+        try
+        {
+            var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location
+                .Replace(".dll", ".exe");
+            var daysArg = string.Join(",", days);
+
+            // Windows Görev Zamanlayıcısı'na ekle (schtasks)
+            var parts = time.Split(':');
+            var hour = parts[0];
+            var minute = parts.Length > 1 ? parts[1] : "00";
+            var timeStr = $"{hour}:{minute}";
+
+            // Her seçili gün için ayrı task oluştur
+            foreach (var day in days)
+            {
+                var taskName = $"ItchyBackup_{day}";
+                var args = $"/create /f /tn \"{taskName}\" /tr \"\\\"{exePath}\\\" --autobackup \\\"{profile}\\\"\" /sc weekly /d {day} /st {timeStr} /rl HIGHEST";
+                var psi = new System.Diagnostics.ProcessStartInfo("schtasks", args)
+                {
+                    CreateNoWindow = true, UseShellExecute = false
+                };
+                System.Diagnostics.Process.Start(psi)?.WaitForExit();
+            }
+            LogService.Info($"Zamanlayıcı oluşturuldu: {string.Join(",", days)} {timeStr}");
+        }
+        catch (Exception ex)
+        {
+            LogService.Error("Zamanlayıcı oluşturulamadı", ex);
+            System.Windows.MessageBox.Show($"Zamanlayıcı oluşturulamadı:\n{ex.Message}",
+                "Hata", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+    }
+
+    private void RemoveScheduledTask()
+    {
+        try
+        {
+            foreach (var day in new[] { "MON","TUE","WED","THU","FRI","SAT","SUN" })
+            {
+                var args = $"/delete /f /tn \"ItchyBackup_{day}\"";
+                var psi = new System.Diagnostics.ProcessStartInfo("schtasks", args)
+                { CreateNoWindow = true, UseShellExecute = false };
+                System.Diagnostics.Process.Start(psi)?.WaitForExit();
+            }
+        }
+        catch { }
+    }
+
+    // ── Ayarlar ─────────────────────────────────────────────────────────────
+    [RelayCommand]
+    public void SaveSettings()
+    {
+        var vm = new SettingsViewModel
+        {
+            StartWithWindows   = StartWithWindows,
+            MinimizeToTray     = MinimizeToTray,
+            AutoChecksum          = AutoChecksum,
+            SoundNotification     = SoundNotification,
+            OpenFolderAfterBackup = OpenFolderAfterBackup,
+            DefaultDestination    = DefaultDestination
+        };
+        vm.Save();
+        if (!string.IsNullOrEmpty(DefaultDestination) && string.IsNullOrEmpty(DestinationPath))
+            DestinationPath = DefaultDestination;
+        System.Windows.MessageBox.Show("Ayarlar kaydedildi.", "Itchy Backup",
+            System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+    }
+
+    private void LoadSettings()
+    {
+        var vm = new SettingsViewModel();
+        StartWithWindows   = vm.StartWithWindows;
+        MinimizeToTray     = vm.MinimizeToTray;
+        AutoChecksum       = vm.AutoChecksum;
+        SoundNotification     = vm.SoundNotification;
+        OpenFolderAfterBackup = vm.OpenFolderAfterBackup;
+        DefaultDestination    = vm.DefaultDestination;
+        if (string.IsNullOrEmpty(DestinationPath) && !string.IsNullOrEmpty(DefaultDestination))
+            DestinationPath = DefaultDestination;
+    }
+
+    [RelayCommand]
+    public void BrowseDefaultDestination()
+    {
+        using var d = new System.Windows.Forms.FolderBrowserDialog
+        { Description = "Varsayılan yedek klasörü", SelectedPath = DefaultDestination };
+        if (d.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            DefaultDestination = d.SelectedPath;
+    }
+
+    // ── Yardımcı ────────────────────────────────────────────────────────────
+    private void UpdateSummary()
+    {
+        var n = Categories.SelectMany(c => c.Items).Count(i => i.IsSelected);
+        SelectedSummary = n == 0 ? "Hiç öğe seçilmedi" : $"{n} öğe seçili";
+    }
+}
+
