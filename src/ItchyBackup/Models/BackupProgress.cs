@@ -9,6 +9,7 @@ public class BackupProgress
     public int TotalFiles { get; set; }
     public int FilesCopied { get; set; }
     public int FilesSkipped { get; set; }
+    public int FilesUnchanged { get; set; }
     public string CurrentFile { get; set; } = "";
     public string CurrentCategory { get; set; } = "";
     public double SpeedMBps { get; set; }
@@ -37,6 +38,7 @@ public class BackupProgress
     }
 
     public string FileCountText => $"{FilesCopied}/{TotalFiles} dosya"
+        + (FilesUnchanged > 0 ? $" • {FilesUnchanged} değişmedi" : "")
         + (FilesSkipped > 0 ? $" • {FilesSkipped} atlandı" : "");
 }
 

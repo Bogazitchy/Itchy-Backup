@@ -455,16 +455,57 @@
                           </Style>
                         </Border.Style>
                         <DockPanel>
-                          <!-- Profil avatar -->
-                          <Border DockPanel.Dock="Left" Width="28" Height="28" CornerRadius="14"
-                                  Background="{StaticResource BgQuaternary}"
-                                  BorderBrush="{StaticResource BorderHoverBrush}" BorderThickness="1"
+                          <!-- Profil ikon -->
+                          <Border DockPanel.Dock="Left" Width="30" Height="30" CornerRadius="8"
+                                  Background="{StaticResource AccentSubtle}"
+                                  BorderBrush="{StaticResource Accent}" BorderThickness="1"
                                   Margin="0,0,10,0">
-                            <TextBlock Text="{Binding ProfileName[0]}" FontSize="12" FontWeight="Bold"
-                                       Foreground="{StaticResource Accent}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       FontFamily="Consolas"/>
+                            <Viewbox Width="16" Height="16"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center">
+                              <Canvas Width="024" Height="24">
+                                <Path Data="{Binding IconPath}" Fill="{StaticResource AccentLight}"/>
+                              </Canvas>
+                            </Viewbox>
                           </Border>
+                          <!-- Sil butonu -->
+                          <Button DockPanel.Dock="Right" VerticalAlignment="Center"
+                                  Width="20" Height="20" Margin="6,0,0,0"
+                                  Command="{Binding DataContext.DeleteProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                  CommandParameter="{Binding}"
+                                  ToolTip="Profili Sil">
+                            <Button.Style>
+                              <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Opacity" Value="0.35"/>
+                                <Setter Property="Template">
+                                  <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                      <Border Background="{TemplateBinding Background}"
+                                              CornerRadius="4"
+                                              Width="20" Height="20">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                      </Border>
+                                    </ControlTemplate>
+                                  </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                  <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#2A0A0A"/>
+                                    <Setter Property="Opacity" Value="1"/>
+                                  </Trigger>
+                                </Style.Triggers>
+                              </Style>
+                            </Button.Style>
+                            <Viewbox Width="11" Height="11">
+                              <Canvas Width="24" Height="24">
+                                <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"
+                                      Fill="{StaticResource Danger}"/>
+                              </Canvas>
+                            </Viewbox>
+                          </Button>
                           <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="{Binding ProfileName}" FontSize="12"
                                        Foreground="{StaticResource TextPrimary}"
@@ -973,6 +1014,75 @@
                       </StackPanel>
                     </Border>
 
+                    <!-- Ağ Kimlik Bilgileri — UNC path girilince görünür -->
+                    <Border Background="{StaticResource BgTertiary}" CornerRadius="10"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            Margin="0,0,0,12" Padding="14,12">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Visibility" Value="Collapsed"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsNetworkPath}" Value="True">
+                              <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                      <StackPanel>
+                        <TextBlock Text="AĞ KİMLİK BİLGİLERİ" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+                        <CheckBox Style="{StaticResource ItchyCheckBox}"
+                                  IsChecked="{Binding UseNetworkCredentials}" Margin="0,0,0,0">
+                          <TextBlock Text="SMB kimlik doğrulama" FontFamily="Segoe UI" FontSize="12"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        </CheckBox>
+                        <StackPanel Margin="0,8,0,0">
+                          <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                              <Setter Property="Visibility" Value="Collapsed"/>
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding UseNetworkCredentials}" Value="True">
+                                  <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </StackPanel.Style>
+                          <Separator Margin="0,0,0,8"/>
+                          <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="*"/>
+                              <ColumnDefinition Width="8"/>
+                              <ColumnDefinition Width="90"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                              <TextBlock Text="kullanıcı adı" FontSize="9" FontFamily="Consolas"
+                                         Foreground="{StaticResource TextTertiary}" Margin="0,0,0,2"/>
+                              <TextBox Style="{StaticResource ItchyTextBox}"
+                                       Text="{Binding NetworkUsername, UpdateSourceTrigger=PropertyChanged}"
+                                       FontFamily="Consolas" FontSize="11" Height="30"
+                                       VerticalContentAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                              <TextBlock Text="domain" FontSize="9" FontFamily="Consolas"
+                                         Foreground="{StaticResource TextTertiary}" Margin="0,0,0,2"/>
+                              <TextBox Style="{StaticResource ItchyTextBox}"
+                                       Text="{Binding NetworkDomain, UpdateSourceTrigger=PropertyChanged}"
+                                       FontFamily="Consolas" FontSize="11" Height="30"
+                                       VerticalContentAlignment="Center"/>
+                            </StackPanel>
+                          </Grid>
+                          <TextBlock Text="parola" FontSize="9" FontFamily="Consolas"
+                                     Foreground="{StaticResource TextTertiary}" Margin="0,0,0,2"/>
+                          <TextBox Style="{StaticResource ItchyTextBox}"
+                                   Text="{Binding NetworkPassword, UpdateSourceTrigger=PropertyChanged}"
+                                   FontFamily="Consolas" FontSize="11" Height="30"
+                                   VerticalContentAlignment="Center"/>
+                          <TextBlock Text="Parola profilde saklanmaz." FontSize="9" FontFamily="Consolas"
+                                     Foreground="{StaticResource TextTertiary}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
+
                     <!-- Sıkıştırma grubu -->
                     <Border Background="{StaticResource BgTertiary}" CornerRadius="10"
                             BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
@@ -1037,6 +1147,61 @@
                           <TextBlock Text="VSS (açık dosya desteği)" FontFamily="Segoe UI" FontSize="12"
                                      Foreground="{StaticResource TextPrimary}"/>
                         </CheckBox>
+                      </StackPanel>
+                    </Border>
+
+                    <!-- Artımlı Yedekleme -->
+                    <Border Background="{StaticResource BgTertiary}" CornerRadius="10"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            Margin="0,0,0,12" Padding="14,12">
+                      <StackPanel>
+                        <TextBlock Text="YEDEKLEME TÜRÜ" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+                        <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding IsIncremental}">
+                          <TextBlock Text="Artımlı yedekleme" FontFamily="Segoe UI" FontSize="12"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        </CheckBox>
+                        <StackPanel Margin="0,6,0,0">
+                          <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                              <Setter Property="Visibility" Value="Collapsed"/>
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsIncremental}" Value="True">
+                                  <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </StackPanel.Style>
+                          <TextBlock Text="Yalnızca değişen dosyaları yedekler." FontSize="10"
+                                     FontFamily="Consolas" Foreground="{StaticResource TextTertiary}"
+                                     Margin="0,0,0,8"/>
+                          <TextBlock Text="BAZ YEDEK" FontSize="9" FontFamily="Consolas"
+                                     Foreground="{StaticResource TextTertiary}" Margin="0,0,0,4"/>
+                          <Grid>
+                            <ComboBox Style="{StaticResource ItchyComboBox}"
+                                      ItemsSource="{Binding IncrementalBaseOptions}"
+                                      SelectedItem="{Binding SelectedIncrementalBase}"
+                                      DisplayMemberPath="Label"
+                                      Height="34"/>
+                            <TextBlock Text="Lütfen bir yedek seçin"
+                                       IsHitTestVisible="False"
+                                       VerticalAlignment="Center"
+                                       Margin="10,0,30,0"
+                                       FontFamily="Segoe UI" FontSize="12"
+                                       Foreground="{StaticResource TextTertiary}">
+                              <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                  <Setter Property="Visibility" Value="Collapsed"/>
+                                  <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedIncrementalBase}" Value="{x:Null}">
+                                      <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                  </Style.Triggers>
+                                </Style>
+                              </TextBlock.Style>
+                            </TextBlock>
+                          </Grid>
+                        </StackPanel>
                       </StackPanel>
                     </Border>
 
@@ -1135,33 +1300,52 @@
                               <TextBlock Text="{Binding Summary}" FontSize="11"
                                          Foreground="{StaticResource TextSecondary}"
                                          FontFamily="Segoe UI" Margin="0,3,0,0"/>
+                              <TextBlock Text="{Binding DestinationRoot}" FontSize="10" FontFamily="Consolas"
+                                         Foreground="{StaticResource TextTertiary}" Margin="0,4,0,0"
+                                         TextTrimming="CharacterEllipsis"/>
                             </StackPanel>
-                            <Border Grid.Column="1" VerticalAlignment="Center" CornerRadius="8" Padding="10,4">
-                              <Border.Style>
-                                <Style TargetType="Border">
-                                  <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
-                                  <Style.Triggers>
-                                    <DataTrigger Binding="{Binding HasErrors}" Value="True">
-                                      <Setter Property="Background" Value="#1A0A0A"/>
-                                    </DataTrigger>
-                                  </Style.Triggers>
-                                </Style>
-                              </Border.Style>
-                              <TextBlock FontSize="10" FontFamily="Consolas" FontWeight="Medium">
-                                <TextBlock.Style>
-                                  <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="✓ Başarılı"/>
-                                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                              <Border VerticalAlignment="Top" CornerRadius="8" Padding="10,4"
+                                      HorizontalAlignment="Right">
+                                <Border.Style>
+                                  <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
                                     <Style.Triggers>
                                       <DataTrigger Binding="{Binding HasErrors}" Value="True">
-                                        <Setter Property="Text" Value="✕ Hata var"/>
-                                        <Setter Property="Foreground" Value="{StaticResource Danger}"/>
+                                        <Setter Property="Background" Value="#1A0A0A"/>
                                       </DataTrigger>
                                     </Style.Triggers>
                                   </Style>
-                                </TextBlock.Style>
-                              </TextBlock>
-                            </Border>
+                                </Border.Style>
+                                <TextBlock FontSize="10" FontFamily="Consolas" FontWeight="Medium">
+                                  <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                      <Setter Property="Text" Value="✓ Başarılı"/>
+                                      <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                      <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                                          <Setter Property="Text" Value="✕ Hata var"/>
+                                          <Setter Property="Foreground" Value="{StaticResource Danger}"/>
+                                        </DataTrigger>
+                                      </Style.Triggers>
+                                    </Style>
+                                  </TextBlock.Style>
+                                </TextBlock>
+                              </Border>
+                              <Button Style="{StaticResource SecondaryButton}" Margin="0,6,0,0"
+                                      Padding="8,5" HorizontalAlignment="Right"
+                                      Command="{Binding DataContext.OpenHistoryFolderCommand,
+                                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                      CommandParameter="{Binding DestinationPath}"
+                                      ToolTip="{Binding DestinationPath}">
+                                <StackPanel Orientation="Horizontal">
+                                  <TextBlock Text="📁" FontFamily="Segoe UI Emoji" FontSize="11"
+                                             VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                  <TextBlock Text="Konuma Git" FontFamily="Segoe UI" FontSize="10"
+                                             VerticalAlignment="Center"/>
+                                </StackPanel>
+                              </Button>
+                            </StackPanel>
                           </Grid>
                         </Grid>
                       </Border>
@@ -1972,6 +2156,32 @@
                     </StackPanel>
                   </Border>
                 </UniformGrid>
+
+                <!-- Artımlı bilgi (yalnızca artımlı yedekte görünür) -->
+                <Border Background="{StaticResource BgCard}" CornerRadius="8"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,-8,0,12" Padding="12,8">
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding LastBackupResult.IsIncremental}" Value="True">
+                          <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <DockPanel>
+                    <TextBlock Text="ARTIMLI" FontSize="9" FontFamily="Consolas"
+                               Foreground="{StaticResource AccentLight}" VerticalAlignment="Center"
+                               DockPanel.Dock="Left" Margin="0,0,10,0"/>
+                    <TextBlock FontSize="11" FontFamily="Segoe UI"
+                               Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center">
+                      <Run Text="{Binding LastBackupResult.FilesUnchanged, Mode=OneWay}"/>
+                      <Run Text=" dosya değişmedi (atlandı)"/>
+                    </TextBlock>
+                  </DockPanel>
+                </Border>
 
                 <!-- Doğrulama Raporu -->
                 <Border Background="{StaticResource BgCard}" CornerRadius="10"

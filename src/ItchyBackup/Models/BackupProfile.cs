@@ -13,6 +13,13 @@ public class BackupProfile
     public int KeepLastN { get; set; } = 3;
     public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Normal;
     public List<string> SelectedItemIds { get; set; } = new();
+    public bool IsIncremental { get; set; } = false;
+    public bool UseNetworkCredentials { get; set; } = false;
+    public string NetworkUsername { get; set; } = "";
+    public string NetworkDomain { get; set; } = "";
+    public string Icon { get; set; } = "person";
+
+    public string IconPath => ProfileIcons.GetPath(Icon);
 }
 
 public enum CompressionLevel

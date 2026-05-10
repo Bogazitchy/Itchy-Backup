@@ -17,6 +17,12 @@ public class BackupOptions
     public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Normal;
     public List<BackupItem> SelectedItems { get; set; } = new();
     public bool IncludeMachineInfo { get; set; } = true;
+    public bool IsIncremental { get; set; } = false;
+    public string IncrementalBaseFolder { get; set; } = ""; // boş = otomatik tespit
+    public bool UseNetworkCredentials { get; set; } = false;
+    public string NetworkUsername { get; set; } = "";
+    public string NetworkPassword { get; set; } = "";
+    public string NetworkDomain { get; set; } = "";
 }
 
 public class BackupResult
@@ -27,10 +33,13 @@ public class BackupResult
     public int TotalCategories { get; set; }
     public int FilesCopied { get; set; }
     public int FilesSkipped { get; set; }
+    public int FilesUnchanged { get; set; }
     public long TotalBytes { get; set; }
     public List<string> Errors { get; set; } = new();
     public List<string> Warnings { get; set; } = new();
     public VerificationReport? VerificationReport { get; set; }
+    public bool IsIncremental { get; set; }
+    public string IncrementalBase { get; set; } = "";
 }
 
 public class BackupEngine
@@ -40,6 +49,8 @@ public class BackupEngine
     private readonly CancellationToken _ct;
     private readonly BackupProgress _state = new();
     private readonly Stopwatch _sw = new();
+    private string? _incrementalBase;
+    private string _workFolder = "";
 
     public BackupResult Result { get; } = new();
 
@@ -54,6 +65,23 @@ public class BackupEngine
     {
         _sw.Start();
         var timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+
+        // Ağ paylaşımına bağlan (kimlik bilgileri varsa)
+        if (_options.UseNetworkCredentials && NetworkShareHelper.IsUncPath(_options.DestinationRoot))
+        {
+            try
+            {
+                LogService.Info($"Ağ paylaşımına bağlanılıyor: {_options.DestinationRoot}");
+                NetworkShareHelper.Connect(_options.DestinationRoot,
+                    _options.NetworkUsername, _options.NetworkPassword, _options.NetworkDomain);
+                LogService.Info("Ağ bağlantısı başarılı.");
+            }
+            catch (Exception ex)
+            {
+                LogService.Error("Ağ bağlantısı kurulamadı", ex);
+                throw new InvalidOperationException($"SMB bağlantısı başarısız: {ex.Message}", ex);
+            }
+        }
 
         // Klasör adı: bilgisayar/kullanıcı bilgisi ile
         string folderName;
@@ -97,6 +125,26 @@ public class BackupEngine
 
         if (_options.UseZip)
             Directory.CreateDirectory(workFolder);
+
+        _workFolder = workFolder;
+
+        // Artımlı yedekleme için önceki yedek klasörünü bul
+        if (_options.IsIncremental)
+        {
+            if (!string.IsNullOrEmpty(_options.IncrementalBaseFolder) && Directory.Exists(_options.IncrementalBaseFolder))
+            {
+                _incrementalBase = _options.IncrementalBaseFolder;
+                LogService.Info($"Artımlı baz (manuel): {_incrementalBase}");
+            }
+            else
+            {
+                _incrementalBase = FindLastBackupFolder(backupFolder);
+                if (_incrementalBase != null)
+                    LogService.Info($"Artımlı baz (otomatik): {_incrementalBase}");
+                else
+                    LogService.Info("Artımlı: önceki yedek bulunamadı, tam yedek yapılıyor.");
+            }
+        }
 
         for (int i = 0; i < _options.SelectedItems.Count; i++)
         {
@@ -153,15 +201,22 @@ public class BackupEngine
         _state.CopiedBytes = _state.TotalBytes;
         Report("Tamamlandı!", "");
 
+        // Ağ bağlantısını kes
+        if (_options.UseNetworkCredentials && NetworkShareHelper.IsUncPath(_options.DestinationRoot))
+            NetworkShareHelper.Disconnect(_options.DestinationRoot);
+
         Result.Success = _state.Errors.Count == 0;
         Result.Elapsed = _sw.Elapsed;
         Result.TotalCategories = _state.TotalItems;
         Result.FilesCopied = _state.FilesCopied;
         Result.FilesSkipped = _state.FilesSkipped;
+        Result.FilesUnchanged = _state.FilesUnchanged;
         Result.Errors = _state.Errors.ToList();
         Result.Warnings = _state.Warnings.ToList();
+        Result.IsIncremental = _options.IsIncremental;
+        Result.IncrementalBase = _incrementalBase != null ? Path.GetFileName(_incrementalBase) : "";
 
-        LogService.Info($"=== Tamamlandı. Süre: {_sw.Elapsed:mm\\:ss} Dosya: {_state.FilesCopied} Hata: {_state.Errors.Count} ===");
+        LogService.Info($"=== Tamamlandı. Süre: {_sw.Elapsed:mm\\:ss} Dosya: {_state.FilesCopied} Değişmedi: {_state.FilesUnchanged} Hata: {_state.Errors.Count} ===");
 
         NotificationService.ShowSuccess("Itchy Backup",
             $"Yedekleme tamamlandı!\n{_state.TotalItems} kategori • {_state.FilesCopied} dosya • {_state.Errors.Count} hata • {_sw.Elapsed:mm\\:ss}");
@@ -171,6 +226,9 @@ public class BackupEngine
 
     private async Task WriteSystemInfoAsync(string folder)
     {
+        var backupType = _options.IsIncremental
+            ? $"Artımlı{(_incrementalBase != null ? $" (baz: {Path.GetFileName(_incrementalBase)})" : " (baz yok → tam)") }"
+            : "Tam";
         var info = $@"# Itchy Backup - Sistem Bilgisi
 Tarih: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
 Bilgisayar Adı: {Environment.MachineName}
@@ -179,9 +237,11 @@ Domain: {Environment.UserDomainName}
 İşletim Sistemi: {Environment.OSVersion}
 .NET: {Environment.Version}
 İşlemci: {Environment.ProcessorCount} çekirdek
-Yedek Türü: {(_options.UseZip ? "ZIP" : "Klasör")}
+Yedek Türü: {backupType}
+Kapsayıcı: {(_options.UseZip ? "ZIP" : "Klasör")}
 Şifreli: {(_options.UsePassword ? "Evet" : "Hayır")}
 VSS Kullanıldı: {(_options.UseVss ? "Evet" : "Hayır")}
+Ağ Hedefi: {(NetworkShareHelper.IsUncPath(_options.DestinationRoot) ? "Evet" : "Hayır")}
 Kategori Sayısı: {_options.SelectedItems.Count}
 ";
         await File.WriteAllTextAsync(Path.Combine(folder, "system_info.txt"), info);
@@ -249,6 +309,19 @@ Kategori Sayısı: {_options.SelectedItems.Count}
             var destFile = file.FullName.Replace(source, dest);
             try
             {
+                // Artımlı: değişmeyen dosyaları atla
+                if (_options.IsIncremental && _incrementalBase != null)
+                {
+                    var rel = Path.GetRelativePath(_workFolder, destFile);
+                    var baseCopy = Path.Combine(_incrementalBase, rel);
+                    if (File.Exists(baseCopy) && IsUnchanged(file.FullName, baseCopy))
+                    {
+                        _state.FilesUnchanged++;
+                        _state.CopiedBytes += file.Length;
+                        continue;
+                    }
+                }
+
                 Directory.CreateDirectory(Path.GetDirectoryName(destFile)!);
                 Report($"{file.Name}", category);
                 await CopyFileAsync(file.FullName, destFile, category);
@@ -259,6 +332,32 @@ Kategori Sayısı: {_options.SelectedItems.Count}
                 LogService.Warn($"Kopyalanamadı: {file.Name} - {ex.Message}");
             }
         }
+    }
+
+    private static bool IsUnchanged(string srcPath, string lastCopyPath)
+    {
+        try
+        {
+            var src = new FileInfo(srcPath);
+            var last = new FileInfo(lastCopyPath);
+            return src.Length == last.Length
+                && Math.Abs((src.LastWriteTimeUtc - last.LastWriteTimeUtc).TotalSeconds) < 2;
+        }
+        catch { return false; }
+    }
+
+    private string? FindLastBackupFolder(string currentBackupFolder)
+    {
+        try
+        {
+            var machine = SanitizeName(Environment.MachineName);
+            var user = SanitizeName(Environment.UserName);
+            return Directory.GetDirectories(_options.DestinationRoot, $"Yedek_{machine}_{user}_*")
+                .Where(d => d != currentBackupFolder)
+                .OrderByDescending(d => d)
+                .FirstOrDefault();
+        }
+        catch { return null; }
     }
 
     private async Task CopyFileAsync(string src, string dest, string category)
@@ -426,6 +525,7 @@ Kategori Sayısı: {_options.SelectedItems.Count}
         TotalFiles      = _state.TotalFiles,
         FilesCopied     = _state.FilesCopied,
         FilesSkipped    = _state.FilesSkipped,
+        FilesUnchanged  = _state.FilesUnchanged,
         CurrentFile     = _state.CurrentFile,
         CurrentCategory = _state.CurrentCategory,
         SpeedMBps       = _state.SpeedMBps,

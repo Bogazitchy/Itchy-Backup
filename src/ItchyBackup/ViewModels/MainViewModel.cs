@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ItchyBackup.Models;
 using ItchyBackup.Services;
+using System.Linq;
 
 namespace ItchyBackup.ViewModels;
 
@@ -11,10 +12,13 @@ public enum ActivePanel { Backup, History, Scheduler, Settings, Restore, Compare
 
 public partial class MainViewModel : ObservableObject
 {
+    public record IncrementalBaseOption(string Label, string? FolderPath);
+
     public ObservableCollection<BackupCategory> Categories { get; } = new();
     public ObservableCollection<BackupProfile> SavedProfiles { get; } = new();
     public ObservableCollection<HotBackupWarning> HotWarnings { get; } = new();
     public ObservableCollection<HistoryEntry> BackupHistory { get; } = new();
+    public ObservableCollection<IncrementalBaseOption> IncrementalBaseOptions { get; } = new();
 
     // Panel navigasyon
     [ObservableProperty] private ActivePanel _activePanel = ActivePanel.Backup;
@@ -50,6 +54,18 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private CompressionLevel _compressionLevel = CompressionLevel.Normal;
     [ObservableProperty] private bool _isBackingUp = false;
     [ObservableProperty] private bool _showProgressPanel = false;
+
+    // Artımlı yedekleme
+    [ObservableProperty] private bool _isIncremental = false;
+    [ObservableProperty] private IncrementalBaseOption? _selectedIncrementalBase;
+
+    // Ağ paylaşımı
+    [ObservableProperty] private bool _useNetworkCredentials = false;
+    [ObservableProperty] private string _networkUsername = "";
+    [ObservableProperty] private string _networkPassword = "";
+    [ObservableProperty] private string _networkDomain = "";
+
+    public bool IsNetworkPath => NetworkShareHelper.IsUncPath(DestinationPath);
 
     // Progress
     [ObservableProperty] private double _progressPercent = 0;
@@ -102,6 +118,38 @@ public partial class MainViewModel : ObservableObject
 
     private CancellationTokenSource? _cts;
     private CancellationTokenSource? _sizeEstimateCts;
+
+    partial void OnDestinationPathChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsNetworkPath));
+        if (!NetworkShareHelper.IsUncPath(value))
+            UseNetworkCredentials = false;
+        if (IsIncremental) UpdateIncrementalBaseOptions();
+    }
+
+    partial void OnIsIncrementalChanged(bool value)
+    {
+        if (value) UpdateIncrementalBaseOptions();
+        else IncrementalBaseOptions.Clear();
+    }
+
+    private void UpdateIncrementalBaseOptions()
+    {
+        IncrementalBaseOptions.Clear();
+        IncrementalBaseOptions.Add(new IncrementalBaseOption("Otomatik — en son yedek", null));
+
+        if (!string.IsNullOrEmpty(DestinationPath) && Directory.Exists(DestinationPath))
+        {
+            var machine = string.Concat(Environment.MachineName.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
+            var user = string.Concat(Environment.UserName.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
+            var folders = Directory.GetDirectories(DestinationPath, $"Yedek_{machine}_{user}_*")
+                .OrderByDescending(d => d);
+            foreach (var f in folders)
+                IncrementalBaseOptions.Add(new IncrementalBaseOption(Path.GetFileName(f), f));
+        }
+
+        SelectedIncrementalBase = null;
+    }
 
     public MainViewModel()
     {
@@ -259,15 +307,21 @@ public partial class MainViewModel : ObservableObject
 
         var options = new BackupOptions
         {
-            DestinationRoot    = DestinationPath,
-            UseZip             = UseZip,
-            UsePassword        = UsePassword,
-            Password           = ZipPassword,
-            UseVss             = UseVss,
-            VerifyChecksum     = VerifyChecksum,
-            CompressionLevel   = CompressionLevel,
-            SelectedItems      = selected,
-            IncludeMachineInfo = true
+            DestinationRoot      = DestinationPath,
+            UseZip               = UseZip,
+            UsePassword          = UsePassword,
+            Password             = ZipPassword,
+            UseVss               = UseVss,
+            VerifyChecksum       = VerifyChecksum,
+            CompressionLevel     = CompressionLevel,
+            SelectedItems        = selected,
+            IncludeMachineInfo   = true,
+            IsIncremental        = IsIncremental,
+            IncrementalBaseFolder = SelectedIncrementalBase?.FolderPath ?? "",
+            UseNetworkCredentials = UseNetworkCredentials && NetworkShareHelper.IsUncPath(DestinationPath),
+            NetworkUsername      = NetworkUsername,
+            NetworkPassword      = NetworkPassword,
+            NetworkDomain        = NetworkDomain
         };
 
         var progress = new Progress<BackupProgress>(p =>
@@ -323,21 +377,28 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void SaveProfile()
     {
-        var name = Microsoft.VisualBasic.Interaction.InputBox(
-            "Profil adını girin:", "Profil Kaydet", "Teknik Servis Profili");
-        if (string.IsNullOrWhiteSpace(name)) return;
+        var dialog = new Views.SaveProfileDialog
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        if (dialog.ShowDialog() != true) return;
 
         var profile = new BackupProfile
         {
-            ProfileName      = name,
-            CreatedAt        = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            DefaultDestination = DestinationPath,
-            UseZip           = UseZip,
-            UsePassword      = UsePassword,
-            UseVss           = UseVss,
-            VerifyChecksum   = VerifyChecksum,
-            CompressionLevel = CompressionLevel,
-            SelectedItemIds  = Categories.SelectMany(c => c.Items.Where(i => i.IsSelected).Select(i => i.Id)).ToList()
+            ProfileName           = dialog.ProfileName,
+            Icon                  = dialog.SelectedIcon,
+            CreatedAt             = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            DefaultDestination    = DestinationPath,
+            UseZip                = UseZip,
+            UsePassword           = UsePassword,
+            UseVss                = UseVss,
+            VerifyChecksum        = VerifyChecksum,
+            CompressionLevel      = CompressionLevel,
+            SelectedItemIds       = Categories.SelectMany(c => c.Items.Where(i => i.IsSelected).Select(i => i.Id)).ToList(),
+            IsIncremental         = IsIncremental,
+            UseNetworkCredentials = UseNetworkCredentials,
+            NetworkUsername       = NetworkUsername,
+            NetworkDomain         = NetworkDomain
         };
         ProfileService.Save(profile);
         LoadProfiles();
@@ -346,17 +407,49 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void LoadProfile(BackupProfile profile)
     {
-        DestinationPath  = profile.DefaultDestination;
-        UseZip           = profile.UseZip;
-        UsePassword      = profile.UsePassword;
-        UseVss           = profile.UseVss;
-        VerifyChecksum   = profile.VerifyChecksum;
-        CompressionLevel = profile.CompressionLevel;
+        DestinationPath       = profile.DefaultDestination;
+        UseZip                = profile.UseZip;
+        UsePassword           = profile.UsePassword;
+        UseVss                = profile.UseVss;
+        VerifyChecksum        = profile.VerifyChecksum;
+        CompressionLevel      = profile.CompressionLevel;
+        IsIncremental         = profile.IsIncremental;
+        UseNetworkCredentials = profile.UseNetworkCredentials;
+        NetworkUsername       = profile.NetworkUsername;
+        NetworkDomain         = profile.NetworkDomain;
+        NetworkPassword       = "";
         var ids = new HashSet<string>(profile.SelectedItemIds);
         foreach (var cat in Categories)
             foreach (var item in cat.Items)
                 item.IsSelected = ids.Contains(item.Id);
         UpdateSummary();
+    }
+
+    [RelayCommand]
+    public void DeleteProfile(BackupProfile profile)
+    {
+        var r = System.Windows.MessageBox.Show(
+            $"'{profile.ProfileName}' profilini silmek istediğinizden emin misiniz?",
+            "Profil Sil",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+        if (r != System.Windows.MessageBoxResult.Yes) return;
+        ProfileService.Delete(profile.ProfileName);
+        LoadProfiles();
+    }
+
+    [RelayCommand]
+    public void OpenHistoryFolder(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return;
+        if (Directory.Exists(path))
+            System.Diagnostics.Process.Start("explorer.exe", path);
+        else
+        {
+            var parent = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(parent) && Directory.Exists(parent))
+                System.Diagnostics.Process.Start("explorer.exe", parent);
+        }
     }
 
     [RelayCommand]

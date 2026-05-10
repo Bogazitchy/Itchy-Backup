@@ -1,0 +1,63 @@
+<Window x:Class="ItchyBackup.Views.SaveProfileDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Profil Kaydet"
+        Width="460" SizeToContent="Height"
+        MinWidth="400"
+        Background="{StaticResource BgSecondary}"
+        Foreground="{StaticResource TextPrimary}"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        FontFamily="Segoe UI">
+
+  <Grid Margin="24,20,24,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- Başlık -->
+    <TextBlock Grid.Row="0" Text="Profil Kaydet" FontSize="16" FontWeight="Bold"
+               Foreground="{StaticResource TextPrimary}" Margin="0,0,0,20"/>
+
+    <!-- Profil Adı -->
+    <StackPanel Grid.Row="1" Margin="0,0,0,16">
+      <TextBlock Text="PROFİL ADI" FontSize="9" FontFamily="Consolas"
+                 Foreground="{StaticResource TextTertiary}" Margin="0,0,0,6"/>
+      <TextBox x:Name="NameBox" Style="{StaticResource ItchyTextBox}"
+               FontFamily="Segoe UI" FontSize="13" Height="38"
+               VerticalContentAlignment="Center"/>
+    </StackPanel>
+
+    <!-- İkon Seçici -->
+    <StackPanel Grid.Row="2">
+      <TextBlock Text="İKON SEÇ" FontSize="9" FontFamily="Consolas"
+                 Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+      <Border Background="{StaticResource BgTertiary}" CornerRadius="10"
+              BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+              Padding="2,2,8,4">
+        <WrapPanel x:Name="IconPanel" Orientation="Horizontal"/>
+      </Border>
+    </StackPanel>
+
+    <!-- Butonlar -->
+    <Grid Grid.Row="3" Margin="0,16,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="10"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" Content="İptal" Style="{StaticResource SecondaryButton}"
+              Height="38" IsCancel="True"/>
+      <Button Grid.Column="2" Content="Kaydet" Style="{StaticResource PrimaryButton}"
+              Height="38" IsDefault="True" Click="Ok_Click">
+        <Button.Foreground>
+          <SolidColorBrush Color="White"/>
+        </Button.Foreground>
+      </Button>
+    </Grid>
+  </Grid>
+</Window>
