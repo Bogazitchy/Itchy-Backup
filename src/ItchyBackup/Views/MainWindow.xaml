@@ -1,0 +1,2352 @@
+<Window x:Class="ItchyBackup.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:ItchyBackup.ViewModels"
+        xmlns:models="clr-namespace:ItchyBackup.Models"
+        Title="Itchy Backup" Width="1140" Height="740"
+        MinWidth="980" MinHeight="640"
+        WindowStyle="None" AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterScreen">
+  <Window.DataContext>
+    <vm:MainViewModel/>
+  </Window.DataContext>
+
+  <Border CornerRadius="12" Background="{StaticResource BgPrimary}"
+          BorderBrush="{StaticResource BorderHoverBrush}" BorderThickness="1"
+          ClipToBounds="True">
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="52"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="30"/>
+      </Grid.RowDefinitions>
+
+      <!-- ══ TITLEBAR ═════════════════════════════════════════════════════ -->
+      <Border Grid.Row="0" Background="{StaticResource BgSecondary}"
+              BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+              MouseLeftButtonDown="TitleBar_MouseDown">
+        <Grid>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+            <!-- Logo -->
+            <Border Width="32" Height="32" CornerRadius="9"
+                    Margin="0,0,12,0">
+              <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                  <GradientStop Color="#4A3CB5" Offset="0"/>
+                  <GradientStop Color="#6C5CE7" Offset="1"/>
+                </LinearGradientBrush>
+              </Border.Background>
+              <Border.Effect>
+                <DropShadowEffect Color="#6C5CE7" BlurRadius="10" ShadowDepth="0" Opacity="0.5"/>
+              </Border.Effect>
+              <Viewbox Width="18" Height="18">
+                <Canvas Width="24" Height="24">
+                  <Rectangle Canvas.Left="1" Canvas.Top="4" Width="22" Height="16"
+                             RadiusX="2" RadiusY="2"
+                             Stroke="#080C0A" StrokeThickness="1.5" Fill="Transparent"/>
+                  <Ellipse Canvas.Left="4" Canvas.Top="8" Width="5" Height="5"
+                           Stroke="#080C0A" StrokeThickness="1.2" Fill="Transparent"/>
+                  <Ellipse Canvas.Left="15" Canvas.Top="8" Width="5" Height="5"
+                           Stroke="#080C0A" StrokeThickness="1.2" Fill="Transparent"/>
+                  <Path Data="M7,14 Q12,12 17,14" Stroke="#080C0A" StrokeThickness="1.2" Fill="Transparent"/>
+                  <Rectangle Canvas.Left="10" Canvas.Top="17" Width="4" Height="2"
+                             RadiusX="1" RadiusY="1" Fill="#080C0A" Opacity="0.8"/>
+                </Canvas>
+              </Viewbox>
+            </Border>
+            <StackPanel>
+              <TextBlock Text="Itchy Backup" FontSize="14" FontWeight="Bold"
+                         Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+              <TextBlock Text="Teknik Servis Yedekleme Aracı" FontSize="9"
+                         Foreground="{StaticResource TextTertiary}" FontFamily="Consolas"/>
+            </StackPanel>
+            <Border Background="{StaticResource BgQuaternary}" CornerRadius="10"
+                    Padding="8,3" Margin="14,0,0,0"
+                    BorderBrush="{StaticResource BorderHoverBrush}" BorderThickness="1">
+              <TextBlock Text="v0.6" FontSize="10" FontFamily="Consolas"
+                         Foreground="{StaticResource TextTertiary}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+          </StackPanel>
+          <!-- Pencere butonları -->
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <Button Click="MinimizeBtn_Click" Width="46" Height="52"
+                    Background="Transparent" BorderThickness="0" Cursor="Hand">
+              <TextBlock Text="─" Foreground="{StaticResource TextTertiary}" FontSize="11"/>
+            </Button>
+            <Button Click="MaximizeBtn_Click" Width="46" Height="52"
+                    Background="Transparent" BorderThickness="0" Cursor="Hand">
+              <TextBlock Text="□" Foreground="{StaticResource TextTertiary}" FontSize="11"/>
+            </Button>
+            <Button Click="CloseBtn_Click" Width="46" Height="52"
+                    Background="Transparent" BorderThickness="0" Cursor="Hand">
+              <TextBlock Text="✕" Foreground="{StaticResource TextTertiary}" FontSize="11"/>
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- ══ ANA İÇERİK ════════════════════════════════════════════════════ -->
+      <Grid Grid.Row="1">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ── SOL SIDEBAR ───────────────────────────────────────────── -->
+        <Border Grid.Column="0" Background="{StaticResource BgSecondary}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+              <StackPanel Margin="12,16,12,0">
+
+                <TextBlock Text="NAVİGASYON" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}"
+                           Margin="10,0,0,10"/>
+
+                <!-- Sidebar Nav Item Template -->
+                <!-- Yedek Seç -->
+                <Border CornerRadius="8" Margin="0,1" Cursor="Hand" Height="42">
+                  <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenBackupCommand}"/>
+                  </Border.InputBindings>
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Background" Value="Transparent"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsPanelBackup}" Value="True">
+                          <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
+                        </Trigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <Grid>
+                    <!-- Aktif gösterge çizgisi -->
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="Transparent"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelBackup}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource Accent}"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                      <Border.Effect>
+                        <DropShadowEffect Color="#6C5CE7" BlurRadius="6" ShadowDepth="0" Opacity="0.8"/>
+                      </Border.Effect>
+                    </Border>
+                    <DockPanel Margin="14,0,10,0">
+                      <Border DockPanel.Dock="Right" CornerRadius="10" Padding="7,2" VerticalAlignment="Center">
+                        <Border.Style>
+                          <Style TargetType="Border">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding IsPanelBackup}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource AccentDark}"/>
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding SelectedSummary}" FontSize="9" FontFamily="Consolas">
+                          <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                              <Setter Property="Foreground" Value="{StaticResource TextTertiary}"/>
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPanelBackup}" Value="True">
+                                  <Setter Property="Foreground" Value="{StaticResource AccentLight}"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                        </TextBlock>
+                      </Border>
+                      <TextBlock Text="Yedek Seç" VerticalAlignment="Center"
+                                 FontSize="13" FontFamily="Segoe UI">
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding IsPanelBackup}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
+                    </DockPanel>
+                  </Grid>
+                </Border>
+
+                <!-- Geçmiş -->
+                <Border CornerRadius="8" Margin="0,1" Cursor="Hand" Height="42">
+                  <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenHistoryCommand}"/>
+                  </Border.InputBindings>
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Background" Value="Transparent"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsPanelHistory}" Value="True">
+                          <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
+                        </Trigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <Grid>
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="Transparent"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelHistory}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource Accent}"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                    </Border>
+                    <TextBlock Margin="14,0" VerticalAlignment="Center"
+                               FontSize="13" FontFamily="Segoe UI" Text="Geçmiş">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelHistory}" Value="True">
+                              <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                              <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </Grid>
+                </Border>
+
+                <!-- Zamanlayıcı -->
+                <Border CornerRadius="8" Margin="0,1" Cursor="Hand" Height="42">
+                  <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenSchedulerCommand}"/>
+                  </Border.InputBindings>
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Background" Value="Transparent"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsPanelScheduler}" Value="True">
+                          <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
+                        </Trigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <Grid>
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="Transparent"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelScheduler}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource Accent}"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                    </Border>
+                    <TextBlock Margin="14,0" VerticalAlignment="Center"
+                               FontSize="13" FontFamily="Segoe UI" Text="Zamanlayıcı">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelScheduler}" Value="True">
+                              <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                              <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </Grid>
+                </Border>
+
+                <!-- Geri Yükle -->
+                <Border CornerRadius="8" Margin="0,1" Cursor="Hand" Height="42">
+                  <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenRestoreCommand}"/>
+                  </Border.InputBindings>
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Background" Value="Transparent"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsPanelRestore}" Value="True">
+                          <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
+                        </Trigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <Grid>
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="Transparent"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelRestore}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource Accent}"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                    </Border>
+                    <TextBlock Margin="14,0" VerticalAlignment="Center"
+                               FontSize="13" FontFamily="Segoe UI" Text="Geri Yükle">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelRestore}" Value="True">
+                              <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                              <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </Grid>
+                </Border>
+
+                <!-- Karşılaştır -->
+                <Border CornerRadius="8" Margin="0,1" Cursor="Hand" Height="42">
+                  <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenCompareCommand}"/>
+                  </Border.InputBindings>
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Background" Value="Transparent"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsPanelCompare}" Value="True">
+                          <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
+                        </Trigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <Grid>
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="Transparent"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelCompare}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource Accent}"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                    </Border>
+                    <TextBlock Margin="14,0" VerticalAlignment="Center"
+                               FontSize="13" FontFamily="Segoe UI" Text="Karşılaştır">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelCompare}" Value="True">
+                              <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                              <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </Grid>
+                </Border>
+
+                <!-- Ayarlar -->
+                <Border CornerRadius="8" Margin="0,1" Cursor="Hand" Height="42">
+                  <Border.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenSettingsCommand}"/>
+                  </Border.InputBindings>
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Background" Value="Transparent"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsPanelSettings}" Value="True">
+                          <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
+                        </Trigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <Grid>
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="Transparent"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelSettings}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource Accent}"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                    </Border>
+                    <TextBlock Margin="14,0" VerticalAlignment="Center"
+                               FontSize="13" FontFamily="Segoe UI" Text="Ayarlar">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPanelSettings}" Value="True">
+                              <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                              <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </Grid>
+                </Border>
+
+                <!-- Profiller -->
+                <TextBlock Text="PROFİLLER" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}"
+                           Margin="10,18,0,10"/>
+
+                <ItemsControl ItemsSource="{Binding SavedProfiles}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type models:BackupProfile}">
+                      <Border CornerRadius="8" Margin="0,1" Cursor="Hand" Padding="12,8">
+                        <Border.InputBindings>
+                          <MouseBinding MouseAction="LeftClick"
+                                        Command="{Binding DataContext.LoadProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}"/>
+                        </Border.InputBindings>
+                        <Border.Style>
+                          <Style TargetType="Border">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Triggers>
+                              <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
+                              </Trigger>
+                            </Style.Triggers>
+                          </Style>
+                        </Border.Style>
+                        <DockPanel>
+                          <!-- Profil avatar -->
+                          <Border DockPanel.Dock="Left" Width="28" Height="28" CornerRadius="14"
+                                  Background="{StaticResource BgQuaternary}"
+                                  BorderBrush="{StaticResource BorderHoverBrush}" BorderThickness="1"
+                                  Margin="0,0,10,0">
+                            <TextBlock Text="{Binding ProfileName[0]}" FontSize="12" FontWeight="Bold"
+                                       Foreground="{StaticResource Accent}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       FontFamily="Consolas"/>
+                          </Border>
+                          <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ProfileName}" FontSize="12"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       FontWeight="Medium" FontFamily="Segoe UI"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding LastUsed}" FontSize="9"
+                                       Foreground="{StaticResource TextTertiary}"
+                                       FontFamily="Consolas" Margin="0,1,0,0"/>
+                          </StackPanel>
+                        </DockPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Profil yok -->
+                <Border Padding="10,12" Margin="0,4">
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding SavedProfiles.Count}" Value="0">
+                          <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="─" FontSize="18" Foreground="{StaticResource TextTertiary}"
+                               HorizontalAlignment="Center" FontFamily="Consolas"/>
+                    <TextBlock Text="Profil yok" FontSize="11"
+                               Foreground="{StaticResource TextTertiary}"
+                               HorizontalAlignment="Center" FontFamily="Segoe UI"
+                               FontStyle="Italic" Margin="0,4,0,0"/>
+                  </StackPanel>
+                </Border>
+
+              </StackPanel>
+            </ScrollViewer>
+
+            <!-- Log butonu -->
+            <Border Grid.Row="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                    Padding="12,10">
+              <Button Style="{StaticResource SecondaryButton}"
+                      Command="{Binding OpenLogFolderCommand}"
+                      HorizontalAlignment="Stretch">
+                <TextBlock Text="Log Klasörü" FontFamily="Segoe UI" FontSize="11"/>
+              </Button>
+            </Border>
+          </Grid>
+        </Border>
+
+        <!-- ── SAĞ PANEL ALANI ────────────────────────────────────────── -->
+        <Grid Grid.Column="1">
+
+          <!-- ═══ YEDEK SEÇ ════════════════════════════════════════════ -->
+          <Grid>
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsPanelBackup}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="280"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Kategori Listesi -->
+            <Grid Grid.Column="0">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="48"/>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+
+              <!-- Başlık çubuğu -->
+              <Border Grid.Row="0" Background="{StaticResource BgPrimary}"
+                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                <DockPanel Margin="16,0">
+                  <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Yedek Kategorileri" FontSize="15" FontWeight="Bold"
+                               Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                  </StackPanel>
+                  <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Style="{StaticResource SecondaryButton}" Command="{Binding SelectAllCommand}"
+                            Margin="0,0,6,0" FontSize="11" FontFamily="Segoe UI" Padding="12,6">
+                      <TextBlock Text="Tümünü Seç"/>
+                    </Button>
+                    <Button Style="{StaticResource SecondaryButton}" Command="{Binding ClearAllCommand}"
+                            FontSize="11" FontFamily="Segoe UI" Padding="12,6">
+                      <TextBlock Text="Temizle"/>
+                    </Button>
+                  </StackPanel>
+                </DockPanel>
+              </Border>
+
+              <!-- Kategori listesi -->
+              <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Categories}" Margin="14,12,10,12">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type models:BackupCategory}">
+                      <!-- Kategori kartı -->
+                      <Border Margin="0,0,0,8" CornerRadius="10"
+                              Background="{StaticResource BgCard}"
+                              BorderThickness="1,1,1,1">
+                        <Border.Style>
+                          <Style TargetType="Border">
+                            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding SelectedCount}" Value="0">
+                                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </Border.Style>
+                        <Grid>
+                          <!-- Sol aksan çizgisi -->
+                          <Border HorizontalAlignment="Left" Width="3" CornerRadius="10,0,0,10"
+                                  Background="{Binding AccentColor, Converter={StaticResource StringToBrush}}">
+                            <Border.Style>
+                              <Style TargetType="Border">
+                                <Setter Property="Opacity" Value="0.3"/>
+                                <Style.Triggers>
+                                  <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                    <Setter Property="Opacity" Value="1"/>
+                                  </DataTrigger>
+                                </Style.Triggers>
+                              </Style>
+                            </Border.Style>
+                          </Border>
+
+                          <StackPanel Margin="3,0,0,0">
+                            <!-- Kategori başlığı -->
+                            <Grid Margin="14,10,14,10" Cursor="Hand">
+                              <Grid.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding ToggleExpandCommand}"/>
+                              </Grid.InputBindings>
+                              <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="26"/>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="52"/>
+                                <ColumnDefinition Width="18"/>
+                              </Grid.ColumnDefinitions>
+
+                              <CheckBox Grid.Column="0" Style="{StaticResource ItchyCheckBox}"
+                                        IsChecked="{Binding MasterChecked}" VerticalAlignment="Center"
+                                        PreviewMouseLeftButtonDown="CategoryCheckBox_MouseDown"
+                                        Tag="{Binding}"/>
+
+                              <!-- Kategori ikonu - tam oturan -->
+                              <Border Grid.Column="1" Width="36" Height="36" CornerRadius="9"
+                                      VerticalAlignment="Center" Margin="0,0,4,0"
+                                      ClipToBounds="True" SnapsToDevicePixels="True">
+                                <Border.Background>
+                                  <Binding Path="AccentColor" Converter="{StaticResource StringToBrush}"
+                                           ConverterParameter="18"/>
+                                </Border.Background>
+                                <Viewbox Stretch="Uniform" Margin="8"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                  <Canvas Width="22" Height="24">
+                                    <Path Data="{Binding CategoryIconPath}"
+                                          Fill="{Binding AccentColor, Converter={StaticResource StringToBrush}}"/>
+                                  </Canvas>
+                                </Viewbox>
+                              </Border>
+
+                              <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                           FontSize="13" Foreground="{StaticResource TextPrimary}"
+                                           FontFamily="Segoe UI"/>
+                                <TextBlock Text="{Binding Description}" FontSize="10"
+                                           Foreground="{StaticResource TextTertiary}"
+                                           FontFamily="Consolas" Margin="0,1,0,0"/>
+                              </StackPanel>
+
+                              <!-- Seçim sayacı -->
+                              <Border Grid.Column="3" CornerRadius="8" Padding="6"
+                                      VerticalAlignment="Center" HorizontalAlignment="Right"
+                                      Margin="0,0,0,0">
+                                <Border.Style>
+                                  <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{StaticResource BgQuaternary}"/>
+                                    <Style.Triggers>
+                                      <DataTrigger Binding="{Binding SelectedCount}" Value="0">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                      </DataTrigger>
+                                    </Style.Triggers>
+                                  </Style>
+                                </Border.Style>
+                                <TextBlock FontSize="9" FontFamily="Consolas"
+                                           VerticalAlignment="Center">
+                                  <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                      <Setter Property="Foreground" Value="{StaticResource TextTertiary}"/>
+                                      <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedCount}" Value="0">
+                                          <Setter Property="Foreground" Value="{StaticResource TextTertiary}"/>
+                                        </DataTrigger>
+                                      </Style.Triggers>
+                                    </Style>
+                                  </TextBlock.Style>
+                                  <Run Text="{Binding SelectedCount, Mode=OneWay}"/>
+                                  <Run Text=" / "/>
+                                  <Run Text="{Binding Items.Count, Mode=OneWay}"/>
+                                </TextBlock>
+                              </Border>
+
+                              <TextBlock Grid.Column="4" Text="▾" FontSize="10"
+                                         Foreground="{StaticResource TextTertiary}"
+                                         VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                  <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                      <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                        <Setter Property="RenderTransform">
+                                          <Setter.Value>
+                                            <RotateTransform Angle="180" CenterX="5" CenterY="6"/>
+                                          </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                      </DataTrigger>
+                                    </Style.Triggers>
+                                  </Style>
+                                </TextBlock.Style>
+                              </TextBlock>
+                            </Grid>
+
+                            <!-- Özel klasör ekle butonu -->
+                            <Border>
+                              <Border.Style>
+                                <Style TargetType="Border">
+                                  <Setter Property="Visibility" Value="Collapsed"/>
+                                  <Style.Triggers>
+                                    <MultiDataTrigger>
+                                      <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsExpanded}" Value="True"/>
+                                        <Condition Binding="{Binding Type}" Value="CustomFolders"/>
+                                      </MultiDataTrigger.Conditions>
+                                      <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                  </Style.Triggers>
+                                </Style>
+                              </Border.Style>
+                              <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                                      Padding="14,10">
+                                <Grid>
+                                  <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                  </Grid.ColumnDefinitions>
+                                  <TextBox Grid.Column="0" Style="{StaticResource ItchyTextBox}"
+                                           Text="{Binding DataContext.NewCustomPath, UpdateSourceTrigger=PropertyChanged,
+                                                  RelativeSource={RelativeSource AncestorType=Window}}"
+                                           FontFamily="Consolas" FontSize="11"
+                                           VerticalContentAlignment="Center"
+                                           Height="34"/>
+                                  <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
+                                          Command="{Binding DataContext.BrowseCustomFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                          Margin="6,0,4,0" Padding="8,6" ToolTip="Klasör seç">
+                                    <TextBlock Text="📁" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                                  </Button>
+                                  <Button Grid.Column="2" Style="{StaticResource PrimaryButton}"
+                                          Command="{Binding DataContext.AddCustomFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                          Padding="12,6">
+                                    <TextBlock Text="+ Ekle" FontFamily="Segoe UI" FontSize="11"
+                                               FontWeight="Bold" Foreground="{StaticResource BgPrimary}"/>
+                                  </Button>
+                                </Grid>
+                              </Border>
+                            </Border>
+
+                            <!-- Öğe listesi -->
+                            <ItemsControl ItemsSource="{Binding Items}">
+                              <ItemsControl.Style>
+                                <Style TargetType="ItemsControl">
+                                  <Setter Property="Visibility" Value="Collapsed"/>
+                                  <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                      <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                  </Style.Triggers>
+                                </Style>
+                              </ItemsControl.Style>
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type models:BackupItem}">
+                                  <Border BorderBrush="{StaticResource BorderBrush}"
+                                          BorderThickness="0,1,0,0" Cursor="Hand">
+                                    <Border.Style>
+                                      <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Style.Triggers>
+                                          <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
+                                          </Trigger>
+                                          <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </Border.Style>
+                                    <Border.InputBindings>
+                                      <MouseBinding MouseAction="LeftClick" Command="{Binding ToggleSelectCommand}"/>
+                                    </Border.InputBindings>
+                                    <Grid Margin="20,7,14,7">
+                                      <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="26"/>
+                                        <ColumnDefinition Width="28"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                      </Grid.ColumnDefinitions>
+                                      <CheckBox Grid.Column="0" Style="{StaticResource ItchyCheckBox}"
+                                                IsChecked="{Binding IsSelected}" VerticalAlignment="Center"/>
+                                      <!-- Öğe mini ikonu - brand logo varsa onu, yoksa kategori ikonu -->
+                                      <Border Grid.Column="1" Width="24" Height="24" CornerRadius="6"
+                                              VerticalAlignment="Center" Margin="0,0,4,0"
+                                              ClipToBounds="True" SnapsToDevicePixels="True">
+                                        <Border.Background>
+                                          <Binding Path="Parent.AccentColor" Converter="{StaticResource StringToBrush}"
+                                                   ConverterParameter="18"/>
+                                        </Border.Background>
+                                        <Viewbox Stretch="Uniform" Margin="5"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center">
+                                          <Canvas Width="24" Height="24">
+                                            <!-- Brand logo varsa onu göster -->
+                                            <Path Visibility="{Binding HasBrandLogo, Converter={StaticResource BoolToVis}}"
+                                                  Data="{Binding BrandLogoPath}"
+                                                  Fill="{Binding Parent.AccentColor, Converter={StaticResource StringToBrush}}"/>
+                                            <!-- Yoksa kategori ikonunu göster -->
+                                            <Path Data="{Binding Parent.CategoryIconPath}"
+                                                  Fill="{Binding Parent.AccentColor, Converter={StaticResource StringToBrush}}">
+                                              <Path.Style>
+                                                <Style TargetType="Path">
+                                                  <Setter Property="Visibility" Value="Visible"/>
+                                                  <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasBrandLogo}" Value="True">
+                                                      <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                  </Style.Triggers>
+                                                </Style>
+                                              </Path.Style>
+                                            </Path>
+                                          </Canvas>
+                                        </Viewbox>
+                                      </Border>
+                                      <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Label}" FontSize="12"
+                                                   Foreground="{StaticResource TextPrimary}"
+                                                   FontFamily="Segoe UI"/>
+                                        <TextBlock Text="{Binding Path}" FontSize="10"
+                                                   FontFamily="Consolas"
+                                                   Foreground="{StaticResource TextTertiary}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                      </StackPanel>
+                                      <!-- Kurulu değil -->
+                                      <Border Grid.Column="3" Margin="4,0" VerticalAlignment="Center">
+                                        <Border.Style>
+                                          <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                              <DataTrigger Binding="{Binding IsDetected}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                              </DataTrigger>
+                                            </Style.Triggers>
+                                          </Style>
+                                        </Border.Style>
+                                        <Border Background="{StaticResource BgQuaternary}" CornerRadius="8"
+                                                Padding="6,2" BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="1">
+                                          <TextBlock Text="kurulu değil" FontSize="9"
+                                                     Foreground="{StaticResource TextTertiary}"
+                                                     FontFamily="Consolas"/>
+                                        </Border>
+                                      </Border>
+                                      <!-- VSS -->
+                                      <Border Grid.Column="4" Margin="3,0" VerticalAlignment="Center">
+                                        <Border.Style>
+                                          <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                              <DataTrigger Binding="{Binding RequiresVss}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                              </DataTrigger>
+                                            </Style.Triggers>
+                                          </Style>
+                                        </Border.Style>
+                                        <Border Background="{StaticResource AccentSubtle}" CornerRadius="8"
+                                                Padding="6,2" BorderBrush="{StaticResource AccentDark}"
+                                                BorderThickness="1">
+                                          <TextBlock Text="VSS" FontSize="9"
+                                                     Foreground="{StaticResource Accent}"
+                                                     FontFamily="Consolas"/>
+                                        </Border>
+                                      </Border>
+                                      <!-- Custom sil butonu -->
+                                      <Border Grid.Column="5" Margin="3,0" VerticalAlignment="Center">
+                                        <Border.Style>
+                                          <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                              <DataTrigger Binding="{Binding Parent.Type}" Value="CustomFolders">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                              </DataTrigger>
+                                            </Style.Triggers>
+                                          </Style>
+                                        </Border.Style>
+                                        <Button Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                                Command="{Binding DataContext.RemoveCustomFolderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}" Padding="4,2">
+                                          <TextBlock Text="✕" FontSize="10" Foreground="{StaticResource Danger}"/>
+                                        </Button>
+                                      </Border>
+                                    </Grid>
+                                  </Border>
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Özel klasör boş state -->
+                            <Border>
+                              <Border.Style>
+                                <Style TargetType="Border">
+                                  <Setter Property="Visibility" Value="Collapsed"/>
+                                  <Style.Triggers>
+                                    <MultiDataTrigger>
+                                      <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsExpanded}" Value="True"/>
+                                        <Condition Binding="{Binding Type}" Value="CustomFolders"/>
+                                        <Condition Binding="{Binding Items.Count}" Value="0"/>
+                                      </MultiDataTrigger.Conditions>
+                                      <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                  </Style.Triggers>
+                                </Style>
+                              </Border.Style>
+                              <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                                      Padding="20,16">
+                                <StackPanel HorizontalAlignment="Center">
+                                  <TextBlock Text="Henüz özel klasör eklenmedi." FontSize="12"
+                                             Foreground="{StaticResource TextTertiary}"
+                                             HorizontalAlignment="Center" FontFamily="Segoe UI"
+                                             FontStyle="Italic"/>
+                                  <TextBlock Text="Yukarıdan bir klasör yolu girin veya 📁 ile seçin."
+                                             FontSize="10" Foreground="{StaticResource TextTertiary}"
+                                             HorizontalAlignment="Center" FontFamily="Segoe UI"
+                                             Margin="0,4,0,0"/>
+                                </StackPanel>
+                              </Border>
+                            </Border>
+                          </StackPanel>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </Grid>
+
+            <!-- Sağ Seçenek Paneli -->
+            <Border Grid.Column="1" Background="{StaticResource BgSecondary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0">
+              <Grid>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="*"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                  <StackPanel Margin="16,16,16,8">
+
+                    <!-- Hedef klasör grubu -->
+                    <Border Background="{StaticResource BgTertiary}" CornerRadius="10"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            Margin="0,0,0,12" Padding="14,12">
+                      <StackPanel>
+                        <DockPanel Margin="0,0,0,8">
+                          <TextBlock Text="HEDEF KLASÖR" FontSize="9" FontFamily="Consolas"
+                                     Foreground="{StaticResource TextTertiary}"/>
+                          <TextBlock Text="{Binding SelectedSizeText}" FontSize="9" FontFamily="Consolas"
+                                     Foreground="{StaticResource AccentLight}" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                        <Grid>
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                          </Grid.ColumnDefinitions>
+                          <TextBox Grid.Column="0" Style="{StaticResource ItchyTextBox}"
+                                   Text="{Binding DestinationPath, UpdateSourceTrigger=PropertyChanged}"
+                                   FontFamily="Consolas" FontSize="11" Height="34"
+                                   VerticalContentAlignment="Center"/>
+                          <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
+                                  Command="{Binding BrowseDestinationCommand}"
+                                  Margin="6,0,0,0" Padding="10,6" Height="34">
+                            <TextBlock Text="📁" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                          </Button>
+                        </Grid>
+                        <TextBlock Text="UNC paylaşım: \\sunucu\paylasim" FontSize="9"
+                                   FontFamily="Consolas" Foreground="{StaticResource TextTertiary}"
+                                   Margin="0,4,0,0"/>
+                      </StackPanel>
+                    </Border>
+
+                    <!-- Sıkıştırma grubu -->
+                    <Border Background="{StaticResource BgTertiary}" CornerRadius="10"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            Margin="0,0,0,12" Padding="14,12">
+                      <StackPanel>
+                        <TextBlock Text="SIKIŞTURMA" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+                        <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding UseZip}"
+                                  Margin="0,0,0,0">
+                          <TextBlock Text="ZIP olarak sıkıştır" FontFamily="Segoe UI" FontSize="12"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        </CheckBox>
+                        <StackPanel Margin="0,8,0,0">
+                          <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                              <Setter Property="Visibility" Value="Collapsed"/>
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding UseZip}" Value="True">
+                                  <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </StackPanel.Style>
+                          <Separator Margin="0,0,0,8"/>
+                          <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding UsePassword}"
+                                    Margin="0,0,0,6">
+                            <TextBlock Text="AES-256 şifreleme" FontFamily="Segoe UI" FontSize="12"
+                                       Foreground="{StaticResource TextPrimary}"/>
+                          </CheckBox>
+                          <StackPanel>
+                            <StackPanel.Style>
+                              <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                  <DataTrigger Binding="{Binding UsePassword}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                  </DataTrigger>
+                                </Style.Triggers>
+                              </Style>
+                            </StackPanel.Style>
+                            <TextBox Style="{StaticResource ItchyTextBox}" Margin="0,4,0,0"
+                                     Text="{Binding ZipPassword, UpdateSourceTrigger=PropertyChanged}"
+                                     FontFamily="Consolas" Height="32" VerticalContentAlignment="Center"/>
+                          </StackPanel>
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
+
+                    <!-- Güvenlik grubu -->
+                    <Border Background="{StaticResource BgTertiary}" CornerRadius="10"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            Margin="0,0,0,12" Padding="14,12">
+                      <StackPanel>
+                        <TextBlock Text="GÜVENLİK" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+                        <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding VerifyChecksum}"
+                                  Margin="0,0,0,8">
+                          <TextBlock Text="SHA-256 checksum" FontFamily="Segoe UI" FontSize="12"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        </CheckBox>
+                        <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding UseVss}">
+                          <TextBlock Text="VSS (açık dosya desteği)" FontFamily="Segoe UI" FontSize="12"
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        </CheckBox>
+                      </StackPanel>
+                    </Border>
+
+                    <!-- Profil kaydet -->
+                    <Button Style="{StaticResource SecondaryButton}" Command="{Binding SaveProfileCommand}"
+                            HorizontalAlignment="Stretch" Margin="0,0,0,0">
+                      <TextBlock Text="💾  Profil Kaydet" FontFamily="Segoe UI" FontSize="12"/>
+                    </Button>
+
+                  </StackPanel>
+                </ScrollViewer>
+
+                <!-- Alt: Yedekle butonu — büyük ve belirgin -->
+                <Border Grid.Row="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                        Padding="16,14">
+                  <StackPanel>
+                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding StartBackupCommand}"
+                            HorizontalAlignment="Stretch" Height="48">
+                      <Button.IsEnabled>
+                        <Binding Path="IsBackingUp" Converter="{StaticResource InverseBool}"/>
+                      </Button.IsEnabled>
+                      <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="▶  " FontSize="16" VerticalAlignment="Center"
+                                   Foreground="White"/>
+                        <TextBlock Text="Yedeği Başlat" FontSize="15" FontWeight="Bold"
+                                   VerticalAlignment="Center" FontFamily="Segoe UI"
+                                   Foreground="White"/>
+                      </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource DangerButton}" Command="{Binding CancelBackupCommand}"
+                            HorizontalAlignment="Stretch" Margin="0,8,0,0" Height="36">
+                      <Button.Visibility>
+                        <Binding Path="IsBackingUp" Converter="{StaticResource BoolToVis}"/>
+                      </Button.Visibility>
+                      <TextBlock Text="✕  İptal Et" FontFamily="Segoe UI" FontSize="12"/>
+                    </Button>
+                  </StackPanel>
+                </Border>
+              </Grid>
+            </Border>
+          </Grid>
+
+          <!-- ═══ GEÇMİŞ ════════════════════════════════════════════════ -->
+          <Grid>
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsPanelHistory}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="48"/>
+              <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Background="{StaticResource BgPrimary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+              <TextBlock Text="Yedekleme Geçmişi" FontSize="15" FontWeight="Bold"
+                         Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"
+                         Margin="16,0" FontFamily="Segoe UI"/>
+            </Border>
+            <ScrollViewer Grid.Row="1" Margin="16,12" VerticalScrollBarVisibility="Auto">
+              <StackPanel>
+                <ItemsControl ItemsSource="{Binding BackupHistory}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type models:HistoryEntry}">
+                      <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                              BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                              Margin="0,0,0,8">
+                        <Grid>
+                          <Border HorizontalAlignment="Left" Width="3" CornerRadius="10,0,0,10">
+                            <Border.Style>
+                              <Style TargetType="Border">
+                                <Setter Property="Background" Value="{StaticResource Accent}"/>
+                                <Style.Triggers>
+                                  <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource Danger}"/>
+                                  </DataTrigger>
+                                </Style.Triggers>
+                              </Style>
+                            </Border.Style>
+                          </Border>
+                          <Grid Margin="16,12,14,12">
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="*"/>
+                              <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                              <TextBlock Text="{Binding FolderName}" FontSize="13" FontWeight="SemiBold"
+                                         Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                              <TextBlock Text="{Binding Date}" FontSize="10" FontFamily="Consolas"
+                                         Foreground="{StaticResource TextTertiary}" Margin="0,2,0,0"/>
+                              <TextBlock Text="{Binding Summary}" FontSize="11"
+                                         Foreground="{StaticResource TextSecondary}"
+                                         FontFamily="Segoe UI" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <Border Grid.Column="1" VerticalAlignment="Center" CornerRadius="8" Padding="10,4">
+                              <Border.Style>
+                                <Style TargetType="Border">
+                                  <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                                  <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                                      <Setter Property="Background" Value="#1A0A0A"/>
+                                    </DataTrigger>
+                                  </Style.Triggers>
+                                </Style>
+                              </Border.Style>
+                              <TextBlock FontSize="10" FontFamily="Consolas" FontWeight="Medium">
+                                <TextBlock.Style>
+                                  <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="✓ Başarılı"/>
+                                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                    <Style.Triggers>
+                                      <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                                        <Setter Property="Text" Value="✕ Hata var"/>
+                                        <Setter Property="Foreground" Value="{StaticResource Danger}"/>
+                                      </DataTrigger>
+                                    </Style.Triggers>
+                                  </Style>
+                                </TextBlock.Style>
+                              </TextBlock>
+                            </Border>
+                          </Grid>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Boş state -->
+                <StackPanel HorizontalAlignment="Center" Margin="0,80,0,0">
+                  <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding BackupHistory.Count}" Value="0">
+                          <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </StackPanel.Style>
+                  <Border Width="64" Height="64" CornerRadius="32"
+                          Background="{StaticResource AccentSubtle}"
+                          HorizontalAlignment="Center" Margin="0,0,0,16">
+                    <Viewbox Width="32" Height="32">
+                      <Canvas Width="24" Height="24">
+                        <Path Data="M13,2.03V2.05L13,4.05C17.39,4.59 20.5,8.58 19.96,12.97C19.5,16.61 16.64,19.5 13,19.93V21.93C18.5,21.38 22.5,16.5 21.95,11C21.5,6.25 17.73,2.5 13,2.03M11,2.06C9.05,2.25 7.19,3 5.67,4.26L7.1,5.74C8.22,4.84 9.57,4.26 11,4.06V2.06M4.26,5.67C3,7.19 2.25,9.04 2.05,11H4.05C4.24,9.58 4.8,8.23 5.69,7.1L4.26,5.67M15,11H11V17L16,12L15,11M4.06,13C4.26,14.43 4.83,15.78 5.72,16.9L7.15,15.47C6.25,14.35 5.69,13 5.47,13H4.06M7.1,18.37L5.67,19.74C7.18,21 9.04,21.79 11,22V20C9.58,19.8 8.22,19.24 7.1,18.37Z"
+                              Fill="{StaticResource Accent}"/>
+                      </Canvas>
+                    </Viewbox>
+                  </Border>
+                  <TextBlock Text="Henüz yedekleme yapılmadı" FontSize="16" FontWeight="SemiBold"
+                             Foreground="{StaticResource TextSecondary}"
+                             HorizontalAlignment="Center" FontFamily="Segoe UI"/>
+                  <TextBlock Text="İlk yedeği aldıktan sonra burada görünecek."
+                             FontSize="12" Foreground="{StaticResource TextTertiary}"
+                             HorizontalAlignment="Center" Margin="0,8,0,0" FontFamily="Segoe UI"/>
+                </StackPanel>
+              </StackPanel>
+            </ScrollViewer>
+          </Grid>
+
+          <!-- ═══ ZAMANLAYICI ═══════════════════════════════════════════ -->
+          <Grid>
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsPanelScheduler}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="48"/>
+              <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Background="{StaticResource BgPrimary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+              <TextBlock Text="Otomatik Zamanlayıcı" FontSize="15" FontWeight="Bold"
+                         Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"
+                         Margin="16,0" FontFamily="Segoe UI"/>
+            </Border>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+              <StackPanel Margin="24,16,24,16" MaxWidth="680">
+
+                <!-- Aktif toggle -->
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16">
+                  <Grid Margin="16,14">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                      <TextBlock Text="Zamanlayıcıyı Etkinleştir" FontSize="13" FontWeight="SemiBold"
+                                 Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                      <TextBlock Text="{Binding SchedulerStatus}" FontSize="10"
+                                 Foreground="{StaticResource AccentLight}" FontFamily="Consolas"
+                                 Margin="0,3,0,0"/>
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" Style="{StaticResource ItchyCheckBox}"
+                              IsChecked="{Binding SchedulerEnabled}" VerticalAlignment="Center"/>
+                  </Grid>
+                </Border>
+
+                <!-- Günler -->
+                <TextBlock Text="YEDEKLEME GÜNLERİ" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16" Padding="16,14">
+                  <WrapPanel>
+                    <!-- Gün butonları macro -->
+                    <Border Margin="0,0,8,8" CornerRadius="8" Cursor="Hand" Width="80" Height="52" BorderThickness="1">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="{StaticResource BgQuaternary}"/>
+                          <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SchedMon}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                              <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                      <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftClick" Command="{Binding ToggleMonCommand}"/>
+                      </Border.InputBindings>
+                      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Pzt" FontSize="13" FontWeight="Medium" HorizontalAlignment="Center" FontFamily="Segoe UI">
+                          <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextSecondary}"/><Style.Triggers><DataTrigger Binding="{Binding SchedMon}" Value="True"><Setter Property="Foreground" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="MON" FontSize="9" FontFamily="Consolas" HorizontalAlignment="Center" Foreground="{StaticResource TextTertiary}"/>
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,8,8" CornerRadius="8" Cursor="Hand" Width="80" Height="52" BorderThickness="1">
+                      <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="{StaticResource BgQuaternary}"/><Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/><Style.Triggers><DataTrigger Binding="{Binding SchedulerTue}" Value="True"><Setter Property="Background" Value="{StaticResource AccentSubtle}"/><Setter Property="BorderBrush" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                      <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding ToggleTueCommand}"/></Border.InputBindings>
+                      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Sal" FontSize="13" FontWeight="Medium" HorizontalAlignment="Center" FontFamily="Segoe UI"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextSecondary}"/><Style.Triggers><DataTrigger Binding="{Binding SchedulerTue}" Value="True"><Setter Property="Foreground" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                        <TextBlock Text="TUE" FontSize="9" FontFamily="Consolas" HorizontalAlignment="Center" Foreground="{StaticResource TextTertiary}"/>
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,8,8" CornerRadius="8" Cursor="Hand" Width="80" Height="52" BorderThickness="1">
+                      <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="{StaticResource BgQuaternary}"/><Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/><Style.Triggers><DataTrigger Binding="{Binding SchedWed}" Value="True"><Setter Property="Background" Value="{StaticResource AccentSubtle}"/><Setter Property="BorderBrush" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                      <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding ToggleWedCommand}"/></Border.InputBindings>
+                      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Çar" FontSize="13" FontWeight="Medium" HorizontalAlignment="Center" FontFamily="Segoe UI"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextSecondary}"/><Style.Triggers><DataTrigger Binding="{Binding SchedWed}" Value="True"><Setter Property="Foreground" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                        <TextBlock Text="WED" FontSize="9" FontFamily="Consolas" HorizontalAlignment="Center" Foreground="{StaticResource TextTertiary}"/>
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,8,8" CornerRadius="8" Cursor="Hand" Width="80" Height="52" BorderThickness="1">
+                      <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="{StaticResource BgQuaternary}"/><Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/><Style.Triggers><DataTrigger Binding="{Binding SchedThu}" Value="True"><Setter Property="Background" Value="{StaticResource AccentSubtle}"/><Setter Property="BorderBrush" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                      <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding ToggleThuCommand}"/></Border.InputBindings>
+                      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Per" FontSize="13" FontWeight="Medium" HorizontalAlignment="Center" FontFamily="Segoe UI"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextSecondary}"/><Style.Triggers><DataTrigger Binding="{Binding SchedThu}" Value="True"><Setter Property="Foreground" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                        <TextBlock Text="THU" FontSize="9" FontFamily="Consolas" HorizontalAlignment="Center" Foreground="{StaticResource TextTertiary}"/>
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,8,8" CornerRadius="8" Cursor="Hand" Width="80" Height="52" BorderThickness="1">
+                      <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="{StaticResource BgQuaternary}"/><Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/><Style.Triggers><DataTrigger Binding="{Binding SchedFri}" Value="True"><Setter Property="Background" Value="{StaticResource AccentSubtle}"/><Setter Property="BorderBrush" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                      <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding ToggleFriCommand}"/></Border.InputBindings>
+                      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Cum" FontSize="13" FontWeight="Medium" HorizontalAlignment="Center" FontFamily="Segoe UI"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextSecondary}"/><Style.Triggers><DataTrigger Binding="{Binding SchedFri}" Value="True"><Setter Property="Foreground" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                        <TextBlock Text="FRI" FontSize="9" FontFamily="Consolas" HorizontalAlignment="Center" Foreground="{StaticResource TextTertiary}"/>
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,8,8" CornerRadius="8" Cursor="Hand" Width="80" Height="52" BorderThickness="1">
+                      <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="{StaticResource BgQuaternary}"/><Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/><Style.Triggers><DataTrigger Binding="{Binding SchedSat}" Value="True"><Setter Property="Background" Value="{StaticResource AccentSubtle}"/><Setter Property="BorderBrush" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                      <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding ToggleSatCommand}"/></Border.InputBindings>
+                      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Cmt" FontSize="13" FontWeight="Medium" HorizontalAlignment="Center" FontFamily="Segoe UI"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextSecondary}"/><Style.Triggers><DataTrigger Binding="{Binding SchedSat}" Value="True"><Setter Property="Foreground" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                        <TextBlock Text="SAT" FontSize="9" FontFamily="Consolas" HorizontalAlignment="Center" Foreground="{StaticResource TextTertiary}"/>
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,8,8" CornerRadius="8" Cursor="Hand" Width="80" Height="52" BorderThickness="1">
+                      <Border.Style><Style TargetType="Border"><Setter Property="Background" Value="{StaticResource BgQuaternary}"/><Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/><Style.Triggers><DataTrigger Binding="{Binding SchedSun}" Value="True"><Setter Property="Background" Value="{StaticResource AccentSubtle}"/><Setter Property="BorderBrush" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                      <Border.InputBindings><MouseBinding MouseAction="LeftClick" Command="{Binding ToggleSunCommand}"/></Border.InputBindings>
+                      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Paz" FontSize="13" FontWeight="Medium" HorizontalAlignment="Center" FontFamily="Segoe UI"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextSecondary}"/><Style.Triggers><DataTrigger Binding="{Binding SchedSun}" Value="True"><Setter Property="Foreground" Value="{StaticResource Accent}"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                        <TextBlock Text="SUN" FontSize="9" FontFamily="Consolas" HorizontalAlignment="Center" Foreground="{StaticResource TextTertiary}"/>
+                      </StackPanel>
+                    </Border>
+                  </WrapPanel>
+                </Border>
+
+                <!-- Saat ve profil -->
+                <TextBlock Text="SAAT VE PROFİL" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16" Padding="16,14">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto"/>
+                      <ColumnDefinition Width="14"/>
+                      <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Sol: Saat ve Dakika seçici -->
+                    <StackPanel Grid.Column="0">
+                      <TextBlock Text="Yedekleme Saati" FontSize="11" FontWeight="Medium"
+                                 Foreground="{StaticResource TextSecondary}" FontFamily="Segoe UI" Margin="0,0,0,8"/>
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="72"/>
+                          <ColumnDefinition Width="22"/>
+                          <ColumnDefinition Width="72"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Saat spinner -->
+                        <StackPanel Grid.Column="0">
+                          <TextBlock Text="SAAT" FontSize="8" FontFamily="Consolas"
+                                     Foreground="{StaticResource TextTertiary}"
+                                     HorizontalAlignment="Center" Margin="0,0,0,3"/>
+                          <Button Style="{StaticResource SpinArrowButton}" Height="20"
+                                  Command="{Binding IncrementHourCommand}"
+                                  HorizontalAlignment="Stretch">
+                            <Path Data="M0,5 L5,0 L10,5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Button>
+                          <Border Background="{StaticResource BgQuaternary}"
+                                  BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                  CornerRadius="7" Height="40" Margin="0,2"
+                                  PreviewMouseWheel="HourSpinner_MouseWheel">
+                            <TextBlock Text="{Binding SchedulerHour, StringFormat={}{0:D2}}"
+                                       FontSize="19" FontWeight="Bold" FontFamily="Consolas"
+                                       Foreground="{StaticResource Accent}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Border>
+                          <Button Style="{StaticResource SpinArrowButton}" Height="20"
+                                  Command="{Binding DecrementHourCommand}"
+                                  HorizontalAlignment="Stretch">
+                            <Path Data="M0,0 L5,5 L10,0" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Button>
+                        </StackPanel>
+
+                        <!-- Ayırıcı -->
+                        <TextBlock Grid.Column="1" Text=":" FontSize="22" FontWeight="Bold"
+                                   FontFamily="Consolas" Foreground="{StaticResource TextTertiary}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,8,0,0"/>
+
+                        <!-- Dakika spinner -->
+                        <StackPanel Grid.Column="2">
+                          <TextBlock Text="DAKİKA" FontSize="8" FontFamily="Consolas"
+                                     Foreground="{StaticResource TextTertiary}"
+                                     HorizontalAlignment="Center" Margin="0,0,0,3"/>
+                          <Button Style="{StaticResource SpinArrowButton}" Height="20"
+                                  Command="{Binding IncrementMinuteCommand}"
+                                  HorizontalAlignment="Stretch">
+                            <Path Data="M0,5 L5,0 L10,5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Button>
+                          <Border Background="{StaticResource BgQuaternary}"
+                                  BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                  CornerRadius="7" Height="40" Margin="0,2"
+                                  PreviewMouseWheel="MinuteSpinner_MouseWheel">
+                            <TextBlock Text="{Binding SchedulerMinute, StringFormat={}{0:D2}}"
+                                       FontSize="19" FontWeight="Bold" FontFamily="Consolas"
+                                       Foreground="{StaticResource Accent}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Border>
+                          <Button Style="{StaticResource SpinArrowButton}" Height="20"
+                                  Command="{Binding DecrementMinuteCommand}"
+                                  HorizontalAlignment="Stretch">
+                            <Path Data="M0,0 L5,5 L10,0" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                          </Button>
+                        </StackPanel>
+                      </Grid>
+                    </StackPanel>
+
+                    <!-- Sağ: Profil seçici -->
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                      <TextBlock Text="Kullanılacak Profil" FontSize="11" FontWeight="Medium"
+                                 Foreground="{StaticResource TextSecondary}" FontFamily="Segoe UI" Margin="0,0,0,6"/>
+                      <ComboBox Style="{StaticResource ItchyComboBox}"
+                                ItemsSource="{Binding SavedProfiles}"
+                                SelectedValuePath="ProfileName"
+                                SelectedValue="{Binding SchedulerProfile}">
+                        <ComboBox.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock Text="{Binding ProfileName}" FontFamily="Segoe UI" FontSize="12"/>
+                          </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                      </ComboBox>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+
+                <Button Style="{StaticResource PrimaryButton}" Command="{Binding SaveSchedulerCommand}"
+                        HorizontalAlignment="Stretch" Height="44">
+                  <TextBlock Text="Zamanlayıcıyı Kaydet" FontSize="13" FontWeight="Bold"
+                             FontFamily="Segoe UI" Foreground="White"/>
+                </Button>
+              </StackPanel>
+            </ScrollViewer>
+          </Grid>
+
+
+          <!-- ═══ GERİ YÜKLE ═════════════════════════════════════════════ -->
+          <Grid>
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsPanelRestore}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="48"/>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Background="{StaticResource BgPrimary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+              <TextBlock Text="Yedekten Geri Yükle" FontSize="15" FontWeight="Bold"
+                         Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"
+                         Margin="16,0" FontFamily="Segoe UI"/>
+            </Border>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+              <StackPanel Margin="20,16,20,16">
+
+                <!-- 1. Yedek seçimi -->
+                <TextBlock Text="1. YEDEK SEÇİMİ" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}" Margin="0,0,0,8"/>
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16">
+                  <ListBox ItemsSource="{Binding AvailableBackups}"
+                           SelectedItem="{Binding SelectedBackupForRestore}"
+                           MaxHeight="200"
+                           Background="Transparent" BorderThickness="0"
+                           ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.ItemContainerStyle>
+                      <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Template">
+                          <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                              <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                            </ControlTemplate>
+                          </Setter.Value>
+                        </Setter>
+                      </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                      <DataTemplate>
+                        <Border Padding="14,10" Cursor="Hand"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                          <Border.Style>
+                            <Style TargetType="Border">
+                              <Setter Property="Background" Value="Transparent"/>
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                  <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
+                                </DataTrigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                  <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
+                                </Trigger>
+                              </Style.Triggers>
+                            </Style>
+                          </Border.Style>
+                          <Grid>
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="20"/>
+                              <ColumnDefinition Width="*"/>
+                              <ColumnDefinition Width="Auto"/>
+                              <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <RadioButton Grid.Column="0" GroupName="RestoreBackup" VerticalAlignment="Center"
+                                         IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Mode=OneWay}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                              <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="Medium"
+                                         Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                              <TextBlock Text="{Binding Date}" FontSize="10" FontFamily="Consolas"
+                                         Foreground="{StaticResource TextTertiary}"/>
+                            </StackPanel>
+                            <Border Grid.Column="2" CornerRadius="8" Padding="6,2" VerticalAlignment="Center"
+                                    Margin="0,0,8,0" Background="{StaticResource BgQuaternary}">
+                              <TextBlock Text="ZIP" FontSize="9" FontFamily="Consolas"
+                                         Foreground="{StaticResource AccentLight}"
+                                         Visibility="{Binding IsZip, Converter={StaticResource BoolToVis}}"/>
+                            </Border>
+                            <TextBlock Grid.Column="3" Text="{Binding SizeText}" FontSize="11"
+                                       FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"
+                                       VerticalAlignment="Center"/>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                  </ListBox>
+                </Border>
+
+                <!-- 2. Hedef konum -->
+                <TextBlock Text="2. HEDEF KONUM" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}" Margin="0,0,0,8"/>
+                <Grid Margin="0,0,0,16">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBox Grid.Column="0" Style="{StaticResource ItchyTextBox}"
+                           Text="{Binding RestoreTargetPath, UpdateSourceTrigger=PropertyChanged}"
+                           Height="36" FontFamily="Consolas" FontSize="11"
+                           VerticalContentAlignment="Center"/>
+                  <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
+                          Command="{Binding BrowseRestoreTargetCommand}"
+                          Margin="6,0,0,0" Padding="10,6" Height="36">
+                    <TextBlock Text="📁" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                  </Button>
+                </Grid>
+
+                <!-- 3. Seçenekler -->
+                <TextBlock Text="3. SEÇENEKLER" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}" Margin="0,0,0,8"/>
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16" Padding="14,12">
+                  <StackPanel>
+                    <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding RestoreOverwrite}"
+                              Margin="0,0,0,8">
+                      <TextBlock Text="Mevcut dosyaların üzerine yaz" FontFamily="Segoe UI" FontSize="12"
+                                 Foreground="{StaticResource TextPrimary}"/>
+                    </CheckBox>
+                    <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding RestorePartial}">
+                      <TextBlock Text="Kısmi geri yükleme (sadece seçilen dosyalar)"
+                                 FontFamily="Segoe UI" FontSize="12"
+                                 Foreground="{StaticResource TextPrimary}"/>
+                    </CheckBox>
+                    <StackPanel>
+                      <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                          <Setter Property="Visibility" Value="Collapsed"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedBackupForRestore.IsZip}" Value="True">
+                              <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </StackPanel.Style>
+                      <Separator Margin="0,8"/>
+                      <TextBlock Text="ZIP Şifresi (gerekiyorsa)" FontSize="11"
+                                 Foreground="{StaticResource TextSecondary}" FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                      <TextBox Style="{StaticResource ItchyTextBox}" Height="32"
+                               Text="{Binding RestoreZipPassword, UpdateSourceTrigger=PropertyChanged}"
+                               FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+
+                <!-- 4. Kısmi geri yükleme - klasör listesi -->
+                <StackPanel>
+                  <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding RestorePartial}" Value="True">
+                          <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </StackPanel.Style>
+                  <DockPanel Margin="0,0,0,8">
+                    <TextBlock DockPanel.Dock="Left" Text="4. KLASÖR SEÇİMİ"
+                               FontSize="9" FontFamily="Consolas"
+                               Foreground="{StaticResource TextTertiary}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                      <Button Style="{StaticResource SecondaryButton}"
+                              Command="{Binding SelectAllRestoreItemsCommand}"
+                              Padding="10,4" FontSize="10" Margin="0,0,4,0">
+                        <TextBlock Text="Tümü"/>
+                      </Button>
+                      <Button Style="{StaticResource SecondaryButton}"
+                              Command="{Binding ClearAllRestoreItemsCommand}"
+                              Padding="10,4" FontSize="10">
+                        <TextBlock Text="Hiçbiri"/>
+                      </Button>
+                    </StackPanel>
+                  </DockPanel>
+                  <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                          BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                          MaxHeight="280">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                      <ItemsControl ItemsSource="{Binding RestoreFolders}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <Border Padding="12,8"
+                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                              <Grid>
+                                <Grid.ColumnDefinitions>
+                                  <ColumnDefinition Width="22"/>
+                                  <ColumnDefinition Width="*"/>
+                                  <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Column="0" Style="{StaticResource ItchyCheckBox}"
+                                          IsChecked="{Binding IsSelected}" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0">
+                                  <TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="Medium"
+                                             Foreground="{StaticResource TextPrimary}"
+                                             FontFamily="Segoe UI"/>
+                                  <TextBlock Text="{Binding SubText}" FontSize="9"
+                                             FontFamily="Consolas"
+                                             Foreground="{StaticResource TextTertiary}"/>
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="{Binding SizeText}" FontSize="10"
+                                           FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"
+                                           VerticalAlignment="Center"/>
+                              </Grid>
+                            </Border>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </ScrollViewer>
+                  </Border>
+                </StackPanel>
+
+              </StackPanel>
+            </ScrollViewer>
+
+            <!-- Alt: Geri yükle butonu + progress -->
+            <Border Grid.Row="2" Background="{StaticResource BgSecondary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                    Padding="20,14">
+              <StackPanel>
+                <Border Visibility="{Binding IsRestoring, Converter={StaticResource BoolToVis}}" Margin="0,0,0,10">
+                  <StackPanel>
+                    <DockPanel Margin="0,0,0,4">
+                      <TextBlock DockPanel.Dock="Right" FontFamily="Consolas" FontSize="10"
+                                 Foreground="{StaticResource AccentLight}" FontWeight="Bold">
+                        <Run Text="{Binding RestoreProgressPercent, StringFormat='{}{0:F0}', Mode=OneWay}"/>
+                        <Run Text="%"/>
+                      </TextBlock>
+                      <TextBlock Text="{Binding RestoreCurrentFile}" FontSize="10"
+                                 FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"
+                                 TextTrimming="CharacterEllipsis"/>
+                    </DockPanel>
+                    <ProgressBar Style="{StaticResource ItchyProgressBar}"
+                                 Value="{Binding RestoreProgressPercent}" Maximum="100"/>
+                    <TextBlock Text="{Binding RestoreProgressText}" FontSize="10" FontFamily="Consolas"
+                               Foreground="{StaticResource TextTertiary}" Margin="0,4,0,0"/>
+                  </StackPanel>
+                </Border>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <Button Grid.Column="0" Style="{StaticResource PrimaryButton}"
+                          Command="{Binding StartRestoreCommand}" Height="44">
+                    <Button.IsEnabled>
+                      <Binding Path="IsRestoring" Converter="{StaticResource InverseBool}"/>
+                    </Button.IsEnabled>
+                    <StackPanel Orientation="Horizontal">
+                      <TextBlock Text="↻  " FontSize="14" Foreground="White" VerticalAlignment="Center"/>
+                      <TextBlock Text="Geri Yüklemeyi Başlat" FontSize="13" FontWeight="Bold"
+                                 FontFamily="Segoe UI" Foreground="White" VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </Button>
+                  <Button Grid.Column="1" Style="{StaticResource DangerButton}"
+                          Command="{Binding CancelRestoreCommand}"
+                          Visibility="{Binding IsRestoring, Converter={StaticResource BoolToVis}}"
+                          Margin="8,0,0,0" Padding="16,8">
+                    <TextBlock Text="✕" FontSize="14"/>
+                  </Button>
+                </Grid>
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <!-- ═══ KARŞILAŞTIR ═══════════════════════════════════════════ -->
+          <Grid>
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsPanelCompare}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="48"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Background="{StaticResource BgPrimary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+              <TextBlock Text="Yedek Karşılaştırma" FontSize="15" FontWeight="Bold"
+                         Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"
+                         Margin="16,0" FontFamily="Segoe UI"/>
+            </Border>
+
+            <Border Grid.Row="1" Padding="20,16">
+              <StackPanel>
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <StackPanel Grid.Column="0">
+                    <TextBlock Text="YEDEK A" FontSize="9" FontFamily="Consolas"
+                               Foreground="{StaticResource TextTertiary}" Margin="0,0,0,6"/>
+                    <ComboBox Style="{StaticResource ItchyComboBox}"
+                              ItemsSource="{Binding AvailableBackups}"
+                              SelectedItem="{Binding CompareBackupA}">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                          <TextBlock Text="{Binding Name}" FontFamily="Segoe UI" FontSize="12"/>
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                    </ComboBox>
+                  </StackPanel>
+                  <TextBlock Grid.Column="1" Text="vs" FontSize="14" FontWeight="Bold"
+                             Foreground="{StaticResource AccentLight}"
+                             HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,7"
+                             FontFamily="Consolas"/>
+                  <StackPanel Grid.Column="2">
+                    <TextBlock Text="YEDEK B" FontSize="9" FontFamily="Consolas"
+                               Foreground="{StaticResource TextTertiary}" Margin="0,0,0,6"/>
+                    <ComboBox Style="{StaticResource ItchyComboBox}"
+                              ItemsSource="{Binding AvailableBackups}"
+                              SelectedItem="{Binding CompareBackupB}">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                          <TextBlock Text="{Binding Name}" FontFamily="Segoe UI" FontSize="12"/>
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                    </ComboBox>
+                  </StackPanel>
+                </Grid>
+
+                <Button Style="{StaticResource PrimaryButton}" Command="{Binding StartCompareCommand}"
+                        HorizontalAlignment="Stretch" Height="40">
+                  <Button.IsEnabled>
+                    <Binding Path="IsComparing" Converter="{StaticResource InverseBool}"/>
+                  </Button.IsEnabled>
+                  <TextBlock Text="Karşılaştır" FontSize="13" FontWeight="Bold"
+                             FontFamily="Segoe UI" Foreground="White"/>
+                </Button>
+
+                <TextBlock Text="{Binding CompareStatus}" FontSize="11"
+                           Foreground="{StaticResource AccentLight}" FontFamily="Consolas"
+                           HorizontalAlignment="Center" Margin="0,12,0,0"/>
+              </StackPanel>
+            </Border>
+
+            <ScrollViewer Grid.Row="2" Margin="20,0,20,16" VerticalScrollBarVisibility="Auto"
+                          Visibility="{Binding HasCompareResult, Converter={StaticResource BoolToVis}}">
+              <StackPanel>
+                <!-- Sadece A'da -->
+                <TextBlock FontSize="11" FontFamily="Consolas" Margin="0,8,0,6">
+                  <Run Text="SADECE YEDEK A'DA (" Foreground="{StaticResource TextTertiary}"/>
+                  <Run Text="{Binding CompareResult.OnlyInA.Count, Mode=OneWay}" Foreground="{StaticResource Info}" FontWeight="Bold"/>
+                  <Run Text=")" Foreground="{StaticResource TextTertiary}"/>
+                </TextBlock>
+                <ItemsControl ItemsSource="{Binding CompareResult.OnlyInA}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Padding="12,5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <DockPanel>
+                          <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" FontSize="10"
+                                     FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"/>
+                          <TextBlock Text="{Binding RelativePath}" FontSize="11"
+                                     Foreground="{StaticResource Info}" FontFamily="Consolas"
+                                     TextTrimming="CharacterEllipsis"/>
+                        </DockPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Sadece B'de -->
+                <TextBlock FontSize="11" FontFamily="Consolas" Margin="0,12,0,6">
+                  <Run Text="SADECE YEDEK B'DE (" Foreground="{StaticResource TextTertiary}"/>
+                  <Run Text="{Binding CompareResult.OnlyInB.Count, Mode=OneWay}" Foreground="{StaticResource Success}" FontWeight="Bold"/>
+                  <Run Text=")" Foreground="{StaticResource TextTertiary}"/>
+                </TextBlock>
+                <ItemsControl ItemsSource="{Binding CompareResult.OnlyInB}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Padding="12,5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <DockPanel>
+                          <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" FontSize="10"
+                                     FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"/>
+                          <TextBlock Text="{Binding RelativePath}" FontSize="11"
+                                     Foreground="{StaticResource Success}" FontFamily="Consolas"
+                                     TextTrimming="CharacterEllipsis"/>
+                        </DockPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Değişmiş -->
+                <TextBlock FontSize="11" FontFamily="Consolas" Margin="0,12,0,6">
+                  <Run Text="DEĞİŞMİŞ (" Foreground="{StaticResource TextTertiary}"/>
+                  <Run Text="{Binding CompareResult.Modified.Count, Mode=OneWay}" Foreground="{StaticResource Warning}" FontWeight="Bold"/>
+                  <Run Text=")" Foreground="{StaticResource TextTertiary}"/>
+                </TextBlock>
+                <ItemsControl ItemsSource="{Binding CompareResult.Modified}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Padding="12,5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <DockPanel>
+                          <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" FontSize="10"
+                                     FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"/>
+                          <TextBlock Text="{Binding RelativePath}" FontSize="11"
+                                     Foreground="{StaticResource Warning}" FontFamily="Consolas"
+                                     TextTrimming="CharacterEllipsis"/>
+                        </DockPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </ScrollViewer>
+          </Grid>
+
+          <!-- ═══ SONUÇ RAPORU ══════════════════════════════════════════ -->
+          <Grid>
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsPanelResult}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="48"/>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Background="{StaticResource BgPrimary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+              <TextBlock Text="Yedekleme Raporu" FontSize="15" FontWeight="Bold"
+                         Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"
+                         Margin="16,0" FontFamily="Segoe UI"/>
+            </Border>
+
+            <ScrollViewer Grid.Row="1" Margin="20,16" VerticalScrollBarVisibility="Auto">
+              <StackPanel MaxWidth="700">
+                <!-- Genel durum -->
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16" Padding="20,16">
+                  <StackPanel>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                      </Grid.ColumnDefinitions>
+                      <StackPanel Grid.Column="0">
+                        <TextBlock Text="✓ Yedekleme Tamamlandı" FontSize="18" FontWeight="Bold"
+                                   Foreground="{StaticResource Success}" FontFamily="Segoe UI">
+                          <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding LastBackupResult.Success}" Value="False">
+                                  <Setter Property="Text" Value="⚠ Yedekleme Hatalarla Tamamlandı"/>
+                                  <Setter Property="Foreground" Value="{StaticResource Warning}"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="{Binding LastBackupResult.BackupPath}" FontSize="10"
+                                   FontFamily="Consolas" Foreground="{StaticResource TextTertiary}"
+                                   Margin="0,6,0,0" TextTrimming="CharacterEllipsis"/>
+                      </StackPanel>
+                    </Grid>
+                  </StackPanel>
+                </Border>
+
+                <!-- İstatistikler -->
+                <UniformGrid Rows="1" Columns="4" Margin="0,0,0,16">
+                  <Border Background="{StaticResource BgCard}" CornerRadius="10" Margin="0,0,8,0"
+                          BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="14,12">
+                    <StackPanel>
+                      <TextBlock Text="KATEGORİ" FontSize="9" FontFamily="Consolas"
+                                 Foreground="{StaticResource TextTertiary}"/>
+                      <TextBlock Text="{Binding LastBackupResult.TotalCategories}" FontSize="22" FontWeight="Bold"
+                                 Foreground="{StaticResource AccentLight}" FontFamily="Consolas" Margin="0,4,0,0"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Background="{StaticResource BgCard}" CornerRadius="10" Margin="4,0"
+                          BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="14,12">
+                    <StackPanel>
+                      <TextBlock Text="DOSYA" FontSize="9" FontFamily="Consolas"
+                                 Foreground="{StaticResource TextTertiary}"/>
+                      <TextBlock Text="{Binding LastBackupResult.FilesCopied}" FontSize="22" FontWeight="Bold"
+                                 Foreground="{StaticResource Success}" FontFamily="Consolas" Margin="0,4,0,0"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Background="{StaticResource BgCard}" CornerRadius="10" Margin="4,0"
+                          BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="14,12">
+                    <StackPanel>
+                      <TextBlock Text="HATA" FontSize="9" FontFamily="Consolas"
+                                 Foreground="{StaticResource TextTertiary}"/>
+                      <TextBlock Text="{Binding LastBackupResult.Errors.Count}" FontSize="22" FontWeight="Bold"
+                                 Foreground="{StaticResource Danger}" FontFamily="Consolas" Margin="0,4,0,0"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Background="{StaticResource BgCard}" CornerRadius="10" Margin="8,0,0,0"
+                          BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="14,12">
+                    <StackPanel>
+                      <TextBlock Text="SÜRE" FontSize="9" FontFamily="Consolas"
+                                 Foreground="{StaticResource TextTertiary}"/>
+                      <TextBlock Text="{Binding LastBackupResult.Elapsed, StringFormat=mm\:ss}" FontSize="22" FontWeight="Bold"
+                                 Foreground="{StaticResource Info}" FontFamily="Consolas" Margin="0,4,0,0"/>
+                    </StackPanel>
+                  </Border>
+                </UniformGrid>
+
+                <!-- Doğrulama Raporu -->
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16" Padding="16,12"
+                        Visibility="{Binding LastBackupResult.VerificationReport, Converter={StaticResource NotNullToVis}}">
+                  <StackPanel>
+                    <TextBlock Text="DOĞRULAMA" FontSize="9" FontFamily="Consolas"
+                               Foreground="{StaticResource TextTertiary}" Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding LastBackupResult.VerificationReport.Summary}" FontSize="13"
+                               Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                    <Grid Margin="0,8,0,0">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                      </Grid.ColumnDefinitions>
+                      <StackPanel Grid.Column="0">
+                        <TextBlock Text="Geçerli" FontSize="10" Foreground="{StaticResource TextTertiary}"
+                                   FontFamily="Consolas"/>
+                        <TextBlock Text="{Binding LastBackupResult.VerificationReport.Valid}"
+                                   FontSize="16" FontWeight="Bold" Foreground="{StaticResource Success}"
+                                   FontFamily="Consolas"/>
+                      </StackPanel>
+                      <StackPanel Grid.Column="1">
+                        <TextBlock Text="Eksik" FontSize="10" Foreground="{StaticResource TextTertiary}"
+                                   FontFamily="Consolas"/>
+                        <TextBlock Text="{Binding LastBackupResult.VerificationReport.Missing}"
+                                   FontSize="16" FontWeight="Bold" Foreground="{StaticResource Danger}"
+                                   FontFamily="Consolas"/>
+                      </StackPanel>
+                      <StackPanel Grid.Column="2">
+                        <TextBlock Text="Bozuk" FontSize="10" Foreground="{StaticResource TextTertiary}"
+                                   FontFamily="Consolas"/>
+                        <TextBlock Text="{Binding LastBackupResult.VerificationReport.Modified}"
+                                   FontSize="16" FontWeight="Bold" Foreground="{StaticResource Warning}"
+                                   FontFamily="Consolas"/>
+                      </StackPanel>
+                    </Grid>
+                  </StackPanel>
+                </Border>
+
+                <!-- Hata listesi -->
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16" Padding="0">
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding LastBackupResult.Errors.Count, Converter={StaticResource HasItemsConverter}}" Value="True">
+                          <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <StackPanel>
+                    <TextBlock Text="HATALAR" FontSize="9" FontFamily="Consolas"
+                               Foreground="{StaticResource Danger}" Margin="16,12,16,8"/>
+                    <ItemsControl ItemsSource="{Binding LastBackupResult.Errors}" MaxHeight="160">
+                      <ItemsControl.Template>
+                        <ControlTemplate>
+                          <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter/>
+                          </ScrollViewer>
+                        </ControlTemplate>
+                      </ItemsControl.Template>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Padding="16,4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                            <TextBlock Text="{Binding}" FontSize="10" FontFamily="Consolas"
+                                       Foreground="{StaticResource Danger}" TextWrapping="Wrap"/>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+
+              </StackPanel>
+            </ScrollViewer>
+
+            <Border Grid.Row="2" Background="{StaticResource BgSecondary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                    Padding="20,12">
+              <DockPanel>
+                <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}"
+                        Command="{Binding CloseResultCommand}" Padding="24,10" Height="40">
+                  <TextBlock Text="Kapat" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold"
+                             Foreground="White"/>
+                </Button>
+                <Button Style="{StaticResource SecondaryButton}"
+                        Command="{Binding OpenLogFolderCommand}" Padding="16,10" Height="40">
+                  <TextBlock Text="📁  Log Klasörü" FontFamily="Segoe UI" FontSize="11"/>
+                </Button>
+              </DockPanel>
+            </Border>
+          </Grid>
+
+          <!-- ═══ AYARLAR ═══════════════════════════════════════════════ -->
+          <Grid>
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsPanelSettings}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="48"/>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="60"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Background="{StaticResource BgPrimary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+              <TextBlock Text="Ayarlar" FontSize="15" FontWeight="Bold"
+                         Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"
+                         Margin="16,0" FontFamily="Segoe UI"/>
+            </Border>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+              <StackPanel Margin="24,16,24,16" MaxWidth="580">
+
+                <!-- HAKKINDA - EN ÜSTTE -->
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,20" Padding="16,16">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                      <TextBlock Text="Itchy Backup" FontSize="20" FontWeight="Bold" FontFamily="Segoe UI">
+                        <TextBlock.Foreground>
+                          <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#6C5CE7" Offset="0"/>
+                            <GradientStop Color="#A29BFE" Offset="1"/>
+                          </LinearGradientBrush>
+                        </TextBlock.Foreground>
+                      </TextBlock>
+                      <TextBlock Text="v0.6 — Teknik Servis Yedekleme Aracı" FontSize="11"
+                                 Foreground="{StaticResource TextTertiary}" FontFamily="Segoe UI" Margin="0,3,0,0"/>
+                      <TextBlock Text="Created by M.Mert" FontSize="12"
+                                 Foreground="{StaticResource AccentLight}" FontFamily="Segoe UI"
+                                 FontWeight="SemiBold" Margin="0,6,0,0"/>
+                    </StackPanel>
+                    <!-- GitHub Butonu -->
+                    <Border Grid.Column="1" VerticalAlignment="Center">
+                      <Button Click="GitHubBtn_Click" Cursor="Hand" Background="Transparent"
+                              BorderThickness="0" Padding="0">
+                        <Border Background="{StaticResource BgQuaternary}" CornerRadius="10"
+                                BorderBrush="{StaticResource BorderHoverBrush}" BorderThickness="1"
+                                Padding="14,10">
+                          <StackPanel Orientation="Horizontal">
+                            <!-- GitHub Logo SVG -->
+                            <Viewbox Width="18" Height="18" Margin="0,0,8,0">
+                              <Canvas Width="24" Height="24">
+                                <Path Fill="{StaticResource TextPrimary}"
+                                      Data="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"/>
+                              </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="GitHub" FontSize="12" FontWeight="Medium"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                          </StackPanel>
+                        </Border>
+                      </Button>
+                    </Border>
+                  </Grid>
+                </Border>
+
+                <TextBlock Text="GENEL" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16">
+                  <StackPanel>
+                    <DockPanel Margin="16,13">
+                      <CheckBox DockPanel.Dock="Right" Style="{StaticResource ItchyCheckBox}"
+                                IsChecked="{Binding StartWithWindows}" VerticalAlignment="Center"/>
+                      <StackPanel>
+                        <TextBlock Text="Windows ile başlat" FontSize="13" FontWeight="Medium"
+                                   Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Sistem açılışında otomatik başlat" FontSize="11"
+                                   Foreground="{StaticResource TextTertiary}" FontFamily="Segoe UI"/>
+                      </StackPanel>
+                    </DockPanel>
+                    <Separator/>
+                    <DockPanel Margin="16,13">
+                      <CheckBox DockPanel.Dock="Right" Style="{StaticResource ItchyCheckBox}"
+                                IsChecked="{Binding MinimizeToTray}" VerticalAlignment="Center"/>
+                      <StackPanel>
+                        <TextBlock Text="Sistem tepsisine küçült" FontSize="13" FontWeight="Medium"
+                                   Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Kapatınca tepside gizle" FontSize="11"
+                                   Foreground="{StaticResource TextTertiary}" FontFamily="Segoe UI"/>
+                      </StackPanel>
+                    </DockPanel>
+                  </StackPanel>
+                </Border>
+
+                <TextBlock Text="YEDEKLEME" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+                                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16">
+                                    <StackPanel>
+                                        <StackPanel Margin="16,13">
+                                            <TextBlock Text="Varsayılan Yedek Klasörü" FontSize="13" FontWeight="Medium"
+                                 Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI" Margin="0,0,0,8"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox Grid.Column="0" Style="{StaticResource ItchyTextBox}"
+                                 Text="{Binding DefaultDestination, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Consolas" FontSize="11" Height="34" VerticalContentAlignment="Center"/>
+                                                <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
+                                Command="{Binding BrowseDefaultDestinationCommand}"
+                                Margin="6,0,0,0" Padding="10,6" Height="34">
+                                                    <TextBlock Text="📁" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                                                </Button>
+                                            </Grid>
+                                        </StackPanel>
+                                        <Separator/>
+                                        <DockPanel Margin="16,13">
+                                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ItchyCheckBox}"
+                                IsChecked="{Binding AutoChecksum}" VerticalAlignment="Center"/>
+                                            <StackPanel>
+                                                <TextBlock Text="Otomatik checksum doğrulama" FontSize="13" FontWeight="Medium"
+                                   Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                                                <TextBlock Text="Her yedek sonrası SHA-256 ile doğrula" FontSize="11"
+                                   Foreground="{StaticResource TextTertiary}" FontFamily="Segoe UI"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                        <Separator/>
+                                        <DockPanel Margin="16,13">
+                                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ItchyCheckBox}"
+                                IsChecked="{Binding SoundNotification}" VerticalAlignment="Center"/>
+                                            <StackPanel>
+                                                <TextBlock Text="Ses bildirimi" FontSize="13" FontWeight="Medium"
+                                   Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                                                <TextBlock Text="Yedekleme tamamlanınca ses çal" FontSize="11"
+                                   Foreground="{StaticResource TextTertiary}" FontFamily="Segoe UI"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                        <Separator/>
+                                        <DockPanel Margin="16,13">
+                                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ItchyCheckBox}"
+                                IsChecked="{Binding OpenFolderAfterBackup}" VerticalAlignment="Center"/>
+                                            <StackPanel>
+                                                <TextBlock Text="Yedek bitince klasörü aç" FontSize="13" FontWeight="Medium"
+                                   Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                                                <TextBlock Text="Manuel yedek tamamlanınca klasörü otomatik aç" FontSize="11"
+                                   Foreground="{StaticResource TextTertiary}" FontFamily="Segoe UI"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+            </ScrollViewer>
+            <Border Grid.Row="2" Background="{StaticResource BgSecondary}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+              <DockPanel Margin="24,0">
+                <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}"
+                        Command="{Binding SaveSettingsCommand}" Padding="28,10" Height="40">
+                  <TextBlock Text="Kaydet" FontFamily="Segoe UI" FontSize="12" FontWeight="Bold"
+                             Foreground="White"/>
+                </Button>
+              </DockPanel>
+            </Border>
+          </Grid>
+
+        </Grid>
+      </Grid>
+
+      <!-- ══ İLERLEME BARI ════════════════════════════════════════════════ -->
+      <Border Grid.Row="2" Background="{StaticResource BgSecondary}"
+              BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+        <Border.Visibility>
+          <Binding Path="ShowProgressPanel" Converter="{StaticResource BoolToVis}"/>
+        </Border.Visibility>
+        <Grid Margin="16,10,16,12">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="14"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <!-- Kategori + dosya + hız + kalan -->
+          <DockPanel Grid.Row="0" Margin="0,0,0,6">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+              <TextBlock Text="{Binding FileCountText}" FontFamily="Consolas" FontSize="10"
+                         Foreground="{StaticResource AccentLight}" Margin="0,0,12,0" VerticalAlignment="Center"/>
+              <TextBlock Text="{Binding SpeedText}" FontFamily="Consolas" FontSize="10"
+                         Foreground="{StaticResource TextTertiary}" Margin="0,0,12,0" VerticalAlignment="Center"/>
+              <TextBlock Text="ETA: " FontSize="10" Foreground="{StaticResource TextTertiary}"
+                         FontFamily="Consolas" VerticalAlignment="Center"/>
+              <TextBlock Text="{Binding EtaText}" FontFamily="Consolas" FontSize="10"
+                         Foreground="{StaticResource AccentLight}" FontWeight="Bold" VerticalAlignment="Center"/>
+            </StackPanel>
+            <TextBlock VerticalAlignment="Center" FontSize="12" FontFamily="Segoe UI">
+              <Run Text="{Binding CurrentCategory, Mode=OneWay}"
+                   Foreground="{StaticResource Accent}" FontWeight="SemiBold"/>
+              <Run Text=" — " Foreground="{StaticResource TextTertiary}"/>
+              <Run Text="{Binding CurrentFile, Mode=OneWay}"
+                   Foreground="{StaticResource TextSecondary}"/>
+            </TextBlock>
+          </DockPanel>
+          <!-- Progress bar -->
+          <ProgressBar Grid.Row="2" Style="{StaticResource ItchyProgressBar}"
+                       Value="{Binding ProgressPercent}" Maximum="100"/>
+          <!-- Yüzde + durum -->
+          <DockPanel Grid.Row="3" Margin="0,5,0,0">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+              <TextBlock FontFamily="Consolas" FontSize="11" FontWeight="Bold">
+                <TextBlock.Foreground>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#00A050" Offset="0"/>
+                    <GradientStop Color="#00FF80" Offset="1"/>
+                  </LinearGradientBrush>
+                </TextBlock.Foreground>
+                <Run Text="{Binding ProgressPercent, StringFormat='{}{0:F0}', Mode=OneWay}"/>
+                <Run Text="%"/>
+              </TextBlock>
+            </StackPanel>
+            <TextBlock Text="{Binding ProgressText}" FontSize="10" FontFamily="Consolas"
+                       Foreground="{StaticResource TextTertiary}"/>
+          </DockPanel>
+        </Grid>
+      </Border>
+
+      <!-- ══ STATUS BAR ════════════════════════════════════════════════════ -->
+      <Border Grid.Row="3" Background="{StaticResource BgSecondary}"
+              BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+        <DockPanel Margin="16,0">
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+            <Ellipse Width="7" Height="7" Margin="0,0,6,0">
+              <Ellipse.Style>
+                <Style TargetType="Ellipse">
+                  <Setter Property="Fill" Value="{StaticResource Accent}"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsBackingUp}" Value="True">
+                      <Setter Property="Fill" Value="{StaticResource Warning}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Ellipse.Style>
+              <Ellipse.Effect>
+                <DropShadowEffect Color="#6C5CE7" BlurRadius="6" ShadowDepth="0" Opacity="0.8"/>
+              </Ellipse.Effect>
+            </Ellipse>
+            <TextBlock FontSize="10" FontFamily="Consolas" Foreground="{StaticResource TextTertiary}">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Text" Value="● Hazır"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsBackingUp}" Value="True">
+                      <Setter Property="Text" Value="◉ Yedekleniyor..."/>
+                      <Setter Property="Foreground" Value="{StaticResource Warning}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+          </StackPanel>
+          <TextBlock Text="Created by M.Mert — Teknik Servis Yedekleme Aracı"
+                     FontSize="10" FontFamily="Consolas"
+                     Foreground="{StaticResource TextTertiary}" VerticalAlignment="Center"/>
+        </DockPanel>
+      </Border>
+    </Grid>
+  </Border>
+</Window>

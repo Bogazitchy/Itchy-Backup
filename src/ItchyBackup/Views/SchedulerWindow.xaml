@@ -1,0 +1,4 @@
+<Window x:Class="ItchyBackup.Views.SchedulerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Unused" Width="100" Height="100" Visibility="Collapsed"/>

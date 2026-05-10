@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  WiX v4 Toolset — Itchy Backup Setup
+  Derleme: wix build ItchyBackup.wxs -out ItchyBackup_Setup.msi
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="Itchy Backup"
+           Manufacturer="Itchy Tech"
+           Version="1.0.0.0"
+           UpgradeCode="A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+           Language="1055"
+           Codepage="1254"
+           InstallerVersion="500"
+           Compressed="yes"
+           Scope="perMachine">
+
+    <MajorUpgrade DowngradeErrorMessage="Bu bilgisayarda daha yeni bir sürüm kurulu. Eski sürümü kurmak için önce yeni sürümü kaldırın."/>
+    <MediaTemplate EmbedCab="yes"/>
+
+    <!-- .NET 8 Runtime kontrolü -->
+    <Property Id="DOTNET8INSTALLED">
+      <RegistrySearch Id="DotNet8Check"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full"
+                      Name="Release"
+                      Type="raw"/>
+    </Property>
+
+    <Condition Message=".NET 8 Runtime bulunamadı. Lütfen önce .NET 8 Desktop Runtime kurun: https://dotnet.microsoft.com/download">
+      <![CDATA[Installed OR DOTNET8INSTALLED]]>
+    </Condition>
+
+    <!-- Kurulum klasörü -->
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="MANUFACTURERDIR" Name="Itchy Tech">
+        <Directory Id="INSTALLFOLDER" Name="Itchy Backup"/>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Başlat Menüsü -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="STARTMENUFOLDER" Name="Itchy Backup"/>
+    </StandardDirectory>
+
+    <!-- Masaüstü -->
+    <StandardDirectory Id="DesktopFolder"/>
+
+    <!-- Bileşenler -->
+    <ComponentGroup Id="MainComponents" Directory="INSTALLFOLDER">
+
+      <Component Id="MainExe" Guid="B1C2D3E4-F5A6-7890-BCDE-F01234567891">
+        <File Id="ItchyBackupExe"
+              Source="$(var.SourceDir)\ItchyBackup.exe"
+              KeyPath="yes"/>
+        <!-- Başlat Menüsü kısayolu -->
+        <Shortcut Id="StartMenuShortcut"
+                  Directory="STARTMENUFOLDER"
+                  Name="Itchy Backup"
+                  Description="Teknik Servis Yedekleme Aracı"
+                  Target="[#ItchyBackupExe]"
+                  WorkingDirectory="INSTALLFOLDER"/>
+        <!-- Masaüstü kısayolu -->
+        <Shortcut Id="DesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="Itchy Backup"
+                  Description="Teknik Servis Yedekleme Aracı"
+                  Target="[#ItchyBackupExe]"
+                  WorkingDirectory="INSTALLFOLDER"/>
+        <RemoveFolder Id="RemoveStartMenu" Directory="STARTMENUFOLDER" On="uninstall"/>
+        <RegistryValue Root="HKCU"
+                       Key="Software\ItchyTech\ItchyBackup"
+                       Name="Installed"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="no"/>
+      </Component>
+
+      <!-- Yardımcı DLL'ler -->
+      <Component Id="Newtonsoft" Guid="C2D3E4F5-A6B7-8901-CDEF-012345678902">
+        <File Source="$(var.SourceDir)\Newtonsoft.Json.dll" KeyPath="yes"/>
+      </Component>
+
+      <Component Id="SharpZipLib" Guid="D3E4F5A6-B7C8-9012-DEF0-123456789013">
+        <File Source="$(var.SourceDir)\ICSharpCode.SharpZipLib.dll" KeyPath="yes"/>
+      </Component>
+
+      <Component Id="CommunityToolkit" Guid="E4F5A6B7-C8D9-0123-EF01-234567890124">
+        <File Source="$(var.SourceDir)\CommunityToolkit.Mvvm.dll" KeyPath="yes"/>
+      </Component>
+
+    </ComponentGroup>
+
+    <!-- Özellikler -->
+    <Feature Id="MainFeature"
+             Title="Itchy Backup"
+             Description="Teknik servis yedekleme programı"
+             Level="1"
+             ConfigurableDirectory="INSTALLFOLDER">
+      <ComponentGroupRef Id="MainComponents"/>
+    </Feature>
+
+    <!-- Kurulum sihirbazı UI -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER"/>
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER"/>
+
+    <!-- Lisans metni -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf"/>
+    <WixVariable Id="WixUIBannerBmp" Value="banner.bmp"/>
+    <WixVariable Id="WixUIDialogBmp" Value="dialog.bmp"/>
+
+  </Package>
+</Wix>

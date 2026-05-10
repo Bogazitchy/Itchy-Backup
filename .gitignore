@@ -1,0 +1,9 @@
+build/
+bin/
+obj/
+.vs/
+.claude/
+*.user
+*.suo
+*.log
+*.idea/
