@@ -6,7 +6,7 @@
 
 **Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme aracı**
 
-[![Version](https://img.shields.io/badge/version-v0.6-6C5CE7?style=flat-square)](https://github.com/Bogazitchy/Itchy-Backup/releases)
+[![Version](https://img.shields.io/badge/version-v0.7-6C5CE7?style=flat-square)](https://github.com/Bogazitchy/Itchy-Backup/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)](https://github.com/Bogazitchy/Itchy-Backup/releases)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![License](https://img.shields.io/badge/license-MIT-00CEC9?style=flat-square)](LICENSE)
@@ -50,20 +50,17 @@
 
 ### ♻️ Geri Yükleme
 - Mevcut yedek listesini otomatik görüntüleme
-- **Klasör bazlı kısmi geri yükleme** — yalnızca seçilen klasörleri geri yükle
+- **Hiyerarşik klasör ağacı** — iki seviyeli alt klasör görünümü, seçim alt klasör bazında çalışır
+- **Kısmi geri yükleme** — yalnızca seçilen klasörleri/alt klasörleri geri yükle
 - ZIP yedeklerini şifre ile geri yükleme
 - Mevcut dosyaların üzerine yazma seçeneği
 - Canlı ilerleme ve iptal desteği
-
-### 🔍 Yedek Karşılaştırma
-- İki yedek arasında dosya düzeyinde karşılaştırma
-- Sadece A'da olan / sadece B'de olan / değişmiş / aynı dosyaları raporlama
-- Boyut farkı gösterimi
 
 ### ⏰ Otomasyon
 - **Zamanlayıcı** — Gün ve saat seçerek otomatik yedekleme
 - **Windows Görev Zamanlayıcısı** entegrasyonu
 - **Profil sistemi** — Ayarları kaydedip farklı bilgisayarlarda yükle
+- **Profil düzenleme** — Mevcut profili düzenle, ad değiştir, oluşturma tarihi korunur
 
 ### 📊 İzleme & Raporlama
 - **Canlı ilerleme çubuğu** — Dosya bazlı gerçek zamanlı ilerleme
@@ -74,8 +71,10 @@
 - **Log dosyası** — Her yedek için detaylı kayıt
 
 ### 🎨 Arayüz
-- Modern dark tema
-- Tek pencere navigasyon (Yedek Seç, Geçmiş, Zamanlayıcı, Geri Yükle, Karşılaştır, Ayarlar)
+- **Yenilenen dark tema** — derin mor gradyan arka plan, pencere üzerinde glow efekti
+- Logo animasyonu — nefes alan ışık efekti (titbar)
+- **Yeniden tasarlanan pencere butonları** — özel vektör ikonlar, kapat butonu kırmızıya döner (Windows 11 stili)
+- Tek pencere navigasyon (Yedek Seç, Geçmiş, Zamanlayıcı, Geri Yükle, Ayarlar)
 - Yedek bitince klasörü otomatik açma
 
 ---
@@ -111,8 +110,8 @@ build.bat
 ```
 
 `build.bat` çalıştırıldığında `build/output/` altında şunlar üretilir:
-- `ItchyBackup_v0.6_portable.exe` — runtime dahil tek dosya
-- `ItchyBackup_v0.6_Setup.exe` — kurulum sihirbazı (runtime dahil)
+- `ItchyBackup_v0.7_portable.exe` — runtime dahil tek dosya
+- `ItchyBackup_v0.7_Setup.exe` — kurulum sihirbazı (runtime dahil)
 
 ---
 
@@ -126,14 +125,15 @@ ItchyBackup/
 │   ├── Views/                # WPF XAML arayüzler
 │   ├── Services/
 │   │   ├── BackupEngine.cs       # Ana yedekleme motoru
-│   │   ├── RestoreEngine.cs      # Geri yükleme motoru
-│   │   ├── BackupCompareService.cs # Yedek karşılaştırma
+│   │   ├── RestoreEngine.cs      # Geri yükleme motoru + BackupFolderItem
 │   │   ├── CategoryBuilder.cs    # Kategori & otomatik tespit
 │   │   ├── ChecksumService.cs    # SHA-256 doğrulama
 │   │   ├── ZipService.cs         # ZIP + AES-256
 │   │   ├── VssService.cs         # Volume Shadow Copy
 │   │   ├── HotBackupDetector.cs  # Çalışan servis tespiti
-│   │   ├── ProfileService.cs     # Profil kaydet/yükle
+│   │   ├── NetworkShareHelper.cs # SMB/UNC bağlantısı
+│   │   ├── NotificationService.cs# Bildirim servisi
+│   │   ├── ProfileService.cs     # Profil kaydet/yükle/sil
 │   │   └── LogService.cs         # Log dosyası
 │   └── Resources/Styles/     # Dark tema XAML
 ├── installer/
@@ -157,11 +157,13 @@ ItchyBackup/
 - [x] Profil sistemi
 - [x] Otomatik zamanlayıcı
 - [x] Özel klasör ekleme
-- [x] Yedekten geri yükleme (klasör bazlı kısmi restore dahil)
-- [x] Yedek karşılaştırma
+- [x] Yedekten geri yükleme (hiyerarşik klasör ağacı, alt klasör bazlı seçim)
+- [x] Profil düzenleme (ad değiştirme, güncelleme)
+- [x] Ağ paylaşımına yedekleme (SMB/UNC)
+- [x] Artımlı yedekleme
 - [x] Setup içinde .NET 8 Runtime dahil (bağımsız kurulum)
-- [ ] Ağ paylaşımına yedekleme (SMB/UNC)
-- [ ] Artımlı yedekleme
+- [x] Yenilenen arayüz (gradyan tema, animasyonlar, vektör pencere ikonları)
+- [ ] Yedek karşılaştırma (kaldırıldı — yeniden tasarlanacak)
 - [ ] E-posta bildirimi
 
 ---
