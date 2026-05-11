@@ -19,6 +19,7 @@ public partial class MainViewModel : ObservableObject
     public ObservableCollection<HotBackupWarning> HotWarnings { get; } = new();
     public ObservableCollection<HistoryEntry> BackupHistory { get; } = new();
     public ObservableCollection<IncrementalBaseOption> IncrementalBaseOptions { get; } = new();
+    public ObservableCollection<string> AdditionalDestinations { get; } = new();
 
     // Panel navigasyon
     [ObservableProperty] private ActivePanel _activePanel = ActivePanel.Backup;
@@ -62,6 +63,20 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _networkPassword = "";
     [ObservableProperty] private string _networkDomain = "";
 
+    // Yedek rotasyonu
+    [ObservableProperty] private int _rotationPolicyIndex = 0;
+    [ObservableProperty] private int _rotationKeepLastN = 5;
+    [ObservableProperty] private int _rotationDeleteOlderThanDays = 30;
+
+    partial void OnRotationPolicyIndexChanged(int value)
+    {
+        OnPropertyChanged(nameof(RotationIsKeepLastN));
+        OnPropertyChanged(nameof(RotationIsDeleteOlderThan));
+    }
+
+    public bool RotationIsKeepLastN       => RotationPolicyIndex == 1;
+    public bool RotationIsDeleteOlderThan => RotationPolicyIndex == 2;
+
     public bool IsNetworkPath => NetworkShareHelper.IsUncPath(DestinationPath);
 
     // Progress
@@ -94,6 +109,26 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _soundNotification = true;
     [ObservableProperty] private bool _openFolderAfterBackup = false;
     [ObservableProperty] private string _defaultDestination = "";
+    [ObservableProperty] private string _themeName = "Dark";
+    [ObservableProperty] private string _accentColor = "#6C5CE7";
+
+    private bool _suppressThemeApply;
+
+    partial void OnThemeNameChanged(string value)
+    {
+        if (!_suppressThemeApply) ThemeService.Apply(value, AccentColor);
+    }
+
+    partial void OnAccentColorChanged(string value)
+    {
+        if (!_suppressThemeApply) ThemeService.Apply(ThemeName, value);
+    }
+
+    [RelayCommand]
+    public void SetTheme(string theme) => ThemeName = theme;
+
+    [RelayCommand]
+    public void SetAccent(string hex) => AccentColor = hex;
 
     // Zamanlayıcı
     [ObservableProperty] private bool _schedulerEnabled = false;
@@ -158,6 +193,7 @@ public partial class MainViewModel : ObservableObject
 
     public MainViewModel()
     {
+        ProfileService.EnsureDefaultProfiles();
         LoadCategories();
         LoadCustomFolders();
         LoadProfiles();
@@ -239,6 +275,21 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    public void AddDestination()
+    {
+        using var d = new System.Windows.Forms.FolderBrowserDialog
+        {
+            Description = "Ek yedek hedef klasörünü seçin",
+            UseDescriptionForTitle = true
+        };
+        if (d.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            AdditionalDestinations.Add(d.SelectedPath);
+    }
+
+    [RelayCommand]
+    public void RemoveDestination(string dest) => AdditionalDestinations.Remove(dest);
+
     // ── Yedekleme ───────────────────────────────────────────────────────────
     [RelayCommand]
     public async Task StartBackupAsync()
@@ -311,21 +362,26 @@ public partial class MainViewModel : ObservableObject
 
         var options = new BackupOptions
         {
-            DestinationRoot      = DestinationPath,
-            UseZip               = UseZip,
-            UsePassword          = UsePassword,
-            Password             = ZipPassword,
-            UseVss               = UseVss,
-            VerifyChecksum       = VerifyChecksum,
-            CompressionLevel     = CompressionLevel,
-            SelectedItems        = selected,
-            IncludeMachineInfo   = true,
-            IsIncremental        = IsIncremental,
-            IncrementalBaseFolder = SelectedIncrementalBase?.FolderPath ?? "",
-            UseNetworkCredentials = UseNetworkCredentials && NetworkShareHelper.IsUncPath(DestinationPath),
-            NetworkUsername      = NetworkUsername,
-            NetworkPassword      = NetworkPassword,
-            NetworkDomain        = NetworkDomain
+            DestinationRoot          = DestinationPath,
+            AdditionalDestinations   = AdditionalDestinations.ToList(),
+            UseZip                   = UseZip,
+            UsePassword              = UsePassword,
+            Password                 = ZipPassword,
+            UseVss                   = UseVss,
+            VerifyChecksum           = VerifyChecksum,
+            CompressionLevel         = CompressionLevel,
+            SelectedItems            = selected,
+            IncludeMachineInfo       = true,
+            IsIncremental            = IsIncremental,
+            IncrementalBaseFolder    = SelectedIncrementalBase?.FolderPath ?? "",
+            UseNetworkCredentials    = UseNetworkCredentials && NetworkShareHelper.IsUncPath(DestinationPath),
+            NetworkUsername          = NetworkUsername,
+            NetworkPassword          = NetworkPassword,
+            NetworkDomain            = NetworkDomain,
+            RotationPolicy           = (RotationPolicy)RotationPolicyIndex,
+            RotationKeepLastN        = RotationKeepLastN,
+            RotationDeleteOlderThanDays = RotationDeleteOlderThanDays,
+            ParallelCopyThreads      = 4,
         };
 
         var progress = new Progress<BackupProgress>(p =>
@@ -392,20 +448,24 @@ public partial class MainViewModel : ObservableObject
 
         var profile = new BackupProfile
         {
-            ProfileName           = dialog.ProfileName,
-            Icon                  = dialog.SelectedIcon,
-            CreatedAt             = createdAt,
-            DefaultDestination    = DestinationPath,
-            UseZip                = UseZip,
-            UsePassword           = UsePassword,
-            UseVss                = UseVss,
-            VerifyChecksum        = VerifyChecksum,
-            CompressionLevel      = CompressionLevel,
-            SelectedItemIds       = Categories.SelectMany(c => c.Items.Where(i => i.IsSelected).Select(i => i.Id)).ToList(),
-            IsIncremental         = IsIncremental,
-            UseNetworkCredentials = UseNetworkCredentials,
-            NetworkUsername       = NetworkUsername,
-            NetworkDomain         = NetworkDomain
+            ProfileName              = dialog.ProfileName,
+            Icon                     = dialog.SelectedIcon,
+            CreatedAt                = createdAt,
+            DefaultDestination       = DestinationPath,
+            AdditionalDestinations   = AdditionalDestinations.ToList(),
+            UseZip                   = UseZip,
+            UsePassword              = UsePassword,
+            UseVss                   = UseVss,
+            VerifyChecksum           = VerifyChecksum,
+            CompressionLevel         = CompressionLevel,
+            SelectedItemIds          = Categories.SelectMany(c => c.Items.Where(i => i.IsSelected).Select(i => i.Id)).ToList(),
+            IsIncremental            = IsIncremental,
+            UseNetworkCredentials    = UseNetworkCredentials,
+            NetworkUsername          = NetworkUsername,
+            NetworkDomain            = NetworkDomain,
+            RotationPolicy           = (RotationPolicy)RotationPolicyIndex,
+            RotationKeepLastN        = RotationKeepLastN,
+            RotationDeleteOlderThanDays = RotationDeleteOlderThanDays,
         };
 
         if (oldName != null && oldName != dialog.ProfileName)
@@ -444,6 +504,12 @@ public partial class MainViewModel : ObservableObject
         NetworkUsername       = profile.NetworkUsername;
         NetworkDomain         = profile.NetworkDomain;
         NetworkPassword       = "";
+        RotationPolicyIndex   = (int)profile.RotationPolicy;
+        RotationKeepLastN     = profile.RotationKeepLastN;
+        RotationDeleteOlderThanDays = profile.RotationDeleteOlderThanDays;
+        AdditionalDestinations.Clear();
+        foreach (var d in profile.AdditionalDestinations)
+            AdditionalDestinations.Add(d);
         var ids = new HashSet<string>(profile.SelectedItemIds);
         foreach (var cat in Categories)
             foreach (var item in cat.Items)
@@ -618,7 +684,9 @@ public partial class MainViewModel : ObservableObject
             AutoChecksum          = AutoChecksum,
             SoundNotification     = SoundNotification,
             OpenFolderAfterBackup = OpenFolderAfterBackup,
-            DefaultDestination    = DefaultDestination
+            DefaultDestination    = DefaultDestination,
+            ThemeName             = ThemeName,
+            AccentColor           = AccentColor,
         };
         vm.Save();
         if (!string.IsNullOrEmpty(DefaultDestination) && string.IsNullOrEmpty(DestinationPath))
@@ -636,6 +704,11 @@ public partial class MainViewModel : ObservableObject
         SoundNotification     = vm.SoundNotification;
         OpenFolderAfterBackup = vm.OpenFolderAfterBackup;
         DefaultDestination    = vm.DefaultDestination;
+        _suppressThemeApply = true;
+        ThemeName   = vm.ThemeName;
+        AccentColor = vm.AccentColor;
+        _suppressThemeApply = false;
+        ThemeService.Apply(vm.ThemeName, vm.AccentColor);
         if (string.IsNullOrEmpty(DestinationPath) && !string.IsNullOrEmpty(DefaultDestination))
             DestinationPath = DefaultDestination;
     }

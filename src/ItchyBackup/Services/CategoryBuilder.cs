@@ -16,6 +16,7 @@ public static class CategoryBuilder
             BuildDatabases(),
             BuildVirtualMachines(),
             BuildCloudStorage(),
+            BuildSystemTools(),
             BuildCustomFolders()
         };
         foreach (var cat in categories)
@@ -26,6 +27,18 @@ public static class CategoryBuilder
             }
         return categories;
     }
+
+    private static BackupCategory BuildSystemTools() => new()
+    {
+        Id = "system_tools", Name = "Sistem Araçları",
+        Description = "Windows sürücüleri ve WiFi profilleri", AccentColor = "#A29BFE",
+        Type = CategoryType.SystemTools,
+        Items = new()
+        {
+            new() { Id = "winDrivers",   Label = "Windows Sürücüleri", Path = "pnputil_export" },
+            new() { Id = "wifiProfiles", Label = "WiFi Profilleri",    Path = "netsh_wifi_export" },
+        }
+    };
 
     private static BackupCategory BuildCustomFolders() => new()
     {
@@ -164,7 +177,7 @@ public static class CategoryBuilder
 
     private static bool DetectItem(BackupItem item)
     {
-        if (item.Parent?.Type == CategoryType.CustomFolders) return true;
+        if (item.Parent?.Type is CategoryType.CustomFolders or CategoryType.SystemTools) return true;
         if (item.Path is "Sistem genelinde" or "Bulunamadı") return true;
         if (item.Parent?.Type is CategoryType.UserFolders or CategoryType.Browsers)
             return Directory.Exists(item.Path);

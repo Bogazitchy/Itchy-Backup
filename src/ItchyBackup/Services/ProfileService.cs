@@ -53,6 +53,36 @@ public static class ProfileService
 
     public static string GetProfileDir() => ProfileDir;
 
+    public static void EnsureDefaultProfiles()
+    {
+        const string name = "Hızlı Format";
+        var path = Path.Combine(ProfileDir, SanitizeFileName(name) + ".json");
+        if (File.Exists(path)) return;
+
+        var profile = new BackupProfile
+        {
+            ProfileName = name,
+            CreatedAt   = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            Icon        = "flash",
+            UseVss      = true,
+            VerifyChecksum = true,
+            SelectedItemIds = new List<string>
+            {
+                // Kullanıcı klasörleri
+                "desktop", "documents", "downloads", "pictures", "videos", "music",
+                // Tarayıcılar
+                "chrome", "firefox", "edge", "opera", "brave", "vivaldi",
+                // Sistem araçları
+                "wifiProfiles", "winDrivers",
+                // Outlook
+                "pst", "ost", "sig", "templ", "nk2",
+            }
+        };
+        var json = JsonConvert.SerializeObject(profile, Formatting.Indented);
+        File.WriteAllText(path, json);
+        LogService.Info("Varsayılan profil oluşturuldu: Hızlı Format");
+    }
+
     private static string SanitizeFileName(string name) =>
         string.Concat(name.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
 }

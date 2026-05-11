@@ -6,6 +6,7 @@ public class BackupProfile
     public string CreatedAt { get; set; } = "";
     public string LastUsed { get; set; } = "";
     public string DefaultDestination { get; set; } = "";
+    public List<string> AdditionalDestinations { get; set; } = new();
     public bool UseZip { get; set; } = false;
     public bool UsePassword { get; set; } = false;
     public bool UseVss { get; set; } = true;
@@ -18,6 +19,9 @@ public class BackupProfile
     public string NetworkUsername { get; set; } = "";
     public string NetworkDomain { get; set; } = "";
     public string Icon { get; set; } = "person";
+    public RotationPolicy RotationPolicy { get; set; } = RotationPolicy.None;
+    public int RotationKeepLastN { get; set; } = 5;
+    public int RotationDeleteOlderThanDays { get; set; } = 30;
 
     public string IconPath => ProfileIcons.GetPath(Icon);
 }

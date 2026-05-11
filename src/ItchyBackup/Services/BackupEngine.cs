@@ -9,6 +9,7 @@ namespace ItchyBackup.Services;
 public class BackupOptions
 {
     public string DestinationRoot { get; set; } = "";
+    public List<string> AdditionalDestinations { get; set; } = new();
     public bool UseZip { get; set; } = false;
     public bool UsePassword { get; set; } = false;
     public string? Password { get; set; }
@@ -18,11 +19,15 @@ public class BackupOptions
     public List<BackupItem> SelectedItems { get; set; } = new();
     public bool IncludeMachineInfo { get; set; } = true;
     public bool IsIncremental { get; set; } = false;
-    public string IncrementalBaseFolder { get; set; } = ""; // boş = otomatik tespit
+    public string IncrementalBaseFolder { get; set; } = "";
     public bool UseNetworkCredentials { get; set; } = false;
     public string NetworkUsername { get; set; } = "";
     public string NetworkPassword { get; set; } = "";
     public string NetworkDomain { get; set; } = "";
+    public RotationPolicy RotationPolicy { get; set; } = RotationPolicy.None;
+    public int RotationKeepLastN { get; set; } = 5;
+    public int RotationDeleteOlderThanDays { get; set; } = 30;
+    public int ParallelCopyThreads { get; set; } = 4;
 }
 
 public class BackupResult
@@ -49,6 +54,7 @@ public class BackupEngine
     private readonly CancellationToken _ct;
     private readonly BackupProgress _state = new();
     private readonly Stopwatch _sw = new();
+    private readonly object _stateLock = new();
     private string? _incrementalBase;
     private string _workFolder = "";
 
@@ -196,6 +202,29 @@ public class BackupEngine
             LogService.Info($"Doğrulama: {Result.VerificationReport.Summary}");
         }
 
+        // Rotasyonu ana hedefte uygula
+        ApplyRotation(_options.DestinationRoot);
+
+        // Ek hedeflere kopyala
+        foreach (var extraDest in _options.AdditionalDestinations.Where(d => !string.IsNullOrWhiteSpace(d)))
+        {
+            Report("Ek hedefe kopyalanıyor...", "Çoklu Hedef");
+            try
+            {
+                LogService.Info($"Ek hedef kopyalanıyor: {extraDest}");
+                Directory.CreateDirectory(extraDest);
+                var extraFolder = Path.Combine(extraDest, folderName);
+                await CopyFolderToExtraDestAsync(backupFolder, extraFolder);
+                ApplyRotation(extraDest);
+                LogService.Info($"Ek hedef tamamlandı: {extraFolder}");
+            }
+            catch (Exception ex)
+            {
+                Result.Warnings.Add($"Ek hedef başarısız ({extraDest}): {ex.Message}");
+                LogService.Error($"Ek hedef hatası: {extraDest}", ex);
+            }
+        }
+
         _sw.Stop();
         _state.Elapsed = _sw.Elapsed;
         _state.CopiedBytes = _state.TotalBytes;
@@ -249,14 +278,26 @@ Kategori Sayısı: {_options.SelectedItems.Count}
 
     private async Task BackupItemAsync(BackupItem item, string destRoot, VssService? vss)
     {
-        var sourcePath = Environment.ExpandEnvironmentVariables(item.Path);
-        if (vss != null && item.RequiresVss)
-            sourcePath = vss.GetVssPath(sourcePath);
-
         var safeLabel = SanitizeName(item.Label);
         var safeCat = SanitizeName(item.Parent?.Name ?? "Diger");
         var destDir = Path.Combine(destRoot, safeCat, safeLabel);
         Directory.CreateDirectory(destDir);
+
+        // Özel sistem araçları
+        if (item.Id == "winDrivers")
+        {
+            await ExportDriversAsync(destDir);
+            return;
+        }
+        if (item.Id == "wifiProfiles")
+        {
+            await ExportWifiProfilesAsync(destDir);
+            return;
+        }
+
+        var sourcePath = Environment.ExpandEnvironmentVariables(item.Path);
+        if (vss != null && item.RequiresVss)
+            sourcePath = vss.GetVssPath(sourcePath);
 
         if (sourcePath == "Sistem genelinde")
         {
@@ -303,12 +344,16 @@ Kategori Sayısı: {_options.SelectedItems.Count}
         }
 
         var files = di.GetFiles("*", SearchOption.AllDirectories);
-        foreach (var file in files)
+        var sem = new SemaphoreSlim(_options.ParallelCopyThreads, _options.ParallelCopyThreads);
+
+        var tasks = files.Select(async file =>
         {
             _ct.ThrowIfCancellationRequested();
-            var destFile = file.FullName.Replace(source, dest);
+            await sem.WaitAsync(_ct);
             try
             {
+                var destFile = file.FullName.Replace(source, dest);
+
                 // Artımlı: değişmeyen dosyaları atla
                 if (_options.IsIncremental && _incrementalBase != null)
                 {
@@ -316,9 +361,8 @@ Kategori Sayısı: {_options.SelectedItems.Count}
                     var baseCopy = Path.Combine(_incrementalBase, rel);
                     if (File.Exists(baseCopy) && IsUnchanged(file.FullName, baseCopy))
                     {
-                        _state.FilesUnchanged++;
-                        _state.CopiedBytes += file.Length;
-                        continue;
+                        lock (_stateLock) { _state.FilesUnchanged++; _state.CopiedBytes += file.Length; }
+                        return;
                     }
                 }
 
@@ -328,10 +372,13 @@ Kategori Sayısı: {_options.SelectedItems.Count}
             }
             catch (Exception ex)
             {
-                _state.FilesSkipped++;
+                lock (_stateLock) { _state.FilesSkipped++; }
                 LogService.Warn($"Kopyalanamadı: {file.Name} - {ex.Message}");
             }
-        }
+            finally { sem.Release(); }
+        }).ToArray();
+
+        await Task.WhenAll(tasks);
     }
 
     private static bool IsUnchanged(string srcPath, string lastCopyPath)
@@ -375,7 +422,7 @@ Kategori Sayısı: {_options.SelectedItems.Count}
             while ((read = await fsIn.ReadAsync(buffer, _ct)) > 0)
             {
                 await fsOut.WriteAsync(buffer.AsMemory(0, read), _ct);
-                _state.CopiedBytes += read;
+                lock (_stateLock) { _state.CopiedBytes += read; }
 
                 if ((DateTime.Now - lastReport).TotalMilliseconds > 200)
                 {
@@ -384,14 +431,17 @@ Kategori Sayısı: {_options.SelectedItems.Count}
                     lastReport = DateTime.Now;
                 }
             }
-            _state.FilesCopied++;
+            lock (_stateLock) { _state.FilesCopied++; }
             UpdateSpeed();
         }
         catch (IOException ex) when (ex.Message.Contains("used by another"))
         {
-            _state.FilesSkipped++;
+            lock (_stateLock)
+            {
+                _state.FilesSkipped++;
+                _state.Warnings.Add($"Kilitli: {Path.GetFileName(src)}");
+            }
             LogService.Warn($"Dosya kilitli, atlanıyor: {Path.GetFileName(src)}");
-            _state.Warnings.Add($"Kilitli: {Path.GetFileName(src)}");
         }
     }
 
@@ -470,6 +520,117 @@ Kategori Sayısı: {_options.SelectedItems.Count}
                 }
             }
         }
+    }
+
+    private async Task ExportDriversAsync(string destDir)
+    {
+        try
+        {
+            Report("Windows sürücüleri dışa aktarılıyor...", "Sistem Araçları");
+            var psi = new ProcessStartInfo("pnputil", $"/export-drivers * \"{destDir}\"")
+            {
+                CreateNoWindow = true, UseShellExecute = false,
+                RedirectStandardOutput = true, RedirectStandardError = true
+            };
+            using var p = Process.Start(psi);
+            if (p != null)
+            {
+                await p.WaitForExitAsync(_ct);
+                LogService.Info($"pnputil /export-drivers tamamlandı, çıkış kodu: {p.ExitCode}");
+                if (p.ExitCode != 0)
+                    _state.Warnings.Add($"Sürücü dışa aktarma uyarısı (kod: {p.ExitCode}) — yönetici yetkisi gerekebilir.");
+            }
+            _state.FilesCopied++;
+        }
+        catch (Exception ex)
+        {
+            LogService.Error("Sürücü dışa aktarma hatası", ex);
+            _state.Warnings.Add($"Sürücü dışa aktarılamadı: {ex.Message}");
+        }
+    }
+
+    private async Task ExportWifiProfilesAsync(string destDir)
+    {
+        try
+        {
+            Report("WiFi profilleri dışa aktarılıyor...", "Sistem Araçları");
+            var psi = new ProcessStartInfo("netsh", $"wlan export profile key=clear folder=\"{destDir}\"")
+            {
+                CreateNoWindow = true, UseShellExecute = false,
+                RedirectStandardOutput = true, RedirectStandardError = true
+            };
+            using var p = Process.Start(psi);
+            if (p != null)
+            {
+                await p.WaitForExitAsync(_ct);
+                LogService.Info($"netsh wlan export tamamlandı, çıkış kodu: {p.ExitCode}");
+            }
+            _state.FilesCopied++;
+        }
+        catch (Exception ex)
+        {
+            LogService.Error("WiFi profili dışa aktarma hatası", ex);
+            _state.Warnings.Add($"WiFi profilleri dışa aktarılamadı: {ex.Message}");
+        }
+    }
+
+    private async Task CopyFolderToExtraDestAsync(string sourceFolder, string destFolder)
+    {
+        Directory.CreateDirectory(destFolder);
+        foreach (var dir in Directory.GetDirectories(sourceFolder, "*", SearchOption.AllDirectories))
+        {
+            var target = dir.Replace(sourceFolder, destFolder);
+            Directory.CreateDirectory(target);
+        }
+        var files = Directory.GetFiles(sourceFolder, "*", SearchOption.AllDirectories);
+        var sem = new SemaphoreSlim(_options.ParallelCopyThreads);
+        var tasks = files.Select(async file =>
+        {
+            await sem.WaitAsync(_ct);
+            try
+            {
+                var destFile = file.Replace(sourceFolder, destFolder);
+                Directory.CreateDirectory(Path.GetDirectoryName(destFile)!);
+                using var fsIn  = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 81920, true);
+                using var fsOut = new FileStream(destFile, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true);
+                await fsIn.CopyToAsync(fsOut, _ct);
+            }
+            finally { sem.Release(); }
+        }).ToArray();
+        await Task.WhenAll(tasks);
+    }
+
+    private void ApplyRotation(string destRoot)
+    {
+        if (_options.RotationPolicy == RotationPolicy.None) return;
+        try
+        {
+            var machine = SanitizeName(Environment.MachineName);
+            var user = SanitizeName(Environment.UserName);
+            var dirs = Directory.GetDirectories(destRoot, $"Yedek_{machine}_{user}_*")
+                .OrderByDescending(d => d).ToList();
+
+            if (_options.RotationPolicy == RotationPolicy.KeepLastN)
+            {
+                foreach (var old in dirs.Skip(_options.RotationKeepLastN))
+                {
+                    LogService.Info($"Rotasyon: siliniyor {Path.GetFileName(old)}");
+                    Directory.Delete(old, true);
+                    Result.Warnings.Add($"Eski yedek silindi: {Path.GetFileName(old)}");
+                }
+            }
+            else if (_options.RotationPolicy == RotationPolicy.DeleteOlderThanDays)
+            {
+                var cutoff = DateTime.Now.AddDays(-_options.RotationDeleteOlderThanDays);
+                foreach (var old in dirs.Where(d => Directory.GetCreationTime(d) < cutoff))
+                {
+                    LogService.Info($"Rotasyon: siliniyor {Path.GetFileName(old)}");
+                    Directory.Delete(old, true);
+                    Result.Warnings.Add($"Eski yedek silindi: {Path.GetFileName(old)}");
+                }
+            }
+        }
+        catch (Exception ex) { LogService.Error("Rotasyon hatası", ex); }
     }
 
     private async Task<long> EstimateTotalSizeAsync()

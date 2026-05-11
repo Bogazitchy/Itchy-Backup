@@ -35,7 +35,24 @@ public partial class MainWindow : Window
         => WindowState = WindowState == WindowState.Maximized
             ? WindowState.Normal : WindowState.Maximized;
 
-    private void CloseBtn_Click(object sender, RoutedEventArgs e) => Close();
+    private void CloseBtn_Click(object sender, RoutedEventArgs e)
+    {
+        var vm = (MainViewModel)DataContext;
+        if (vm.MinimizeToTray) Hide();
+        else Close();
+    }
+
+    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        var app = (App)System.Windows.Application.Current;
+        if (app.IsQuitting) return;
+        var vm = (MainViewModel)DataContext;
+        if (vm.MinimizeToTray)
+        {
+            e.Cancel = true;
+            Hide();
+        }
+    }
 
     private void CategoryCheckBox_MouseDown(object sender, MouseButtonEventArgs e)
     {

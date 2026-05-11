@@ -5,8 +5,10 @@ namespace ItchyBackup.Models;
 
 public enum CategoryType
 {
-    UserFolders, Browsers, Outlook, Databases, VirtualMachines, CloudStorage, CustomFolders
+    UserFolders, Browsers, Outlook, Databases, VirtualMachines, CloudStorage, CustomFolders, SystemTools
 }
+
+public enum RotationPolicy { None, KeepLastN, DeleteOlderThanDays }
 
 public partial class BackupItem : ObservableObject
 {
@@ -66,6 +68,7 @@ public partial class BackupCategory : ObservableObject
         CategoryType.VirtualMachines => "M4,6H20V16H4M20,18A2,2 0 0,0 22,16V6C22,4.89 21.1,4 20,4H4C2.89,4 2,4.89 2,6V16A2,2 0 0,0 4,18H0V20H24V18H20Z",
         CategoryType.CloudStorage    => "M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z",
         CategoryType.CustomFolders   => "M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6M19,14H15V18H13V14H9V12H13V8H15V12H19V14Z",
+        CategoryType.SystemTools     => "M12,1L3,5V11C3,16.55 6.84,21.73 12,23C17.16,21.73 21,16.55 21,11V5L12,1Z",
         _ => "M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2Z"
     };
 

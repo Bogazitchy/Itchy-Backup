@@ -13,7 +13,7 @@ echo.
 set PROJECT=src\ItchyBackup\ItchyBackup.csproj
 set PUBLISH_SC=build\publish_sc
 set OUTPUT_DIR=build\output
-set VERSION=0.6
+set VERSION=0.8
 
 :: ── Gereksinim kontrolü ──────────────────────────────────────────────────
 echo [1/4] Gereksinimler kontrol ediliyor...

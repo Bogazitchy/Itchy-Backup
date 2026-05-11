@@ -55,4 +55,23 @@
   <SolidColorBrush x:Key="CatCloud"        Color="#55EFC4"/>
   <SolidColorBrush x:Key="CatCustom"       Color="#E17055"/>
 
+  <!-- ── Progress Fill (ThemeService bu kaynağı accent rengine göre günceller) ── -->
+  <LinearGradientBrush x:Key="ProgressFillBrush" StartPoint="0,0" EndPoint="1,0">
+    <GradientStop Color="#4A3CB5" Offset="0"/>
+    <GradientStop Color="#6C5CE7" Offset="0.6"/>
+    <GradientStop Color="#A29BFE" Offset="1"/>
+  </LinearGradientBrush>
+
+  <!-- ── Runtime Theme Brushes (ThemeService bu kaynakları override eder) ── -->
+  <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="1,1">
+    <GradientStop Color="#0E0B1C" Offset="0"/>
+    <GradientStop Color="#0C0B18" Offset="0.5"/>
+    <GradientStop Color="#110C22" Offset="1"/>
+  </LinearGradientBrush>
+  <LinearGradientBrush x:Key="TitleBarBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#16152E" Offset="0"/>
+    <GradientStop Color="#11101E" Offset="1"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="WindowBorderBrush" Color="#4A3890"/>
+
 </ResourceDictionary>

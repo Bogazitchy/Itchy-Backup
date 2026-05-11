@@ -16,6 +16,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _soundNotification = true;
     [ObservableProperty] private bool _openFolderAfterBackup = false;
     [ObservableProperty] private string _defaultDestination = "";
+    [ObservableProperty] private string _themeName = "Dark";
+    [ObservableProperty] private string _accentColor = "#6C5CE7";
 
     public SettingsViewModel() => Load();
 
@@ -32,6 +34,8 @@ public partial class SettingsViewModel : ObservableObject
             SoundNotification     = s.SoundNotification;
             OpenFolderAfterBackup = s.OpenFolderAfterBackup;
             DefaultDestination    = s.DefaultDestination;
+            ThemeName             = s.ThemeName;
+            AccentColor           = s.AccentColor;
         }
         catch { }
     }
@@ -48,7 +52,9 @@ public partial class SettingsViewModel : ObservableObject
                 AutoChecksum          = AutoChecksum,
                 SoundNotification     = SoundNotification,
                 OpenFolderAfterBackup = OpenFolderAfterBackup,
-                DefaultDestination    = DefaultDestination
+                DefaultDestination    = DefaultDestination,
+                ThemeName             = ThemeName,
+                AccentColor           = AccentColor,
             }, Formatting.Indented));
         }
         catch { }
@@ -62,5 +68,7 @@ public partial class SettingsViewModel : ObservableObject
         public bool SoundNotification { get; set; } = true;
         public bool OpenFolderAfterBackup { get; set; } = false;
         public string DefaultDestination { get; set; } = "";
+        public string ThemeName { get; set; } = "Dark";
+        public string AccentColor { get; set; } = "#6C5CE7";
     }
 }

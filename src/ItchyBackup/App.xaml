@@ -1,8 +1,7 @@
 <Application x:Class="ItchyBackup.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:helpers="clr-namespace:ItchyBackup.Helpers"
-             StartupUri="Views/MainWindow.xaml">
+             xmlns:helpers="clr-namespace:ItchyBackup.Helpers">
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
