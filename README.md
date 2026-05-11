@@ -6,7 +6,7 @@
 
 **Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme aracı**
 
-[![Version](https://img.shields.io/badge/version-v0.7-6C5CE7?style=flat-square)](https://github.com/Bogazitchy/Itchy-Backup/releases)
+[![Version](https://img.shields.io/badge/version-v0.8-6C5CE7?style=flat-square)](https://github.com/Bogazitchy/Itchy-Backup/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)](https://github.com/Bogazitchy/Itchy-Backup/releases)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![License](https://img.shields.io/badge/license-MIT-00CEC9?style=flat-square)](LICENSE)
@@ -40,6 +40,7 @@
 | **Veritabanları** | Firebird, SQLite, SQL Server, Access — otomatik tespit |
 | **Sanal Makineler** | VMware (.vmdk/.vmx), VirtualBox (.vdi/.vbox), Hyper-V (.vhdx) |
 | **Bulut Depolama** | OneDrive, Google Drive, MEGA, Dropbox — yerel dosyalar |
+| **Sistem Araçları** | Windows sürücüleri (pnputil) ve WiFi profilleri (netsh) dışa aktarımı |
 | **Özel Klasörler** | İstediğiniz herhangi bir klasör veya konumu ekleyin |
 
 ### 🔐 Güvenlik & Doğrulama
@@ -47,6 +48,7 @@
 - **SHA-256 checksum** — Yedek tamamlandıktan sonra otomatik doğrulama
 - **VSS (Volume Shadow Copy)** — Açık PST, OST, SQL dosyalarını kopyalar
 - **Hot Backup tespiti** — SQL Server, Firebird, Outlook açıksa uyarı verir
+- **Disk alanı kontrolü** — Yedekleme başlamadan önce tahmini boyut ve boş alan karşılaştırması
 
 ### ♻️ Geri Yükleme
 - Mevcut yedek listesini otomatik görüntüleme
@@ -62,6 +64,12 @@
 - **Profil sistemi** — Ayarları kaydedip farklı bilgisayarlarda yükle
 - **Profil düzenleme** — Mevcut profili düzenle, ad değiştir, oluşturma tarihi korunur
 
+### 🗄️ Yedek Yönetimi
+- **Çoklu hedef** — Ana hedef + sınırsız ek hedef klasörü; aynı yedek tüm konumlara kopyalanır
+- **Yedek rotasyonu** — Son N yedeği tut veya X günden eski yedekleri otomatik sil
+- **Artımlı yedekleme** — Yalnızca değişen dosyaları kopyala; temel yedek otomatik veya manuel seçilir
+- **Ağ paylaşımı** — SMB/UNC yoluna kimlik bilgileriyle bağlanarak yedekleme
+
 ### 📊 İzleme & Raporlama
 - **Canlı ilerleme çubuğu** — Dosya bazlı gerçek zamanlı ilerleme
 - **Hız göstergesi** — Anlık kopyalama hızı (MB/s)
@@ -70,9 +78,12 @@
 - **Geçmiş** — Son 50 yedeğin listesi ve durumu
 - **Log dosyası** — Her yedek için detaylı kayıt
 
-### 🎨 Arayüz
-- **Yenilenen dark tema** — derin mor gradyan arka plan, pencere üzerinde glow efekti
-- Logo animasyonu — nefes alan ışık efekti (titbar)
+### 🎨 Arayüz & Tema
+- **Splash ekranı** — Açılışta animasyonlu yükleme çubuğu ve neon logo efekti
+- **Dark / Light tema** — Koyu derin mor veya açık lavanta paleti; anında değiştir
+- **Accent renk seçimi** — 6 hazır renk (Mor, Turkuaz, Yeşil, Altın, Turuncu, Pembe); seçim kalıcı kaydedilir
+- **Marka logoları** — Tarayıcı ve bulut depolama öğelerinde SVG marka ikonları
+- Logo animasyonu — nefes alan ışık efekti (titlebar)
 - **Yeniden tasarlanan pencere butonları** — özel vektör ikonlar, kapat butonu kırmızıya döner (Windows 11 stili)
 - Tek pencere navigasyon (Yedek Seç, Geçmiş, Zamanlayıcı, Geri Yükle, Ayarlar)
 - Yedek bitince klasörü otomatik açma
@@ -110,8 +121,8 @@ build.bat
 ```
 
 `build.bat` çalıştırıldığında `build/output/` altında şunlar üretilir:
-- `ItchyBackup_v0.7_portable.exe` — runtime dahil tek dosya
-- `ItchyBackup_v0.7_Setup.exe` — kurulum sihirbazı (runtime dahil)
+- `ItchyBackup_v0.8_portable.exe` — runtime dahil tek dosya
+- `ItchyBackup_v0.8_Setup.exe` — kurulum sihirbazı (runtime dahil)
 
 ---
 
@@ -123,10 +134,13 @@ ItchyBackup/
 │   ├── Models/               # Veri modelleri
 │   ├── ViewModels/           # MVVM ViewModels
 │   ├── Views/                # WPF XAML arayüzler
+│   │   └── SplashWindow      # Açılış ekranı
 │   ├── Services/
-│   │   ├── BackupEngine.cs       # Ana yedekleme motoru
+│   │   ├── BackupEngine.cs       # Ana yedekleme motoru (paralel kopyalama)
 │   │   ├── RestoreEngine.cs      # Geri yükleme motoru + BackupFolderItem
 │   │   ├── CategoryBuilder.cs    # Kategori & otomatik tespit
+│   │   ├── ThemeService.cs       # Dark/Light tema & accent renk yönetimi
+│   │   ├── DiskSpaceChecker.cs   # Yedek boyut tahmini & disk alanı kontrolü
 │   │   ├── ChecksumService.cs    # SHA-256 doğrulama
 │   │   ├── ZipService.cs         # ZIP + AES-256
 │   │   ├── VssService.cs         # Volume Shadow Copy
@@ -135,7 +149,7 @@ ItchyBackup/
 │   │   ├── NotificationService.cs# Bildirim servisi
 │   │   ├── ProfileService.cs     # Profil kaydet/yükle/sil
 │   │   └── LogService.cs         # Log dosyası
-│   └── Resources/Styles/     # Dark tema XAML
+│   └── Resources/Styles/     # Dark/Light tema XAML
 ├── installer/
 │   └── ItchyBackup.iss       # Inno Setup script
 ├── build.bat                 # Build scripti
@@ -147,23 +161,27 @@ ItchyBackup/
 ## 🗺️ Yol Haritası
 
 - [x] Kullanıcı klasörleri yedekleme
-- [x] Tarayıcı verileri yedekleme
+- [x] Tarayıcı verileri yedekleme (SVG marka logoları)
 - [x] Outlook PST/OST yedekleme
 - [x] Veritabanı tespiti ve yedekleme
 - [x] Sanal makine yedekleme
+- [x] Sistem araçları yedekleme (Windows sürücüleri, WiFi profilleri)
 - [x] ZIP + AES-256 şifreleme
 - [x] SHA-256 checksum doğrulama
 - [x] VSS (açık dosya) desteği
+- [x] Disk alanı kontrolü (yedekleme öncesi)
 - [x] Profil sistemi
 - [x] Otomatik zamanlayıcı
 - [x] Özel klasör ekleme
 - [x] Yedekten geri yükleme (hiyerarşik klasör ağacı, alt klasör bazlı seçim)
 - [x] Profil düzenleme (ad değiştirme, güncelleme)
 - [x] Ağ paylaşımına yedekleme (SMB/UNC)
-- [x] Artımlı yedekleme
+- [x] Artımlı yedekleme (manuel temel seçimi)
+- [x] Çoklu hedef (birden fazla yedek konumu)
+- [x] Yedek rotasyonu (son N tut / X günden eskiyi sil)
+- [x] Dark / Light tema + accent renk seçimi
+- [x] Splash ekranı (animasyonlu açılış)
 - [x] Setup içinde .NET 8 Runtime dahil (bağımsız kurulum)
-- [x] Yenilenen arayüz (gradyan tema, animasyonlar, vektör pencere ikonları)
-- [ ] Yedek karşılaştırma (kaldırıldı — yeniden tasarlanacak)
 - [ ] E-posta bildirimi
 
 ---
