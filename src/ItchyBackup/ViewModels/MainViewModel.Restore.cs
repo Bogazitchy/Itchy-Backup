@@ -31,14 +31,6 @@ public partial class MainViewModel
     [ObservableProperty] private string _restoreProgressText = "Hazır";
     [ObservableProperty] private string _restoreCurrentFile = "";
 
-    // Karşılaştırma
-    [ObservableProperty] private AvailableBackup? _compareBackupA;
-    [ObservableProperty] private AvailableBackup? _compareBackupB;
-    [ObservableProperty] private bool _isComparing = false;
-    [ObservableProperty] private string _compareStatus = "";
-    [ObservableProperty] private CompareReport? _compareResult;
-    [ObservableProperty] private bool _hasCompareResult = false;
-
     private CancellationTokenSource? _restoreCts;
 
     partial void OnSelectedBackupForRestoreChanged(AvailableBackup? value)
@@ -115,14 +107,32 @@ public partial class MainViewModel
             var folderGroups = items
                 .GroupBy(i => GetTopLevelFolder(i.RelativePath))
                 .OrderBy(g => g.Key);
+
             foreach (var g in folderGroups)
             {
-                RestoreFolders.Add(new BackupFolderItem
+                var topItem = new BackupFolderItem
                 {
                     FolderRelativePath = g.Key,
                     FileCount = g.Count(),
                     TotalSize = g.Sum(i => i.Size)
-                });
+                };
+
+                var subGroups = g
+                    .GroupBy(i => GetSecondLevelPath(i.RelativePath, g.Key))
+                    .Where(sg => !string.IsNullOrEmpty(sg.Key))
+                    .OrderBy(sg => sg.Key);
+
+                foreach (var sg in subGroups)
+                {
+                    topItem.Children.Add(new BackupFolderItem
+                    {
+                        FolderRelativePath = sg.Key,
+                        FileCount = sg.Count(),
+                        TotalSize = sg.Sum(i => i.Size)
+                    });
+                }
+
+                RestoreFolders.Add(topItem);
             }
 
             RestoreProgressText = $"{RestoreItems.Count} dosya, {RestoreFolders.Count} klasör yüklendi";
@@ -140,20 +150,54 @@ public partial class MainViewModel
         return parts.Length > 1 ? parts[0] : "";
     }
 
+    private static string GetSecondLevelPath(string relativePath, string topLevelFolder)
+    {
+        var normalized = relativePath.Replace('/', '\\');
+        var topLen = topLevelFolder.Length;
+        if (normalized.Length <= topLen + 1) return "";
+        var afterTop = normalized.Substring(topLen + 1);
+        var sep = afterTop.IndexOf('\\');
+        if (sep < 0) return "";
+        return topLevelFolder + "\\" + afterTop.Substring(0, sep);
+    }
+
     private List<string> GetSelectedFilePaths()
     {
         if (!RestoreFolders.Any())
             return RestoreItems.Where(i => i.IsSelected).Select(i => i.RelativePath).ToList();
 
-        var selectedFolders = RestoreFolders
-            .Where(f => f.IsSelected)
-            .Select(f => f.FolderRelativePath)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var selectedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var folder in RestoreFolders)
+        {
+            if (folder.Children.Count > 0)
+            {
+                foreach (var child in folder.Children.Where(c => c.IsSelected))
+                    selectedPaths.Add(child.FolderRelativePath);
+            }
+            else if (folder.IsSelected)
+            {
+                selectedPaths.Add(folder.FolderRelativePath);
+            }
+        }
 
         return RestoreItems
-            .Where(i => selectedFolders.Contains(GetTopLevelFolder(i.RelativePath)))
+            .Where(i => IsInSelectedPath(i.RelativePath, selectedPaths))
             .Select(i => i.RelativePath)
             .ToList();
+    }
+
+    private static bool IsInSelectedPath(string relativePath, HashSet<string> selectedPaths)
+    {
+        var normalized = relativePath.Replace('/', '\\');
+        var dir = Path.GetDirectoryName(normalized) ?? "";
+        foreach (var sp in selectedPaths)
+        {
+            if (string.IsNullOrEmpty(sp)) return true;
+            if (dir.Equals(sp, StringComparison.OrdinalIgnoreCase) ||
+                dir.StartsWith(sp + "\\", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
     }
 
     [RelayCommand]
@@ -226,52 +270,21 @@ public partial class MainViewModel
     public void SelectAllRestoreItems()
     {
         foreach (var i in RestoreItems) i.IsSelected = true;
-        foreach (var f in RestoreFolders) f.IsSelected = true;
+        foreach (var f in RestoreFolders)
+        {
+            f.IsSelected = true;
+            foreach (var c in f.Children) c.IsSelected = true;
+        }
     }
 
     [RelayCommand]
     public void ClearAllRestoreItems()
     {
         foreach (var i in RestoreItems) i.IsSelected = false;
-        foreach (var f in RestoreFolders) f.IsSelected = false;
-    }
-
-    // ── Karşılaştırma ──────────────────────────────────────────────────────
-    [RelayCommand]
-    public async Task StartCompareAsync()
-    {
-        if (CompareBackupA == null || CompareBackupB == null)
+        foreach (var f in RestoreFolders)
         {
-            System.Windows.MessageBox.Show("Karşılaştırılacak iki yedeği seçin.", "Itchy Backup",
-                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
-            return;
-        }
-        if (CompareBackupA.IsZip || CompareBackupB.IsZip)
-        {
-            System.Windows.MessageBox.Show("Karşılaştırma şu an sadece ZIP olmayan yedeklerde çalışır.",
-                "Itchy Backup", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
-            return;
-        }
-
-        IsComparing = true;
-        HasCompareResult = false;
-        CompareStatus = "Karşılaştırma başlatılıyor...";
-        var prog = new Progress<string>(s => CompareStatus = s);
-        try
-        {
-            CompareResult = await BackupCompareService.CompareAsync(
-                CompareBackupA.Path, CompareBackupB.Path, prog, CancellationToken.None);
-            HasCompareResult = true;
-            CompareStatus = CompareResult.Summary;
-        }
-        catch (Exception ex)
-        {
-            System.Windows.MessageBox.Show($"Karşılaştırma hatası:\n{ex.Message}",
-                "Hata", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-        }
-        finally
-        {
-            IsComparing = false;
+            f.IsSelected = false;
+            foreach (var c in f.Children) c.IsSelected = false;
         }
     }
 

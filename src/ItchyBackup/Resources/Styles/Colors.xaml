@@ -1,19 +1,29 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-  <!-- ── Dark Midnight Palette ──────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="BgPrimary"      Color="#0F0F11"/>
-  <SolidColorBrush x:Key="BgSecondary"    Color="#16161A"/>
-  <SolidColorBrush x:Key="BgTertiary"     Color="#1E1E24"/>
-  <SolidColorBrush x:Key="BgQuaternary"   Color="#26262E"/>
-  <SolidColorBrush x:Key="BgCard"         Color="#16161A"/>
+  <!-- ── Glass Dark Palette ─────────────────────────────────────────────── -->
+  <SolidColorBrush x:Key="BgPrimary"      Color="#0C0B18"/>
+  <SolidColorBrush x:Key="BgSecondary"    Color="#11101E"/>
+  <SolidColorBrush x:Key="BgTertiary"     Color="#1A192E"/>
+  <SolidColorBrush x:Key="BgQuaternary"   Color="#22203A"/>
+  <LinearGradientBrush x:Key="BgCard" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#18183C" Offset="0"/>
+    <GradientStop Color="#0E0E24" Offset="1"/>
+  </LinearGradientBrush>
 
   <!-- ── Purple Accent ──────────────────────────────────────────────────── -->
   <SolidColorBrush x:Key="Accent"         Color="#6C5CE7"/>
   <SolidColorBrush x:Key="AccentLight"    Color="#A29BFE"/>
   <SolidColorBrush x:Key="AccentDark"     Color="#4A3CB5"/>
   <SolidColorBrush x:Key="AccentGlow"     Color="#6C5CE7"/>
-  <SolidColorBrush x:Key="AccentSubtle"   Color="#1A1440"/>
+  <SolidColorBrush x:Key="AccentSubtle"   Color="#201A5C"/>
+  <SolidColorBrush x:Key="AccentBright"   Color="#8B7BFF"/>
+
+  <!-- ── Neon Glow Colors ────────────────────────────────────────────────── -->
+  <SolidColorBrush x:Key="NeonPurple"     Color="#9D8FFF"/>
+  <SolidColorBrush x:Key="NeonCyan"       Color="#00FFE7"/>
+  <Color x:Key="NeonPurpleColor"          >#9D8FFF</Color>
+  <Color x:Key="NeonCyanColor"            >#00FFE7</Color>
 
   <!-- ── Semantic Colors ────────────────────────────────────────────────── -->
   <SolidColorBrush x:Key="Success"        Color="#00CEC9"/>
@@ -28,8 +38,13 @@
   <SolidColorBrush x:Key="TextMuted"      Color="#3A3A50"/>
 
   <!-- ── Borders ────────────────────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="BorderBrush"        Color="#1F1F28"/>
-  <SolidColorBrush x:Key="BorderHoverBrush"   Color="#2E2E3A"/>
+  <SolidColorBrush x:Key="BorderBrush"        Color="#22205A"/>
+  <SolidColorBrush x:Key="BorderHoverBrush"   Color="#302870"/>
+
+  <!-- ── Glass Effects ─────────────────────────────────────────────────── -->
+  <SolidColorBrush x:Key="GlassBorder"        Color="#22FFFFFF"/>
+  <SolidColorBrush x:Key="GlassHighlight"     Color="#12FFFFFF"/>
+  <SolidColorBrush x:Key="GlassSurface"       Color="#08FFFFFF"/>
 
   <!-- ── Category Accent Colors ────────────────────────────────────────── -->
   <SolidColorBrush x:Key="CatUserFolders"  Color="#6C5CE7"/>

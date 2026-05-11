@@ -13,11 +13,21 @@ public partial class SaveProfileDialog : Window
 
     private Border? _activeBorder;
 
-    public SaveProfileDialog()
+    public SaveProfileDialog(string? initialName = null, string? initialIcon = null)
     {
         InitializeComponent();
+        if (initialIcon != null) SelectedIcon = initialIcon;
         BuildIconGrid();
-        Loaded += (_, _) => NameBox.Focus();
+        if (initialName != null)
+        {
+            NameBox.Text = initialName;
+            DialogTitleBlock.Text = "Profili Düzenle";
+        }
+        Loaded += (_, _) =>
+        {
+            NameBox.Focus();
+            NameBox.SelectAll();
+        };
     }
 
     private void BuildIconGrid()

@@ -75,19 +75,92 @@
         <ControlTemplate TargetType="Button">
           <Border x:Name="Root" Background="{TemplateBinding Background}"
                   CornerRadius="8" Padding="{TemplateBinding Padding}">
-            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Grid>
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <Rectangle IsHitTestVisible="False" Opacity="0" VerticalAlignment="Top" Height="1" Fill="White"/>
+            </Grid>
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
               <Setter TargetName="Root" Property="Background" Value="#7D6DF0"/>
               <Setter TargetName="Root" Property="Effect">
                 <Setter.Value>
-                  <DropShadowEffect Color="#6C5CE7" BlurRadius="14" ShadowDepth="0" Opacity="0.45"/>
+                  <DropShadowEffect Color="#6C5CE7" BlurRadius="20" ShadowDepth="0" Opacity="0.65"/>
                 </Setter.Value>
               </Setter>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
               <Setter TargetName="Root" Property="Background" Value="#5A4BC7"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Root" Property="Background" Value="{StaticResource BgQuaternary}"/>
+              <Setter Property="Foreground" Value="{StaticResource TextTertiary}"/>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- ══ Neon Primary Button ═══════════════════════════════════════════════ -->
+  <Style x:Key="NeonPrimaryButton" TargetType="Button">
+    <Setter Property="Background">
+      <Setter.Value>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+          <GradientStop Color="#5748D5" Offset="0"/>
+          <GradientStop Color="#7B6CF0" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="Foreground" Value="White"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="FontWeight" Value="Bold"/>
+    <Setter Property="FontFamily" Value="Segoe UI"/>
+    <Setter Property="Padding" Value="20,12"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Root" Background="{TemplateBinding Background}"
+                  CornerRadius="8" Padding="{TemplateBinding Padding}">
+            <Border.Effect>
+              <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
+            </Border.Effect>
+            <Grid>
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <Rectangle IsHitTestVisible="False" Opacity="0" VerticalAlignment="Top" Height="1" Fill="White"/>
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+              <BeginStoryboard>
+                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                  <DoubleAnimation Storyboard.TargetName="Root"
+                                   Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                   From="8" To="30" Duration="0:0:1.8">
+                    <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                  </DoubleAnimation>
+                  <DoubleAnimation Storyboard.TargetName="Root"
+                                   Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                   From="0.3" To="0.85" Duration="0:0:1.8">
+                    <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                  </DoubleAnimation>
+                </Storyboard>
+              </BeginStoryboard>
+            </EventTrigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Root" Property="Background">
+                <Setter.Value>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#6757E8" Offset="0"/>
+                    <GradientStop Color="#9180FF" Offset="1"/>
+                  </LinearGradientBrush>
+                </Setter.Value>
+              </Setter>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="Root" Property="Background" Value="#4A3CB5"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
               <Setter TargetName="Root" Property="Background" Value="{StaticResource BgQuaternary}"/>
@@ -106,7 +179,7 @@
     <Setter Property="FontSize" Value="12"/>
     <Setter Property="FontFamily" Value="Segoe UI"/>
     <Setter Property="Padding" Value="14,8"/>
-    <Setter Property="BorderBrush" Value="{StaticResource BorderHoverBrush}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource GlassBorder}"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="Cursor" Value="Hand"/>
     <Setter Property="Template">
@@ -116,12 +189,21 @@
                   BorderBrush="{TemplateBinding BorderBrush}"
                   BorderThickness="{TemplateBinding BorderThickness}"
                   CornerRadius="7" Padding="{TemplateBinding Padding}">
-            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Grid>
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <Rectangle IsHitTestVisible="False" Opacity="0" VerticalAlignment="Top" Height="1" Fill="White"/>
+            </Grid>
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
               <Setter TargetName="Root" Property="Background" Value="{StaticResource BgQuaternary}"/>
+              <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource AccentDark}"/>
               <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+              <Setter TargetName="Root" Property="Effect">
+                <Setter.Value>
+                  <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.22"/>
+                </Setter.Value>
+              </Setter>
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace ItchyBackup.ViewModels;
 
-public enum ActivePanel { Backup, History, Scheduler, Settings, Restore, Compare, Result }
+public enum ActivePanel { Backup, History, Scheduler, Settings, Restore, Result }
 
 public partial class MainViewModel : ObservableObject
 {
@@ -27,7 +27,6 @@ public partial class MainViewModel : ObservableObject
     public bool IsPanelScheduler => ActivePanel == ActivePanel.Scheduler;
     public bool IsPanelSettings  => ActivePanel == ActivePanel.Settings;
     public bool IsPanelRestore   => ActivePanel == ActivePanel.Restore;
-    public bool IsPanelCompare   => ActivePanel == ActivePanel.Compare;
     public bool IsPanelResult    => ActivePanel == ActivePanel.Result;
 
     partial void OnActivePanelChanged(ActivePanel value)
@@ -37,11 +36,9 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(IsPanelScheduler));
         OnPropertyChanged(nameof(IsPanelSettings));
         OnPropertyChanged(nameof(IsPanelRestore));
-        OnPropertyChanged(nameof(IsPanelCompare));
         OnPropertyChanged(nameof(IsPanelResult));
         if (value == ActivePanel.History) LoadBackupHistory();
         if (value == ActivePanel.Restore) LoadAvailableBackups();
-        if (value == ActivePanel.Compare) LoadAvailableBackups();
     }
 
     // Yedek seçenekleri
@@ -77,6 +74,14 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _selectedSummary = "Hiç öğe seçilmedi";
     [ObservableProperty] private string _selectedSizeText = "";
     [ObservableProperty] private string _fileCountText = "";
+
+    // Profil düzenleme modu
+    [ObservableProperty] private BackupProfile? _editingProfile;
+
+    partial void OnEditingProfileChanged(BackupProfile? value)
+        => OnPropertyChanged(nameof(IsEditingProfile));
+
+    public bool IsEditingProfile => EditingProfile != null;
 
     // Yedek sonucu
     [ObservableProperty] private bool _showResultReport = false;
@@ -166,7 +171,6 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand] public void OpenScheduler() { ActivePanel = ActivePanel.Scheduler; }
     [RelayCommand] public void OpenSettings()  { ActivePanel = ActivePanel.Settings; }
     [RelayCommand] public void OpenRestore()   { ActivePanel = ActivePanel.Restore; }
-    [RelayCommand] public void OpenCompare()   { ActivePanel = ActivePanel.Compare; }
     [RelayCommand] public void CloseResult()   { ShowResultReport = false; ActivePanel = ActivePanel.Backup; }
 
     // ── Kategori yükleme ────────────────────────────────────────────────────
@@ -377,17 +381,20 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void SaveProfile()
     {
-        var dialog = new Views.SaveProfileDialog
+        var dialog = new Views.SaveProfileDialog(EditingProfile?.ProfileName, EditingProfile?.Icon)
         {
             Owner = System.Windows.Application.Current.MainWindow
         };
         if (dialog.ShowDialog() != true) return;
 
+        var oldName = EditingProfile?.ProfileName;
+        var createdAt = EditingProfile?.CreatedAt ?? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
         var profile = new BackupProfile
         {
             ProfileName           = dialog.ProfileName,
             Icon                  = dialog.SelectedIcon,
-            CreatedAt             = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            CreatedAt             = createdAt,
             DefaultDestination    = DestinationPath,
             UseZip                = UseZip,
             UsePassword           = UsePassword,
@@ -400,8 +407,27 @@ public partial class MainViewModel : ObservableObject
             NetworkUsername       = NetworkUsername,
             NetworkDomain         = NetworkDomain
         };
+
+        if (oldName != null && oldName != dialog.ProfileName)
+            ProfileService.Delete(oldName);
+
         ProfileService.Save(profile);
+        EditingProfile = null;
         LoadProfiles();
+    }
+
+    [RelayCommand]
+    public void EditProfile(BackupProfile profile)
+    {
+        LoadProfile(profile);
+        EditingProfile = profile;
+        ActivePanel = ActivePanel.Backup;
+    }
+
+    [RelayCommand]
+    public void CancelEditProfile()
+    {
+        EditingProfile = null;
     }
 
     [RelayCommand]

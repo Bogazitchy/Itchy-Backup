@@ -20,7 +20,7 @@
     </Grid.RowDefinitions>
 
     <!-- Başlık -->
-    <TextBlock Grid.Row="0" Text="Profil Kaydet" FontSize="16" FontWeight="Bold"
+    <TextBlock x:Name="DialogTitleBlock" Grid.Row="0" Text="Profil Kaydet" FontSize="16" FontWeight="Bold"
                Foreground="{StaticResource TextPrimary}" Margin="0,0,0,20"/>
 
     <!-- Profil Adı -->
@@ -38,7 +38,7 @@
                  Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
       <Border Background="{StaticResource BgTertiary}" CornerRadius="10"
               BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-              Padding="2,2,8,4">
+              Padding="2,2,8,2">
         <WrapPanel x:Name="IconPanel" Orientation="Horizontal"/>
       </Border>
     </StackPanel>

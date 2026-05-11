@@ -13,9 +13,18 @@
     <vm:MainViewModel/>
   </Window.DataContext>
 
-  <Border CornerRadius="12" Background="{StaticResource BgPrimary}"
-          BorderBrush="{StaticResource BorderHoverBrush}" BorderThickness="1"
+  <Border CornerRadius="12" BorderBrush="#4A3890" BorderThickness="1"
           ClipToBounds="True">
+    <Border.Background>
+      <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#0E0B1C" Offset="0"/>
+        <GradientStop Color="#0C0B18" Offset="0.5"/>
+        <GradientStop Color="#110C22" Offset="1"/>
+      </LinearGradientBrush>
+    </Border.Background>
+    <Border.Effect>
+      <DropShadowEffect Color="#6C5CE7" BlurRadius="42" ShadowDepth="0" Opacity="0.32"/>
+    </Border.Effect>
     <Grid>
       <Grid.RowDefinitions>
         <RowDefinition Height="52"/>
@@ -25,9 +34,14 @@
       </Grid.RowDefinitions>
 
       <!-- ══ TITLEBAR ═════════════════════════════════════════════════════ -->
-      <Border Grid.Row="0" Background="{StaticResource BgSecondary}"
-              BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+      <Border Grid.Row="0" BorderBrush="#2A2268" BorderThickness="0,0,0,1"
               MouseLeftButtonDown="TitleBar_MouseDown">
+        <Border.Background>
+          <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#16152E" Offset="0"/>
+            <GradientStop Color="#11101E" Offset="1"/>
+          </LinearGradientBrush>
+        </Border.Background>
         <Grid>
           <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
             <!-- Logo -->
@@ -40,8 +54,24 @@
                 </LinearGradientBrush>
               </Border.Background>
               <Border.Effect>
-                <DropShadowEffect Color="#6C5CE7" BlurRadius="10" ShadowDepth="0" Opacity="0.5"/>
+                <DropShadowEffect Color="#6C5CE7" BlurRadius="10" ShadowDepth="0" Opacity="2"/>
               </Border.Effect>
+              <Border.Triggers>
+                <EventTrigger RoutedEvent="Border.Loaded">
+                  <BeginStoryboard>
+                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                      <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                       From="8" To="26" Duration="0:0:2.0">
+                        <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                      </DoubleAnimation>
+                      <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                       From="0.35" To="0.88" Duration="0:0:2.0">
+                        <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                      </DoubleAnimation>
+                    </Storyboard>
+                  </BeginStoryboard>
+                </EventTrigger>
+              </Border.Triggers>
               <Viewbox Width="18" Height="18">
                 <Canvas Width="24" Height="24">
                   <Rectangle Canvas.Left="1" Canvas.Top="4" Width="22" Height="16"
@@ -60,31 +90,106 @@
             <StackPanel>
               <TextBlock Text="Itchy Backup" FontSize="14" FontWeight="Bold"
                          Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
-              <TextBlock Text="Teknik Servis Yedekleme Aracı" FontSize="9"
+              <TextBlock Text="Teknik Servis Dosya Yedekleme Aracı" FontSize="9"
                          Foreground="{StaticResource TextTertiary}" FontFamily="Consolas"/>
             </StackPanel>
             <Border Background="{StaticResource BgQuaternary}" CornerRadius="10"
                     Padding="8,3" Margin="14,0,0,0"
-                    BorderBrush="{StaticResource BorderHoverBrush}" BorderThickness="1">
-              <TextBlock Text="v0.6" FontSize="10" FontFamily="Consolas"
-                         Foreground="{StaticResource TextTertiary}"
+                    BorderBrush="#4A3CB5" BorderThickness="1">
+              <Border.Effect>
+                <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="1"/>
+              </Border.Effect>
+              <TextBlock Text="v0.7" FontSize="10" FontFamily="Consolas"
+                         Foreground="{StaticResource AccentLight}"
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
           </StackPanel>
           <!-- Pencere butonları -->
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-            <Button Click="MinimizeBtn_Click" Width="46" Height="52"
-                    Background="Transparent" BorderThickness="0" Cursor="Hand">
-              <TextBlock Text="─" Foreground="{StaticResource TextTertiary}" FontSize="11"/>
+
+            <!-- Küçült -->
+            <Button Click="MinimizeBtn_Click" Width="48" Height="52"
+                    BorderThickness="0" Cursor="Hand" ToolTip="Küçült">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border x:Name="Bg" Background="Transparent">
+                    <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <Canvas Width="24" Height="24">
+                        <Rectangle x:Name="Icon" Canvas.Left="3" Canvas.Top="11.5"
+                                   Width="18" Height="1.5" RadiusX="0.75" RadiusY="0.75"
+                                   Fill="#5A5A72"/>
+                      </Canvas>
+                    </Viewbox>
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="Bg" Property="Background" Value="#1CFFFFFF"/>
+                      <Setter TargetName="Icon" Property="Fill" Value="#C8C8E0"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                      <Setter TargetName="Bg" Property="Background" Value="#0EFFFFFF"/>
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Button.Template>
             </Button>
-            <Button Click="MaximizeBtn_Click" Width="46" Height="52"
-                    Background="Transparent" BorderThickness="0" Cursor="Hand">
-              <TextBlock Text="□" Foreground="{StaticResource TextTertiary}" FontSize="11"/>
+
+            <!-- Büyüt / Geri al -->
+            <Button Click="MaximizeBtn_Click" Width="48" Height="52"
+                    BorderThickness="0" Cursor="Hand" ToolTip="Büyüt">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border x:Name="Bg" Background="Transparent">
+                    <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <Canvas Width="24" Height="24">
+                        <Rectangle x:Name="Icon" Canvas.Left="3.5" Canvas.Top="3.5"
+                                   Width="17" Height="17" RadiusX="2.5" RadiusY="2.5"
+                                   Stroke="#5A5A72" StrokeThickness="1.6" Fill="Transparent"/>
+                      </Canvas>
+                    </Viewbox>
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="Bg" Property="Background" Value="#1CFFFFFF"/>
+                      <Setter TargetName="Icon" Property="Stroke" Value="#C8C8E0"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                      <Setter TargetName="Bg" Property="Background" Value="#0EFFFFFF"/>
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Button.Template>
             </Button>
-            <Button Click="CloseBtn_Click" Width="46" Height="52"
-                    Background="Transparent" BorderThickness="0" Cursor="Hand">
-              <TextBlock Text="✕" Foreground="{StaticResource TextTertiary}" FontSize="11"/>
+
+            <!-- Kapat -->
+            <Button Click="CloseBtn_Click" Width="48" Height="52"
+                    BorderThickness="0" Cursor="Hand" ToolTip="Kapat">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border x:Name="Bg" Background="Transparent">
+                    <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <Canvas Width="24" Height="24">
+                        <Path x:Name="Icon"
+                              Data="M4.5,4.5 L19.5,19.5 M19.5,4.5 L4.5,19.5"
+                              Stroke="#5A5A72" StrokeThickness="1.7"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                      </Canvas>
+                    </Viewbox>
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="Bg" Property="Background" Value="#C42B1C"/>
+                      <Setter TargetName="Icon" Property="Stroke" Value="White"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                      <Setter TargetName="Bg" Property="Background" Value="#9B2318"/>
+                      <Setter TargetName="Icon" Property="Stroke" Value="White"/>
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Button.Template>
             </Button>
+
           </StackPanel>
         </Grid>
       </Border>
@@ -97,8 +202,13 @@
         </Grid.ColumnDefinitions>
 
         <!-- ── SOL SIDEBAR ───────────────────────────────────────────── -->
-        <Border Grid.Column="0" Background="{StaticResource BgSecondary}"
-                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" BorderBrush="#28226A" BorderThickness="0,0,1,0">
+          <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+              <GradientStop Color="#14132E" Offset="0"/>
+              <GradientStop Color="#11101E" Offset="1"/>
+            </LinearGradientBrush>
+          </Border.Background>
           <Grid>
             <Grid.RowDefinitions>
               <RowDefinition Height="*"/>
@@ -132,7 +242,7 @@
                   </Border.Style>
                   <Grid>
                     <!-- Aktif gösterge çizgisi -->
-                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="10,3,3,10">
                       <Border.Style>
                         <Style TargetType="Border">
                           <Setter Property="Background" Value="Transparent"/>
@@ -144,8 +254,24 @@
                         </Style>
                       </Border.Style>
                       <Border.Effect>
-                        <DropShadowEffect Color="#6C5CE7" BlurRadius="6" ShadowDepth="0" Opacity="0.8"/>
+                        <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.9"/>
                       </Border.Effect>
+                      <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.Loaded">
+                          <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                               From="5" To="18" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                               From="0.4" To="1.0" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                            </Storyboard>
+                          </BeginStoryboard>
+                        </EventTrigger>
+                      </Border.Triggers>
                     </Border>
                     <DockPanel Margin="14,0,10,0">
                       <Border DockPanel.Dock="Right" CornerRadius="10" Padding="7,2" VerticalAlignment="Center">
@@ -209,7 +335,26 @@
                     </Style>
                   </Border.Style>
                   <Grid>
-                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="10,3,3,10">
+                      <Border.Effect>
+                        <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.9"/>
+                      </Border.Effect>
+                      <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.Loaded">
+                          <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                               From="5" To="18" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                               From="0.4" To="1.0" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                            </Storyboard>
+                          </BeginStoryboard>
+                        </EventTrigger>
+                      </Border.Triggers>
                       <Border.Style>
                         <Style TargetType="Border">
                           <Setter Property="Background" Value="Transparent"/>
@@ -257,7 +402,26 @@
                     </Style>
                   </Border.Style>
                   <Grid>
-                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="10,3,3,10">
+                      <Border.Effect>
+                        <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.9"/>
+                      </Border.Effect>
+                      <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.Loaded">
+                          <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                               From="5" To="18" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                               From="0.4" To="1.0" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                            </Storyboard>
+                          </BeginStoryboard>
+                        </EventTrigger>
+                      </Border.Triggers>
                       <Border.Style>
                         <Style TargetType="Border">
                           <Setter Property="Background" Value="Transparent"/>
@@ -305,7 +469,26 @@
                     </Style>
                   </Border.Style>
                   <Grid>
-                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="10,3,3,10">
+                      <Border.Effect>
+                        <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.9"/>
+                      </Border.Effect>
+                      <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.Loaded">
+                          <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                               From="5" To="18" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                               From="0.4" To="1.0" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                            </Storyboard>
+                          </BeginStoryboard>
+                        </EventTrigger>
+                      </Border.Triggers>
                       <Border.Style>
                         <Style TargetType="Border">
                           <Setter Property="Background" Value="Transparent"/>
@@ -324,54 +507,6 @@
                           <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
                           <Style.Triggers>
                             <DataTrigger Binding="{Binding IsPanelRestore}" Value="True">
-                              <Setter Property="Foreground" Value="{StaticResource Accent}"/>
-                              <Setter Property="FontWeight" Value="SemiBold"/>
-                            </DataTrigger>
-                          </Style.Triggers>
-                        </Style>
-                      </TextBlock.Style>
-                    </TextBlock>
-                  </Grid>
-                </Border>
-
-                <!-- Karşılaştır -->
-                <Border CornerRadius="8" Margin="0,1" Cursor="Hand" Height="42">
-                  <Border.InputBindings>
-                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenCompareCommand}"/>
-                  </Border.InputBindings>
-                  <Border.Style>
-                    <Style TargetType="Border">
-                      <Setter Property="Background" Value="Transparent"/>
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsPanelCompare}" Value="True">
-                          <Setter Property="Background" Value="{StaticResource AccentSubtle}"/>
-                        </DataTrigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                          <Setter Property="Background" Value="{StaticResource BgTertiary}"/>
-                        </Trigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Border.Style>
-                  <Grid>
-                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
-                      <Border.Style>
-                        <Style TargetType="Border">
-                          <Setter Property="Background" Value="Transparent"/>
-                          <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsPanelCompare}" Value="True">
-                              <Setter Property="Background" Value="{StaticResource Accent}"/>
-                            </DataTrigger>
-                          </Style.Triggers>
-                        </Style>
-                      </Border.Style>
-                    </Border>
-                    <TextBlock Margin="14,0" VerticalAlignment="Center"
-                               FontSize="13" FontFamily="Segoe UI" Text="Karşılaştır">
-                      <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                          <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-                          <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsPanelCompare}" Value="True">
                               <Setter Property="Foreground" Value="{StaticResource Accent}"/>
                               <Setter Property="FontWeight" Value="SemiBold"/>
                             </DataTrigger>
@@ -401,7 +536,26 @@
                     </Style>
                   </Border.Style>
                   <Grid>
-                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="0,3,3,0">
+                    <Border HorizontalAlignment="Left" Width="3" CornerRadius="10,3,3,10">
+                      <Border.Effect>
+                        <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.9"/>
+                      </Border.Effect>
+                      <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.Loaded">
+                          <BeginStoryboard>
+                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                               From="5" To="18" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                              <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                               From="0.4" To="1.0" Duration="0:0:1.6">
+                                <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut"/></DoubleAnimation.EasingFunction>
+                              </DoubleAnimation>
+                            </Storyboard>
+                          </BeginStoryboard>
+                        </EventTrigger>
+                      </Border.Triggers>
                       <Border.Style>
                         <Style TargetType="Border">
                           <Setter Property="Background" Value="Transparent"/>
@@ -503,6 +657,45 @@
                               <Canvas Width="24" Height="24">
                                 <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"
                                       Fill="{StaticResource Danger}"/>
+                              </Canvas>
+                            </Viewbox>
+                          </Button>
+                          <!-- Düzenle butonu -->
+                          <Button DockPanel.Dock="Right" VerticalAlignment="Center"
+                                  Width="20" Height="20" Margin="0,0,0,0"
+                                  Command="{Binding DataContext.EditProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                  CommandParameter="{Binding}"
+                                  ToolTip="Profili Düzenle">
+                            <Button.Style>
+                              <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Opacity" Value="0.35"/>
+                                <Setter Property="Template">
+                                  <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                      <Border Background="{TemplateBinding Background}"
+                                              CornerRadius="4"
+                                              Width="20" Height="20">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                      </Border>
+                                    </ControlTemplate>
+                                  </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                  <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#1A2A3A"/>
+                                    <Setter Property="Opacity" Value="1"/>
+                                  </Trigger>
+                                </Style.Triggers>
+                              </Style>
+                            </Button.Style>
+                            <Viewbox Width="11" Height="11">
+                              <Canvas Width="24" Height="24">
+                                <Path Data="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"
+                                      Fill="{StaticResource AccentLight}"/>
                               </Canvas>
                             </Viewbox>
                           </Button>
@@ -963,6 +1156,16 @@
                               </Border>
                             </Border>
                           </StackPanel>
+                          <!-- Glass top highlight strip -->
+                          <Border Height="1" VerticalAlignment="Top" IsHitTestVisible="False">
+                            <Border.Background>
+                              <LinearGradientBrush StartPoint="0,0" EndPoint="0,0">
+                                <GradientStop Color="#2EFFFFFF" Offset="0"/>
+                                <GradientStop Color="#08FFFFFF" Offset="0.7"/>
+                                <GradientStop Color="#00FFFFFF" Offset="1"/>
+                              </LinearGradientBrush>
+                            </Border.Background>
+                          </Border>
                         </Grid>
                       </Border>
                     </DataTemplate>
@@ -972,8 +1175,13 @@
             </Grid>
 
             <!-- Sağ Seçenek Paneli -->
-            <Border Grid.Column="1" Background="{StaticResource BgSecondary}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0">
+            <Border Grid.Column="1" BorderBrush="#28226A" BorderThickness="1,0,0,0">
+              <Border.Background>
+                <LinearGradientBrush StartPoint="1,0" EndPoint="0,1">
+                  <GradientStop Color="#13122C" Offset="0"/>
+                  <GradientStop Color="#11101E" Offset="1"/>
+                </LinearGradientBrush>
+              </Border.Background>
               <Grid>
                 <Grid.RowDefinitions>
                   <RowDefinition Height="*"/>
@@ -1181,8 +1389,13 @@
                             <ComboBox Style="{StaticResource ItchyComboBox}"
                                       ItemsSource="{Binding IncrementalBaseOptions}"
                                       SelectedItem="{Binding SelectedIncrementalBase}"
-                                      DisplayMemberPath="Label"
-                                      Height="34"/>
+                                      Height="34">
+                              <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                  <TextBlock Text="{Binding Label}" FontFamily="Segoe UI" FontSize="12"/>
+                                </DataTemplate>
+                              </ComboBox.ItemTemplate>
+                            </ComboBox>
                             <TextBlock Text="Lütfen bir yedek seçin"
                                        IsHitTestVisible="False"
                                        VerticalAlignment="Center"
@@ -1205,10 +1418,70 @@
                       </StackPanel>
                     </Border>
 
+                    <!-- Düzenleme modu banner -->
+                    <Border Margin="10,0,10,8" CornerRadius="7" Padding="10,7"
+                            Background="#1A6C5CE7" BorderBrush="#556C5CE7" BorderThickness="1"
+                            Visibility="{Binding IsEditingProfile, Converter={StaticResource BoolToVis}}">
+                      <DockPanel>
+                        <Button DockPanel.Dock="Right"
+                                Command="{Binding CancelEditProfileCommand}"
+                                ToolTip="Düzenlemeyi İptal Et"
+                                Margin="6,0,0,0" VerticalAlignment="Center">
+                          <Button.Style>
+                            <Style TargetType="Button">
+                              <Setter Property="Background" Value="Transparent"/>
+                              <Setter Property="BorderThickness" Value="0"/>
+                              <Setter Property="Cursor" Value="Hand"/>
+                              <Setter Property="Opacity" Value="0.6"/>
+                              <Setter Property="Template">
+                                <Setter.Value>
+                                  <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="3">
+                                      <ContentPresenter/>
+                                    </Border>
+                                  </ControlTemplate>
+                                </Setter.Value>
+                              </Setter>
+                              <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                  <Setter Property="Opacity" Value="1"/>
+                                </Trigger>
+                              </Style.Triggers>
+                            </Style>
+                          </Button.Style>
+                          <Viewbox Width="9" Height="9">
+                            <Canvas Width="24" Height="24">
+                              <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"
+                                    Fill="{StaticResource TextSecondary}"/>
+                            </Canvas>
+                          </Viewbox>
+                        </Button>
+                        <StackPanel VerticalAlignment="Center">
+                          <TextBlock FontSize="9" FontFamily="Consolas"
+                                     Foreground="{StaticResource AccentLight}" Text="DÜZENLE MODU"/>
+                          <TextBlock FontSize="11" FontFamily="Segoe UI" Margin="0,2,0,0"
+                                     Foreground="{StaticResource TextSecondary}"
+                                     Text="{Binding EditingProfile.ProfileName}"
+                                     FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                      </DockPanel>
+                    </Border>
+
                     <!-- Profil kaydet -->
                     <Button Style="{StaticResource SecondaryButton}" Command="{Binding SaveProfileCommand}"
                             HorizontalAlignment="Stretch" Margin="0,0,0,0">
-                      <TextBlock Text="💾  Profil Kaydet" FontFamily="Segoe UI" FontSize="12"/>
+                      <TextBlock FontFamily="Segoe UI" FontSize="12">
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="💾  Profil Kaydet"/>
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding IsEditingProfile}" Value="True">
+                                <Setter Property="Text" Value="💾  Profili Güncelle"/>
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
                     </Button>
 
                   </StackPanel>
@@ -1218,7 +1491,7 @@
                 <Border Grid.Row="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
                         Padding="16,14">
                   <StackPanel>
-                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding StartBackupCommand}"
+                    <Button Style="{StaticResource NeonPrimaryButton}" Command="{Binding StartBackupCommand}"
                             HorizontalAlignment="Stretch" Height="48">
                       <Button.IsEnabled>
                         <Binding Path="IsBackingUp" Converter="{StaticResource InverseBool}"/>
@@ -1347,6 +1620,15 @@
                               </Button>
                             </StackPanel>
                           </Grid>
+                          <!-- Glass top highlight strip -->
+                          <Border Height="1" VerticalAlignment="Top" IsHitTestVisible="False">
+                            <Border.Background>
+                              <LinearGradientBrush StartPoint="0,0" EndPoint="0,0">
+                                <GradientStop Color="#2EFFFFFF" Offset="0"/>
+                                <GradientStop Color="#06FFFFFF" Offset="1"/>
+                              </LinearGradientBrush>
+                            </Border.Background>
+                          </Border>
                         </Grid>
                       </Border>
                     </DataTemplate>
@@ -1623,11 +1905,57 @@
                   </Grid>
                 </Border>
 
+                <!-- Yedek klasörü kısayolu -->
+                <TextBlock Text="VARSAYILAN YEDEK KLASÖRÜ" FontSize="9" FontFamily="Consolas"
+                           Foreground="{StaticResource TextTertiary}" Margin="0,0,0,10"/>
+                <Border Background="{StaticResource BgCard}" CornerRadius="10"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Padding="16,12" Margin="0,0,0,16">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                      <TextBlock Text="Yedek Hedef Klasörü" FontSize="11" FontWeight="Medium"
+                                 Foreground="{StaticResource TextSecondary}" FontFamily="Segoe UI"
+                                 Margin="0,0,0,4"/>
+                      <TextBlock Text="{Binding DestinationPath}" FontSize="10" FontFamily="Consolas"
+                                 Foreground="{StaticResource TextTertiary}" TextTrimming="CharacterEllipsis"
+                                 MaxWidth="800"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding BrowseDestinationCommand}"
+                            Margin="12,0,0,0" Padding="12,6">
+                      <TextBlock Text="Klasör Seç" FontSize="11" FontFamily="Segoe UI"/>
+                    </Button>
+                  </Grid>
+                </Border>
+
+                <!-- Windows başlatma uyarısı -->
+                <Border CornerRadius="8" Padding="14,12" Margin="0,0,0,0"
+                        Background="#1A6C5CE7" BorderBrush="#556C5CE7" BorderThickness="1">
+                  <DockPanel>
+                    <TextBlock DockPanel.Dock="Left" Text="ⓘ" FontSize="15"
+                               Foreground="{StaticResource AccentLight}"
+                               VerticalAlignment="Top" Margin="0,0,10,0"/>
+                    <TextBlock FontSize="11" FontFamily="Segoe UI" TextWrapping="Wrap"
+                               Foreground="{StaticResource TextSecondary}" LineHeight="1">
+                      <Run Text="Zamanlayıcının PC açıldığında otomatik çalışması için "/>
+                      <Run Text="Ayarlar" FontWeight="SemiBold" Foreground="{StaticResource AccentLight}"/>
+                      <Run Text=" ekranından "/>
+                      <Run Text="'Windows ile Başlat'" FontWeight="SemiBold" Foreground="{StaticResource AccentLight}"/>
+                      <Run Text=" seçeneğini etkinleştirin."/>
+                    </TextBlock>
+                  </DockPanel>
+                </Border>
+
                 <Button Style="{StaticResource PrimaryButton}" Command="{Binding SaveSchedulerCommand}"
-                        HorizontalAlignment="Stretch" Height="44">
+                        HorizontalAlignment="Stretch" Height="44" Margin="0,16,0,0">
                   <TextBlock Text="Zamanlayıcıyı Kaydet" FontSize="13" FontWeight="Bold"
                              FontFamily="Segoe UI" Foreground="White"/>
                 </Button>
+
               </StackPanel>
             </ScrollViewer>
           </Grid>
@@ -1820,34 +2148,103 @@
                   </DockPanel>
                   <Border Background="{StaticResource BgCard}" CornerRadius="10"
                           BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                          MaxHeight="280">
+                          MaxHeight="320">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                       <ItemsControl ItemsSource="{Binding RestoreFolders}">
                         <ItemsControl.ItemTemplate>
                           <DataTemplate>
-                            <Border Padding="12,8"
-                                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                              <Grid>
-                                <Grid.ColumnDefinitions>
-                                  <ColumnDefinition Width="22"/>
-                                  <ColumnDefinition Width="*"/>
-                                  <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <CheckBox Grid.Column="0" Style="{StaticResource ItchyCheckBox}"
-                                          IsChecked="{Binding IsSelected}" VerticalAlignment="Center"/>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0">
-                                  <TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="Medium"
-                                             Foreground="{StaticResource TextPrimary}"
-                                             FontFamily="Segoe UI"/>
-                                  <TextBlock Text="{Binding SubText}" FontSize="9"
-                                             FontFamily="Consolas"
-                                             Foreground="{StaticResource TextTertiary}"/>
-                                </StackPanel>
-                                <TextBlock Grid.Column="2" Text="{Binding SizeText}" FontSize="10"
-                                           FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"
-                                           VerticalAlignment="Center"/>
-                              </Grid>
-                            </Border>
+                            <StackPanel>
+                              <!-- Ana klasör satırı -->
+                              <Border Padding="10,8"
+                                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                                <Grid>
+                                  <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="22"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                  </Grid.ColumnDefinitions>
+                                  <!-- Genişlet / Daralt oku -->
+                                  <Button Grid.Column="0" Command="{Binding ToggleExpandCommand}"
+                                          Background="Transparent" BorderThickness="0" Padding="0"
+                                          Cursor="Hand" VerticalAlignment="Center" Width="16" Height="16">
+                                    <Button.Style>
+                                      <Style TargetType="Button">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                        <Style.Triggers>
+                                          <DataTrigger Binding="{Binding HasChildren}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                          </DataTrigger>
+                                        </Style.Triggers>
+                                      </Style>
+                                    </Button.Style>
+                                    <Path HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          Stroke="{StaticResource TextTertiary}">
+                                      <Path.Style>
+                                        <Style TargetType="Path">
+                                          <Setter Property="Data" Value="M2,1 L7,5 L2,9"/>
+                                          <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                              <Setter Property="Data" Value="M1,2 L5,7 L9,2"/>
+                                            </DataTrigger>
+                                          </Style.Triggers>
+                                        </Style>
+                                      </Path.Style>
+                                    </Path>
+                                  </Button>
+                                  <CheckBox Grid.Column="1" Style="{StaticResource ItchyCheckBox}"
+                                            IsChecked="{Binding IsSelected}" VerticalAlignment="Center"/>
+                                  <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="4,0,0,0">
+                                    <TextBlock Text="{Binding DisplayName}" FontSize="12" FontWeight="Medium"
+                                               Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="{Binding SubText}" FontSize="9" FontFamily="Consolas"
+                                               Foreground="{StaticResource TextTertiary}"/>
+                                  </StackPanel>
+                                  <TextBlock Grid.Column="3" Text="{Binding SizeText}" FontSize="10"
+                                             FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"
+                                             VerticalAlignment="Center"/>
+                                </Grid>
+                              </Border>
+                              <!-- Alt klasörler -->
+                              <ItemsControl ItemsSource="{Binding Children}">
+                                <ItemsControl.Style>
+                                  <Style TargetType="ItemsControl">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                      <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                      </DataTrigger>
+                                    </Style.Triggers>
+                                  </Style>
+                                </ItemsControl.Style>
+                                <ItemsControl.ItemTemplate>
+                                  <DataTemplate>
+                                    <Border Padding="10,7" Margin="22,0,0,0"
+                                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                                      <Grid>
+                                        <Grid.ColumnDefinitions>
+                                          <ColumnDefinition Width="22"/>
+                                          <ColumnDefinition Width="*"/>
+                                          <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" Style="{StaticResource ItchyCheckBox}"
+                                                  IsChecked="{Binding IsSelected}" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0">
+                                          <TextBlock Text="{Binding DisplayName}" FontSize="11"
+                                                     Foreground="{StaticResource TextSecondary}" FontFamily="Segoe UI"/>
+                                          <TextBlock Text="{Binding SubText}" FontSize="9" FontFamily="Consolas"
+                                                     Foreground="{StaticResource TextTertiary}"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding SizeText}" FontSize="10"
+                                                   FontFamily="Consolas" Foreground="{StaticResource TextTertiary}"
+                                                   VerticalAlignment="Center"/>
+                                      </Grid>
+                                    </Border>
+                                  </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                              </ItemsControl>
+                            </StackPanel>
                           </DataTemplate>
                         </ItemsControl.ItemTemplate>
                       </ItemsControl>
@@ -1861,7 +2258,7 @@
             <!-- Alt: Geri yükle butonu + progress -->
             <Border Grid.Row="2" Background="{StaticResource BgSecondary}"
                     BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
-                    Padding="20,14">
+                    Padding="20,4.3">
               <StackPanel>
                 <Border Visibility="{Binding IsRestoring, Converter={StaticResource BoolToVis}}" Margin="0,0,0,10">
                   <StackPanel>
@@ -1906,157 +2303,6 @@
                 </Grid>
               </StackPanel>
             </Border>
-          </Grid>
-
-          <!-- ═══ KARŞILAŞTIR ═══════════════════════════════════════════ -->
-          <Grid>
-            <Grid.Style>
-              <Style TargetType="Grid">
-                <Setter Property="Visibility" Value="Collapsed"/>
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsPanelCompare}" Value="True">
-                    <Setter Property="Visibility" Value="Visible"/>
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Grid.Style>
-            <Grid.RowDefinitions>
-              <RowDefinition Height="48"/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Border Grid.Row="0" Background="{StaticResource BgPrimary}"
-                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-              <TextBlock Text="Yedek Karşılaştırma" FontSize="15" FontWeight="Bold"
-                         Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"
-                         Margin="16,0" FontFamily="Segoe UI"/>
-            </Border>
-
-            <Border Grid.Row="1" Padding="20,16">
-              <StackPanel>
-                <Grid Margin="0,0,0,12">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="*"/>
-                  </Grid.ColumnDefinitions>
-                  <StackPanel Grid.Column="0">
-                    <TextBlock Text="YEDEK A" FontSize="9" FontFamily="Consolas"
-                               Foreground="{StaticResource TextTertiary}" Margin="0,0,0,6"/>
-                    <ComboBox Style="{StaticResource ItchyComboBox}"
-                              ItemsSource="{Binding AvailableBackups}"
-                              SelectedItem="{Binding CompareBackupA}">
-                      <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                          <TextBlock Text="{Binding Name}" FontFamily="Segoe UI" FontSize="12"/>
-                        </DataTemplate>
-                      </ComboBox.ItemTemplate>
-                    </ComboBox>
-                  </StackPanel>
-                  <TextBlock Grid.Column="1" Text="vs" FontSize="14" FontWeight="Bold"
-                             Foreground="{StaticResource AccentLight}"
-                             HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,7"
-                             FontFamily="Consolas"/>
-                  <StackPanel Grid.Column="2">
-                    <TextBlock Text="YEDEK B" FontSize="9" FontFamily="Consolas"
-                               Foreground="{StaticResource TextTertiary}" Margin="0,0,0,6"/>
-                    <ComboBox Style="{StaticResource ItchyComboBox}"
-                              ItemsSource="{Binding AvailableBackups}"
-                              SelectedItem="{Binding CompareBackupB}">
-                      <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                          <TextBlock Text="{Binding Name}" FontFamily="Segoe UI" FontSize="12"/>
-                        </DataTemplate>
-                      </ComboBox.ItemTemplate>
-                    </ComboBox>
-                  </StackPanel>
-                </Grid>
-
-                <Button Style="{StaticResource PrimaryButton}" Command="{Binding StartCompareCommand}"
-                        HorizontalAlignment="Stretch" Height="40">
-                  <Button.IsEnabled>
-                    <Binding Path="IsComparing" Converter="{StaticResource InverseBool}"/>
-                  </Button.IsEnabled>
-                  <TextBlock Text="Karşılaştır" FontSize="13" FontWeight="Bold"
-                             FontFamily="Segoe UI" Foreground="White"/>
-                </Button>
-
-                <TextBlock Text="{Binding CompareStatus}" FontSize="11"
-                           Foreground="{StaticResource AccentLight}" FontFamily="Consolas"
-                           HorizontalAlignment="Center" Margin="0,12,0,0"/>
-              </StackPanel>
-            </Border>
-
-            <ScrollViewer Grid.Row="2" Margin="20,0,20,16" VerticalScrollBarVisibility="Auto"
-                          Visibility="{Binding HasCompareResult, Converter={StaticResource BoolToVis}}">
-              <StackPanel>
-                <!-- Sadece A'da -->
-                <TextBlock FontSize="11" FontFamily="Consolas" Margin="0,8,0,6">
-                  <Run Text="SADECE YEDEK A'DA (" Foreground="{StaticResource TextTertiary}"/>
-                  <Run Text="{Binding CompareResult.OnlyInA.Count, Mode=OneWay}" Foreground="{StaticResource Info}" FontWeight="Bold"/>
-                  <Run Text=")" Foreground="{StaticResource TextTertiary}"/>
-                </TextBlock>
-                <ItemsControl ItemsSource="{Binding CompareResult.OnlyInA}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <Border Padding="12,5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                        <DockPanel>
-                          <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" FontSize="10"
-                                     FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"/>
-                          <TextBlock Text="{Binding RelativePath}" FontSize="11"
-                                     Foreground="{StaticResource Info}" FontFamily="Consolas"
-                                     TextTrimming="CharacterEllipsis"/>
-                        </DockPanel>
-                      </Border>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <!-- Sadece B'de -->
-                <TextBlock FontSize="11" FontFamily="Consolas" Margin="0,12,0,6">
-                  <Run Text="SADECE YEDEK B'DE (" Foreground="{StaticResource TextTertiary}"/>
-                  <Run Text="{Binding CompareResult.OnlyInB.Count, Mode=OneWay}" Foreground="{StaticResource Success}" FontWeight="Bold"/>
-                  <Run Text=")" Foreground="{StaticResource TextTertiary}"/>
-                </TextBlock>
-                <ItemsControl ItemsSource="{Binding CompareResult.OnlyInB}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <Border Padding="12,5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                        <DockPanel>
-                          <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" FontSize="10"
-                                     FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"/>
-                          <TextBlock Text="{Binding RelativePath}" FontSize="11"
-                                     Foreground="{StaticResource Success}" FontFamily="Consolas"
-                                     TextTrimming="CharacterEllipsis"/>
-                        </DockPanel>
-                      </Border>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <!-- Değişmiş -->
-                <TextBlock FontSize="11" FontFamily="Consolas" Margin="0,12,0,6">
-                  <Run Text="DEĞİŞMİŞ (" Foreground="{StaticResource TextTertiary}"/>
-                  <Run Text="{Binding CompareResult.Modified.Count, Mode=OneWay}" Foreground="{StaticResource Warning}" FontWeight="Bold"/>
-                  <Run Text=")" Foreground="{StaticResource TextTertiary}"/>
-                </TextBlock>
-                <ItemsControl ItemsSource="{Binding CompareResult.Modified}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <Border Padding="12,5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                        <DockPanel>
-                          <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" FontSize="10"
-                                     FontFamily="Consolas" Foreground="{StaticResource TextSecondary}"/>
-                          <TextBlock Text="{Binding RelativePath}" FontSize="11"
-                                     Foreground="{StaticResource Warning}" FontFamily="Consolas"
-                                     TextTrimming="CharacterEllipsis"/>
-                        </DockPanel>
-                      </Border>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </StackPanel>
-            </ScrollViewer>
           </Grid>
 
           <!-- ═══ SONUÇ RAPORU ══════════════════════════════════════════ -->
@@ -2325,7 +2571,7 @@
                           </LinearGradientBrush>
                         </TextBlock.Foreground>
                       </TextBlock>
-                      <TextBlock Text="v0.6 — Teknik Servis Yedekleme Aracı" FontSize="11"
+                      <TextBlock Text="v0.7 — Teknik Servis Dosya Yedekleme Aracı" FontSize="11"
                                  Foreground="{StaticResource TextTertiary}" FontFamily="Segoe UI" Margin="0,3,0,0"/>
                       <TextBlock Text="Created by M.Mert" FontSize="12"
                                  Foreground="{StaticResource AccentLight}" FontFamily="Segoe UI"
@@ -2552,8 +2798,8 @@
               </TextBlock.Style>
             </TextBlock>
           </StackPanel>
-          <TextBlock Text="Created by M.Mert — Teknik Servis Yedekleme Aracı"
-                     FontSize="10" FontFamily="Consolas"
+          <TextBlock Text="- Created by M.Mert -                                                                                                                                    - Itchy -"
+                     FontSize="11" FontFamily="Cascadia Code"
                      Foreground="{StaticResource TextTertiary}" VerticalAlignment="Center"/>
         </DockPanel>
       </Border>

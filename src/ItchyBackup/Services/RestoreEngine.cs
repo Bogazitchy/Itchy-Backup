@@ -247,10 +247,28 @@ public partial class BackupFolderItem : CommunityToolkit.Mvvm.ComponentModel.Obs
     [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty]
     private bool _isSelected = true;
 
+    [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty]
+    private bool _isExpanded = false;
+
     public string FolderRelativePath { get; set; } = "";
-    public string DisplayName => string.IsNullOrEmpty(FolderRelativePath) ? "(Kök dosyalar)" : FolderRelativePath;
+
+    public string DisplayName => string.IsNullOrEmpty(FolderRelativePath)
+        ? "(Kök dosyalar)"
+        : Path.GetFileName(FolderRelativePath.TrimEnd('\\')) is { Length: > 0 } n ? n : FolderRelativePath;
+
     public int FileCount { get; set; }
     public long TotalSize { get; set; }
     public string SizeText => DiskSpaceChecker.FormatBytes(TotalSize);
     public string SubText => $"{FileCount} dosya • {SizeText}";
+
+    public System.Collections.ObjectModel.ObservableCollection<BackupFolderItem> Children { get; } = new();
+    public bool HasChildren => Children.Count > 0;
+
+    partial void OnIsSelectedChanged(bool value)
+    {
+        foreach (var child in Children) child.IsSelected = value;
+    }
+
+    [CommunityToolkit.Mvvm.Input.RelayCommand]
+    private void ToggleExpand() => IsExpanded = !IsExpanded;
 }
