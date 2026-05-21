@@ -18,6 +18,16 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _defaultDestination = "";
     [ObservableProperty] private string _themeName = "Dark";
     [ObservableProperty] private string _accentColor = "#6C5CE7";
+    [ObservableProperty] private bool _enableWebhookNotifications = false;
+    [ObservableProperty] private string _webhookUrl = "";
+    [ObservableProperty] private bool _enableEmailNotifications = false;
+    [ObservableProperty] private string _smtpHost = "";
+    [ObservableProperty] private int _smtpPort = 587;
+    [ObservableProperty] private bool _smtpSsl = true;
+    [ObservableProperty] private string _smtpUsername = "";
+    [ObservableProperty] private string _smtpPassword = "";
+    [ObservableProperty] private string _emailFrom = "";
+    [ObservableProperty] private string _emailTo = "";
 
     public SettingsViewModel() => Load();
 
@@ -36,6 +46,16 @@ public partial class SettingsViewModel : ObservableObject
             DefaultDestination    = s.DefaultDestination;
             ThemeName             = s.ThemeName;
             AccentColor           = s.AccentColor;
+            EnableWebhookNotifications = s.EnableWebhookNotifications;
+            WebhookUrl = s.WebhookUrl;
+            EnableEmailNotifications = s.EnableEmailNotifications;
+            SmtpHost = s.SmtpHost;
+            SmtpPort = s.SmtpPort;
+            SmtpSsl = s.SmtpSsl;
+            SmtpUsername = s.SmtpUsername;
+            SmtpPassword = s.SmtpPassword;
+            EmailFrom = s.EmailFrom;
+            EmailTo = s.EmailTo;
         }
         catch { }
     }
@@ -55,6 +75,16 @@ public partial class SettingsViewModel : ObservableObject
                 DefaultDestination    = DefaultDestination,
                 ThemeName             = ThemeName,
                 AccentColor           = AccentColor,
+                EnableWebhookNotifications = EnableWebhookNotifications,
+                WebhookUrl = WebhookUrl,
+                EnableEmailNotifications = EnableEmailNotifications,
+                SmtpHost = SmtpHost,
+                SmtpPort = SmtpPort,
+                SmtpSsl = SmtpSsl,
+                SmtpUsername = SmtpUsername,
+                SmtpPassword = SmtpPassword,
+                EmailFrom = EmailFrom,
+                EmailTo = EmailTo,
             }, Formatting.Indented));
         }
         catch { }
@@ -70,5 +100,15 @@ public partial class SettingsViewModel : ObservableObject
         public string DefaultDestination { get; set; } = "";
         public string ThemeName { get; set; } = "Dark";
         public string AccentColor { get; set; } = "#6C5CE7";
+        public bool EnableWebhookNotifications { get; set; }
+        public string WebhookUrl { get; set; } = "";
+        public bool EnableEmailNotifications { get; set; }
+        public string SmtpHost { get; set; } = "";
+        public int SmtpPort { get; set; } = 587;
+        public bool SmtpSsl { get; set; } = true;
+        public string SmtpUsername { get; set; } = "";
+        public string SmtpPassword { get; set; } = "";
+        public string EmailFrom { get; set; } = "";
+        public string EmailTo { get; set; } = "";
     }
 }

@@ -1,211 +1,168 @@
-<div align="center">
-
-<img src="src/ItchyBackup/Resources/Icons/app.ico" width="80" height="80" alt="Itchy Backup Logo"/>
-
 # Itchy Backup
 
-**Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme aracı**
+Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme aracı.
 
-[![Version](https://img.shields.io/badge/version-v0.8-6C5CE7?style=flat-square)](https://github.com/Bogazitchy/Itchy-Backup/releases)
-[![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)](https://github.com/Bogazitchy/Itchy-Backup/releases)
-[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/8.0)
-[![License](https://img.shields.io/badge/license-MIT-00CEC9?style=flat-square)](LICENSE)
+![Version](https://img.shields.io/badge/version-v0.8.5-6C5CE7?style=flat-square)
+![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
+![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)
 
-[📥 İndir](#-indirme) • [✨ Özellikler](#-özellikler) • [🛠️ Kurulum](#-kurulum) • [📸 Ekran Görüntüleri](#-ekran-görüntüleri)
+## Özellikler
 
-</div>
-
----
-
-## 📥 İndirme
-
-| Sürüm | Açıklama | İndir |
-|---|---|---|
-| **Setup (.exe)** | Kurulum sihirbazı — önerilen | [⬇ Setup indir](https://github.com/Bogazitchy/Itchy-Backup/releases/latest) |
-| **Portable (.exe)** | Kurulum gerektirmez, direkt çalıştır | [⬇ Portable indir](https://github.com/Bogazitchy/Itchy-Backup/releases/latest) |
-
-> Her iki sürüm de **.NET 8 Runtime dahildir** — ek kurulum gerekmez.
-
----
-
-## ✨ Özellikler
-
-### 🗂️ Yedekleme Kategorileri
+### Yedekleme Kategorileri
 
 | Kategori | İçerik |
 |---|---|
-| **Kullanıcı Klasörleri** | Masaüstü, Belgelerim, İndirilenler, Resimler, Videolar, Müzik, AppData |
-| **Tarayıcı Verileri** | Chrome, Firefox, Edge, Opera, Brave, Vivaldi — şifreler, yer imleri, çerezler |
-| **Outlook / Mail** | PST, OST dosyaları, imzalar, şablonlar, otomatik tamamlama |
-| **Veritabanları** | Firebird, SQLite, SQL Server, Access — otomatik tespit |
-| **Sanal Makineler** | VMware (.vmdk/.vmx), VirtualBox (.vdi/.vbox), Hyper-V (.vhdx) |
-| **Bulut Depolama** | OneDrive, Google Drive, MEGA, Dropbox — yerel dosyalar |
-| **Sistem Araçları** | Windows sürücüleri (pnputil) ve WiFi profilleri (netsh) dışa aktarımı |
-| **Özel Klasörler** | İstediğiniz herhangi bir klasör veya konumu ekleyin |
+| Kullanıcı klasörleri | Masaüstü, Belgeler, İndirilenler, Resimler, Videolar, Müzik, AppData |
+| Tarayıcı verileri | Chrome, Firefox, Edge, Opera, Brave, Vivaldi |
+| Outlook / Mail | PST, OST, imzalar, şablonlar, otomatik tamamlama |
+| Veritabanları | Firebird, SQLite, SQL Server, Access |
+| Sanal makineler | VMware, VirtualBox, Hyper-V dosyaları |
+| Bulut depolama | OneDrive, Google Drive, MEGA, Dropbox yerel dosyaları |
+| Sistem araçları | Windows sürücüleri ve WiFi profilleri dışa aktarımı |
+| Özel klasörler | Kullanıcının seçtiği klasör ve dosya konumları |
 
-### 🔐 Güvenlik & Doğrulama
-- **AES-256 şifreleme** — ZIP yedeklerine şifre koruması
-- **SHA-256 checksum** — Yedek tamamlandıktan sonra otomatik doğrulama
-- **VSS (Volume Shadow Copy)** — Açık PST, OST, SQL dosyalarını kopyalar
-- **Hot Backup tespiti** — SQL Server, Firebird, Outlook açıksa uyarı verir
-- **Disk alanı kontrolü** — Yedekleme başlamadan önce tahmini boyut ve boş alan karşılaştırması
+### Güvenlik ve Doğrulama
 
-### ♻️ Geri Yükleme
-- Mevcut yedek listesini otomatik görüntüleme
-- **Hiyerarşik klasör ağacı** — iki seviyeli alt klasör görünümü, seçim alt klasör bazında çalışır
-- **Kısmi geri yükleme** — yalnızca seçilen klasörleri/alt klasörleri geri yükle
-- ZIP yedeklerini şifre ile geri yükleme
-- Mevcut dosyaların üzerine yazma seçeneği
-- Canlı ilerleme ve iptal desteği
+- ZIP + AES-256 parola koruması
+- SHA-256 checksum manifesti ve doğrulama
+- VSS ile açık dosya desteği
+- Outlook/veritabanı gibi hot backup riskleri için uyarı
+- Yedek öncesi disk alanı, hedef, VSS, OneDrive, FAT32 ve yönetici yetkisi kontrolü
+- Parola alanlarında maskeli giriş
+- Parola alanlarının yanında göz butonu ile geçici göster/gizle desteği
 
-### ⏰ Otomasyon
-- **Zamanlayıcı** — Gün ve saat seçerek otomatik yedekleme
-- **Windows Görev Zamanlayıcısı** entegrasyonu
-- **Profil sistemi** — Ayarları kaydedip farklı bilgisayarlarda yükle
-- **Profil düzenleme** — Mevcut profili düzenle, ad değiştir, oluşturma tarihi korunur
+### Profil ve Otomasyon
 
-### 🗄️ Yedek Yönetimi
-- **Çoklu hedef** — Ana hedef + sınırsız ek hedef klasörü; aynı yedek tüm konumlara kopyalanır
-- **Yedek rotasyonu** — Son N yedeği tut veya X günden eski yedekleri otomatik sil
-- **Artımlı yedekleme** — Yalnızca değişen dosyaları kopyala; temel yedek otomatik veya manuel seçilir
-- **Ağ paylaşımı** — SMB/UNC yoluna kimlik bilgileriyle bağlanarak yedekleme
+- Profil sistemi
+- Varsayılan hazır profiller:
+  - Hızlı Format
+  - Standart Servis
+  - Muhasebe PC
+  - Tarayıcı Kurtarma
+  - Tam Kullanıcı
+- Windows Görev Zamanlayıcısı entegrasyonu
+- Artımlı yedekleme
+- Çoklu hedef klasörüne kopyalama
+- Yedek rotasyonu: son N yedeği tut veya X günden eskiyi sil
+- UNC/SMB ağ paylaşımı ve isteğe bağlı kimlik bilgisi desteği
 
-### 📊 İzleme & Raporlama
-- **Canlı ilerleme çubuğu** — Dosya bazlı gerçek zamanlı ilerleme
-- **Hız göstergesi** — Anlık kopyalama hızı (MB/s)
-- **Tahmini süre** — Kalan süre tahmini
-- **Yedekleme sonuç raporu** — Tamamlanan yedek için özet
-- **Geçmiş** — Son 50 yedeğin listesi ve durumu
-- **Log dosyası** — Her yedek için detaylı kayıt
+### Geri Yükleme
 
-### 🎨 Arayüz & Tema
-- **Splash ekranı** — Açılışta animasyonlu yükleme çubuğu ve neon logo efekti
-- **Dark / Light tema** — Koyu derin mor veya açık lavanta paleti; anında değiştir
-- **Accent renk seçimi** — 6 hazır renk (Mor, Turkuaz, Yeşil, Altın, Turuncu, Pembe); seçim kalıcı kaydedilir
-- **Marka logoları** — Tarayıcı ve bulut depolama öğelerinde SVG marka ikonları
-- Logo animasyonu — nefes alan ışık efekti (titlebar)
-- **Yeniden tasarlanan pencere butonları** — özel vektör ikonlar, kapat butonu kırmızıya döner (Windows 11 stili)
-- Tek pencere navigasyon (Yedek Seç, Geçmiş, Zamanlayıcı, Geri Yükle, Ayarlar)
-- Yedek bitince klasörü otomatik açma
+- Yedek listesini otomatik görüntüleme
+- ZIP veya klasör yedeğinden geri yükleme
+- Kısmi geri yükleme ve klasör ağacı
+- Geri yükleme önizlemesi
+- Var olan dosyaların üzerine yazma seçeneği
+- Şifreli ZIP geri yükleme için maskeli/gösterilebilir parola alanı
 
----
+### İzleme ve Raporlama
 
-## 🛠️ Kurulum
+- Canlı ilerleme, hız ve tahmini süre
+- Sonuç ekranında kategori, dosya, hata, uyarı, süre ve boyut özeti
+- Checksum doğrulama sonucu
+- HTML müşteri/servis raporu
+- Geçmiş ekranında checksum doğrulama
+- İki yedeği karşılaştırma
+- Windows toast bildirimi
+- Webhook bildirimi
+- SMTP e-posta bildirimi
 
-### Kullanıcılar İçin
+### Bildirim Ayarları
 
-1. [Releases](https://github.com/Bogazitchy/Itchy-Backup/releases/latest) sayfasından Setup veya Portable sürümü indir
-2. **Setup:** Kurulum sihirbazını çalıştır (yönetici yetkisi gerekir)
-3. **Portable:** `.exe` dosyasını sağ tıkla → **Yönetici olarak çalıştır**
+Bildirim ekranındaki alanlar etiketlidir:
 
-> ⚠️ **VSS ve sistem dosyaları için yönetici yetkisi zorunludur.**
+- Webhook URL
+- SMTP sunucusu
+- Port
+- SMTP kullanıcı adı
+- SMTP parolası
+- Gönderen e-posta
+- Alıcı e-posta
+- SMTP SSL/TLS seçeneği
 
-### Geliştiriciler İçin
+### Arayüz
 
-**Gereksinimler:**
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- Dark, Light ve sade Servis teması
+- Accent renk seçimi
+- Tek pencere navigasyon
+- Hazır yedek profilleri sol profil listesinde
+- Yedek öncesi kontrol paneli
+- Göz ikonlu parola göster/gizle kontrolleri
+- Teknik servis akışına uygun yoğun ama okunabilir düzen
+
+## Kurulum
+
+### Kullanıcılar için
+
+1. Releases sayfasından Setup veya Portable sürümü indirin.
+2. VSS, sürücü dışa aktarımı ve bazı sistem konumları için uygulamayı yönetici olarak çalıştırın.
+3. İlk açılışta varsayılan yedek hedefini ve tercih ettiğiniz temayı ayarlayın.
+4. Profil listesinden hazır profillerden birini seçebilir veya kendi profilinizi kaydedebilirsiniz.
+
+### Geliştiriciler için
+
+Gereksinimler:
+
+- .NET 8 SDK
 - Visual Studio 2022 veya VS Code
-- [Inno Setup 6](https://jrsoftware.org/isinfo.php) *(setup oluşturmak için opsiyonel)*
+- Setup üretimi için Inno Setup 6
 
-**Derleme:**
-```bash
-git clone https://github.com/Bogazitchy/Itchy-Backup.git
-cd Itchy-Backup
+Derleme:
+
+```bat
+dotnet build ItchyBackup.sln
 ```
 
-Visual Studio'da `ItchyBackup.sln` dosyasını açın veya:
+Portable ve setup çıktıları için:
 
-```bash
-# Portable ve Setup (Runtime dahil, tek komut)
+```bat
 build.bat
 ```
 
-`build.bat` çalıştırıldığında `build/output/` altında şunlar üretilir:
-- `ItchyBackup_v0.8_portable.exe` — runtime dahil tek dosya
-- `ItchyBackup_v0.8_Setup.exe` — kurulum sihirbazı (runtime dahil)
+## Proje Yapısı
 
----
-
-## 📁 Proje Yapısı
-
-```
+```text
 ItchyBackup/
 ├── src/ItchyBackup/
-│   ├── Models/               # Veri modelleri
-│   ├── ViewModels/           # MVVM ViewModels
-│   ├── Views/                # WPF XAML arayüzler
-│   │   └── SplashWindow      # Açılış ekranı
+│   ├── Models/
+│   ├── ViewModels/
+│   ├── Views/
 │   ├── Services/
-│   │   ├── BackupEngine.cs       # Ana yedekleme motoru (paralel kopyalama)
-│   │   ├── RestoreEngine.cs      # Geri yükleme motoru + BackupFolderItem
-│   │   ├── CategoryBuilder.cs    # Kategori & otomatik tespit
-│   │   ├── ThemeService.cs       # Dark/Light tema & accent renk yönetimi
-│   │   ├── DiskSpaceChecker.cs   # Yedek boyut tahmini & disk alanı kontrolü
-│   │   ├── ChecksumService.cs    # SHA-256 doğrulama
-│   │   ├── ZipService.cs         # ZIP + AES-256
-│   │   ├── VssService.cs         # Volume Shadow Copy
-│   │   ├── HotBackupDetector.cs  # Çalışan servis tespiti
-│   │   ├── NetworkShareHelper.cs # SMB/UNC bağlantısı
-│   │   ├── NotificationService.cs# Bildirim servisi
-│   │   ├── ProfileService.cs     # Profil kaydet/yükle/sil
-│   │   └── LogService.cs         # Log dosyası
-│   └── Resources/Styles/     # Dark/Light tema XAML
+│   └── Resources/Styles/
 ├── installer/
-│   └── ItchyBackup.iss       # Inno Setup script
-├── build.bat                 # Build scripti
+├── build.bat
 └── README.md
 ```
 
----
+Öne çıkan servisler:
 
-## 🗺️ Yol Haritası
+- `BackupEngine`: Ana yedekleme motoru
+- `RestoreEngine`: Geri yükleme motoru
+- `ProfileService`: Varsayılan/hazır profiller ve profil yönetimi
+- `BackupPreflightService`: Yedek öncesi kontrol
+- `BackupCompareService`: İki yedeği karşılaştırma
+- `BackupReportService`: HTML sonuç raporu
+- `ChecksumService`: SHA-256 manifest ve doğrulama
+- `NotificationService`: Toast, webhook ve SMTP bildirimi
+- `ThemeService`: Tema ve accent renk yönetimi
 
-- [x] Kullanıcı klasörleri yedekleme
-- [x] Tarayıcı verileri yedekleme (SVG marka logoları)
-- [x] Outlook PST/OST yedekleme
-- [x] Veritabanı tespiti ve yedekleme
-- [x] Sanal makine yedekleme
-- [x] Sistem araçları yedekleme (Windows sürücüleri, WiFi profilleri)
-- [x] ZIP + AES-256 şifreleme
-- [x] SHA-256 checksum doğrulama
-- [x] VSS (açık dosya) desteği
-- [x] Disk alanı kontrolü (yedekleme öncesi)
-- [x] Profil sistemi
-- [x] Otomatik zamanlayıcı
-- [x] Özel klasör ekleme
-- [x] Yedekten geri yükleme (hiyerarşik klasör ağacı, alt klasör bazlı seçim)
-- [x] Profil düzenleme (ad değiştirme, güncelleme)
-- [x] Ağ paylaşımına yedekleme (SMB/UNC)
-- [x] Artımlı yedekleme (manuel temel seçimi)
-- [x] Çoklu hedef (birden fazla yedek konumu)
-- [x] Yedek rotasyonu (son N tut / X günden eskiyi sil)
-- [x] Dark / Light tema + accent renk seçimi
-- [x] Splash ekranı (animasyonlu açılış)
-- [x] Setup içinde .NET 8 Runtime dahil (bağımsız kurulum)
-- [ ] E-posta bildirimi
+## Yol Haritası
 
----
+- Daha ayrıntılı e-posta şablonları
+- ZIP içeriği için doğrudan yedek karşılaştırma
+- Checksum tabanlı güvenli artımlı mod
+- Otomatik güncelleme kontrolü
+- Daha ayrıntılı müşteri teslim raporu
 
-## 🧰 Kullanılan Teknolojiler
+## Teknolojiler
 
-- **C# / WPF** (.NET 8, Windows)
-- **CommunityToolkit.Mvvm** — MVVM altyapısı
-- **SharpZipLib** — ZIP & AES-256 şifreleme
-- **Newtonsoft.Json** — Profil & ayar yönetimi
-- **System.ServiceProcess** — Servis tespiti
+- C# / WPF
+- .NET 8
+- CommunityToolkit.Mvvm
+- SharpZipLib
+- Newtonsoft.Json
+- Windows Task Scheduler, VSS, pnputil, netsh
 
----
+## Geliştirici
 
-## 👤 Geliştirici
-
-**M. Mert** — [@Bogazitchy](https://github.com/Bogazitchy)
-
----
-
-<div align="center">
-
-**Itchy Backup** — Teknik servis iş akışı için tasarlandı.
-
-⭐ Beğendiyseniz star atmayı unutmayın!
-
-</div>
+M. Mert

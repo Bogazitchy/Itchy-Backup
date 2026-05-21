@@ -89,7 +89,7 @@
               <Border.Effect>
                 <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.6"/>
               </Border.Effect>
-              <TextBlock Text="v0.7" FontSize="10" FontFamily="Consolas"
+              <TextBlock Text="v0.8.5" FontSize="10" FontFamily="Consolas"
                          Foreground="{DynamicResource AccentLight}"
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
@@ -181,6 +181,194 @@
             </Button>
 
           </StackPanel>
+
+          <!-- ── Tema Toggle Switch ──────────────────────────────────────── -->
+          <ToggleButton x:Name="ThemeToggle"
+                        IsChecked="{Binding IsDarkTheme, Mode=OneWay}"
+                        Click="ThemeToggle_Click"
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Margin="0,0,152,0"
+                        Width="60" Height="26"
+                        Cursor="Hand"
+                        ToolTip="Koyu / Aydınlık Tema"
+                        BorderThickness="0" Background="Transparent">
+            <ToggleButton.Template>
+              <ControlTemplate TargetType="ToggleButton">
+                <Grid Width="60" Height="26">
+                  <!-- Track -->
+                  <Border x:Name="Track" CornerRadius="13" BorderThickness="1.5">
+                    <Border.Background>
+                      <SolidColorBrush x:Name="TrackFill" Color="#F59F00"/>
+                    </Border.Background>
+                    <Border.BorderBrush>
+                      <SolidColorBrush x:Name="TrackBorder" Color="#C47E00"/>
+                    </Border.BorderBrush>
+                  </Border>
+                  <!-- Thumb (kayan yuvarlak + ikon) -->
+                  <Grid x:Name="ThumbGrid" Width="20" Height="20"
+                        HorizontalAlignment="Left" VerticalAlignment="Center"
+                        Margin="3,0,0,0">
+                    <Grid.RenderTransform>
+                      <TransformGroup>
+                        <ScaleTransform x:Name="ThumbScale" ScaleX="1" ScaleY="1" CenterX="10" CenterY="10"/>
+                        <TranslateTransform x:Name="ThumbSlide" X="0"/>
+                      </TransformGroup>
+                    </Grid.RenderTransform>
+                    <Ellipse Fill="White">
+                      <Ellipse.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="5" ShadowDepth="1" Opacity="0.28"/>
+                      </Ellipse.Effect>
+                    </Ellipse>
+                    <!-- Güneş ikonu — light modda görünür -->
+                    <TextBlock x:Name="SunIcon" Text="☀" FontSize="10"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="#F59F00" Opacity="1"
+                               RenderTransformOrigin="0.5,0.5">
+                      <TextBlock.RenderTransform>
+                        <RotateTransform x:Name="SunRotate" Angle="0"/>
+                      </TextBlock.RenderTransform>
+                    </TextBlock>
+                    <!-- Ay ikonu — dark modda görünür -->
+                    <TextBlock x:Name="MoonIcon" Text="☾" FontSize="10"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="#A29BFE" Opacity="0"
+                               RenderTransformOrigin="0.5,0.5">
+                      <TextBlock.RenderTransform>
+                        <RotateTransform x:Name="MoonRotate" Angle="0"/>
+                      </TextBlock.RenderTransform>
+                    </TextBlock>
+                  </Grid>
+                </Grid>
+                <ControlTemplate.Triggers>
+                  <!-- Koyu mod (IsChecked=True): thumb sağa kayar, track mor -->
+                  <Trigger Property="IsChecked" Value="True">
+                    <Trigger.EnterActions>
+                      <BeginStoryboard>
+                        <Storyboard>
+                          <!-- Thumb sağa kayar -->
+                          <DoubleAnimation Storyboard.TargetName="ThumbSlide"
+                                           Storyboard.TargetProperty="X"
+                                           To="34" Duration="0:0:0.28">
+                            <DoubleAnimation.EasingFunction>
+                              <CubicEase EasingMode="EaseInOut"/>
+                            </DoubleAnimation.EasingFunction>
+                          </DoubleAnimation>
+                          <!-- Thumb squeeze (ezilip geri açılır) -->
+                          <DoubleAnimation Storyboard.TargetName="ThumbScale"
+                                           Storyboard.TargetProperty="ScaleX"
+                                           To="0.82" Duration="0:0:0.12"/>
+                          <DoubleAnimation Storyboard.TargetName="ThumbScale"
+                                           Storyboard.TargetProperty="ScaleX"
+                                           To="1" BeginTime="0:0:0.12" Duration="0:0:0.22">
+                            <DoubleAnimation.EasingFunction>
+                              <ElasticEase EasingMode="EaseOut" Oscillations="1" Springiness="6"/>
+                            </DoubleAnimation.EasingFunction>
+                          </DoubleAnimation>
+                          <DoubleAnimation Storyboard.TargetName="ThumbScale"
+                                           Storyboard.TargetProperty="ScaleY"
+                                           To="0.82" Duration="0:0:0.12"/>
+                          <DoubleAnimation Storyboard.TargetName="ThumbScale"
+                                           Storyboard.TargetProperty="ScaleY"
+                                           To="1" BeginTime="0:0:0.12" Duration="0:0:0.22">
+                            <DoubleAnimation.EasingFunction>
+                              <ElasticEase EasingMode="EaseOut" Oscillations="1" Springiness="6"/>
+                            </DoubleAnimation.EasingFunction>
+                          </DoubleAnimation>
+                          <!-- Track amber → mor -->
+                          <ColorAnimation Storyboard.TargetName="TrackFill"
+                                          Storyboard.TargetProperty="Color"
+                                          To="#6C5CE7" Duration="0:0:0.22"/>
+                          <ColorAnimation Storyboard.TargetName="TrackBorder"
+                                          Storyboard.TargetProperty="Color"
+                                          To="#4A3CB5" Duration="0:0:0.22"/>
+                          <!-- Güneş dönerek söner -->
+                          <DoubleAnimation Storyboard.TargetName="SunRotate"
+                                           Storyboard.TargetProperty="Angle"
+                                           To="90" Duration="0:0:0.18"/>
+                          <DoubleAnimation Storyboard.TargetName="SunIcon"
+                                           Storyboard.TargetProperty="Opacity"
+                                           To="0" Duration="0:0:0.15"/>
+                          <!-- Ay dönerek belirir -->
+                          <DoubleAnimation Storyboard.TargetName="MoonRotate"
+                                           Storyboard.TargetProperty="Angle"
+                                           From="-90" To="0" BeginTime="0:0:0.12" Duration="0:0:0.22">
+                            <DoubleAnimation.EasingFunction>
+                              <CubicEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                          </DoubleAnimation>
+                          <DoubleAnimation Storyboard.TargetName="MoonIcon"
+                                           Storyboard.TargetProperty="Opacity"
+                                           To="1" BeginTime="0:0:0.12" Duration="0:0:0.18"/>
+                        </Storyboard>
+                      </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <!-- Aydınlık mod: thumb sola döner, track altın sarısı -->
+                    <Trigger.ExitActions>
+                      <BeginStoryboard>
+                        <Storyboard>
+                          <!-- Thumb sola kayar -->
+                          <DoubleAnimation Storyboard.TargetName="ThumbSlide"
+                                           Storyboard.TargetProperty="X"
+                                           To="0" Duration="0:0:0.28">
+                            <DoubleAnimation.EasingFunction>
+                              <CubicEase EasingMode="EaseInOut"/>
+                            </DoubleAnimation.EasingFunction>
+                          </DoubleAnimation>
+                          <!-- Thumb squeeze -->
+                          <DoubleAnimation Storyboard.TargetName="ThumbScale"
+                                           Storyboard.TargetProperty="ScaleX"
+                                           To="0.82" Duration="0:0:0.12"/>
+                          <DoubleAnimation Storyboard.TargetName="ThumbScale"
+                                           Storyboard.TargetProperty="ScaleX"
+                                           To="1" BeginTime="0:0:0.12" Duration="0:0:0.22">
+                            <DoubleAnimation.EasingFunction>
+                              <ElasticEase EasingMode="EaseOut" Oscillations="1" Springiness="6"/>
+                            </DoubleAnimation.EasingFunction>
+                          </DoubleAnimation>
+                          <DoubleAnimation Storyboard.TargetName="ThumbScale"
+                                           Storyboard.TargetProperty="ScaleY"
+                                           To="0.82" Duration="0:0:0.12"/>
+                          <DoubleAnimation Storyboard.TargetName="ThumbScale"
+                                           Storyboard.TargetProperty="ScaleY"
+                                           To="1" BeginTime="0:0:0.12" Duration="0:0:0.22">
+                            <DoubleAnimation.EasingFunction>
+                              <ElasticEase EasingMode="EaseOut" Oscillations="1" Springiness="6"/>
+                            </DoubleAnimation.EasingFunction>
+                          </DoubleAnimation>
+                          <!-- Track mor → amber -->
+                          <ColorAnimation Storyboard.TargetName="TrackFill"
+                                          Storyboard.TargetProperty="Color"
+                                          To="#F59F00" Duration="0:0:0.22"/>
+                          <ColorAnimation Storyboard.TargetName="TrackBorder"
+                                          Storyboard.TargetProperty="Color"
+                                          To="#C47E00" Duration="0:0:0.22"/>
+                          <!-- Ay dönerek söner -->
+                          <DoubleAnimation Storyboard.TargetName="MoonRotate"
+                                           Storyboard.TargetProperty="Angle"
+                                           To="90" Duration="0:0:0.18"/>
+                          <DoubleAnimation Storyboard.TargetName="MoonIcon"
+                                           Storyboard.TargetProperty="Opacity"
+                                           To="0" Duration="0:0:0.15"/>
+                          <!-- Güneş dönerek belirir -->
+                          <DoubleAnimation Storyboard.TargetName="SunRotate"
+                                           Storyboard.TargetProperty="Angle"
+                                           From="-90" To="0" BeginTime="0:0:0.12" Duration="0:0:0.22">
+                            <DoubleAnimation.EasingFunction>
+                              <CubicEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                          </DoubleAnimation>
+                          <DoubleAnimation Storyboard.TargetName="SunIcon"
+                                           Storyboard.TargetProperty="Opacity"
+                                           To="1" BeginTime="0:0:0.12" Duration="0:0:0.18"/>
+                        </Storyboard>
+                      </BeginStoryboard>
+                    </Trigger.ExitActions>
+                  </Trigger>
+                </ControlTemplate.Triggers>
+              </ControlTemplate>
+            </ToggleButton.Template>
+          </ToggleButton>
+
         </Grid>
       </Border>
 
@@ -1294,10 +1482,29 @@
                           </Grid>
                           <TextBlock Text="parola" FontSize="9" FontFamily="Consolas"
                                      Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,2"/>
-                          <TextBox Style="{StaticResource ItchyTextBox}"
-                                   Text="{Binding NetworkPassword, UpdateSourceTrigger=PropertyChanged}"
-                                   FontFamily="Consolas" FontSize="11" Height="30"
-                                   VerticalContentAlignment="Center"/>
+                          <Grid>
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="*"/>
+                              <ColumnDefinition Width="6"/>
+                              <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <PasswordBox x:Name="NetworkPasswordBox"
+                                         PasswordChanged="NetworkPasswordBox_PasswordChanged"
+                                         Background="{DynamicResource BgQuaternary}"
+                                         Foreground="{DynamicResource TextPrimary}"
+                                         BorderBrush="{DynamicResource BorderBrush}"
+                                         BorderThickness="1" FontFamily="Consolas" FontSize="11"
+                                         Height="30" Padding="6,3" VerticalContentAlignment="Center"/>
+                            <TextBox x:Name="NetworkPasswordRevealBox" Grid.Column="0"
+                                     Style="{StaticResource ItchyTextBox}"
+                                     Text="{Binding NetworkPassword, UpdateSourceTrigger=PropertyChanged}"
+                                     FontFamily="Consolas" FontSize="11" Height="30"
+                                     VerticalContentAlignment="Center" Visibility="Collapsed"/>
+                            <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Padding="8,4"
+                                    Click="NetworkPasswordReveal_Click" ToolTip="Parolayı göster/gizle">
+                              <TextBlock Text="👁" FontFamily="Segoe UI Emoji" FontSize="12"/>
+                            </Button>
+                          </Grid>
                           <TextBlock Text="Parola profilde saklanmaz." FontSize="9" FontFamily="Consolas"
                                      Foreground="{DynamicResource TextTertiary}" Margin="0,4,0,0"/>
                         </StackPanel>
@@ -1377,6 +1584,23 @@
                                      Foreground="{DynamicResource TextPrimary}"/>
                         </CheckBox>
                         <StackPanel Margin="0,8,0,0">
+                          <TextBlock Text="Sıkıştırma seviyesi" FontSize="9" FontFamily="Consolas"
+                                     Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,4"/>
+                          <ComboBox Style="{StaticResource ItchyComboBox}"
+                                    SelectedValue="{Binding CompressionLevel}"
+                                    SelectedValuePath="Tag" Height="32">
+                            <ComboBoxItem Tag="{x:Static models:CompressionLevel.Fast}">
+                              <TextBlock Text="Hızlı"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="{x:Static models:CompressionLevel.Normal}">
+                              <TextBlock Text="Dengeli"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="{x:Static models:CompressionLevel.Best}">
+                              <TextBlock Text="En küçük boyut"/>
+                            </ComboBoxItem>
+                          </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="0,8,0,0">
                           <StackPanel.Style>
                             <Style TargetType="StackPanel">
                               <Setter Property="Visibility" Value="Collapsed"/>
@@ -1404,9 +1628,30 @@
                                 </Style.Triggers>
                               </Style>
                             </StackPanel.Style>
-                            <TextBox Style="{StaticResource ItchyTextBox}" Margin="0,4,0,0"
-                                     Text="{Binding ZipPassword, UpdateSourceTrigger=PropertyChanged}"
-                                     FontFamily="Consolas" Height="32" VerticalContentAlignment="Center"/>
+                            <Grid Margin="0,4,0,0">
+                              <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="Auto"/>
+                              </Grid.ColumnDefinitions>
+                              <PasswordBox x:Name="ZipPasswordBox"
+                                           PasswordChanged="ZipPasswordBox_PasswordChanged"
+                                           Background="{DynamicResource BgQuaternary}"
+                                           Foreground="{DynamicResource TextPrimary}"
+                                           BorderBrush="{DynamicResource BorderBrush}"
+                                           BorderThickness="1"
+                                           FontFamily="Consolas" Height="32" Padding="6,3"
+                                           VerticalContentAlignment="Center"/>
+                              <TextBox x:Name="ZipPasswordRevealBox" Grid.Column="0"
+                                       Style="{StaticResource ItchyTextBox}"
+                                       Text="{Binding ZipPassword, UpdateSourceTrigger=PropertyChanged}"
+                                       FontFamily="Consolas" Height="32" VerticalContentAlignment="Center"
+                                       Visibility="Collapsed"/>
+                              <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Padding="8,5"
+                                      Click="ZipPasswordReveal_Click" ToolTip="Şifreyi göster/gizle">
+                                <TextBlock Text="👁" FontFamily="Segoe UI Emoji" FontSize="12"/>
+                              </Button>
+                            </Grid>
                           </StackPanel>
                         </StackPanel>
                       </StackPanel>
@@ -1488,6 +1733,42 @@
                             </TextBlock>
                           </Grid>
                         </StackPanel>
+                      </StackPanel>
+                    </Border>
+
+                    <!-- Yedek öncesi kontrol -->
+                    <Border Background="{DynamicResource BgTertiary}" CornerRadius="10"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            Margin="0,0,0,12" Padding="14,12">
+                      <StackPanel>
+                        <DockPanel Margin="0,0,0,8">
+                          <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}"
+                                  Command="{Binding RunPreflightCommand}" Padding="8,3">
+                            <TextBlock Text="Kontrol Et" FontSize="10" FontFamily="Segoe UI"/>
+                          </Button>
+                          <StackPanel>
+                            <TextBlock Text="YEDEK ÖNCESİ KONTROL" FontSize="9" FontFamily="Consolas"
+                                       Foreground="{DynamicResource TextTertiary}"/>
+                            <TextBlock Text="{Binding PreflightSummary}" FontSize="10" FontFamily="Consolas"
+                                       Foreground="{DynamicResource AccentLight}" Margin="0,3,0,0"/>
+                          </StackPanel>
+                        </DockPanel>
+                        <ItemsControl ItemsSource="{Binding PreflightChecks}" MaxHeight="150">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                              <DockPanel Margin="0,0,0,5">
+                                <TextBlock DockPanel.Dock="Left" Text="{Binding Icon}" Width="18"
+                                           FontWeight="Bold" Foreground="{DynamicResource AccentLight}"/>
+                                <StackPanel>
+                                  <TextBlock Text="{Binding Title}" FontSize="11" FontWeight="SemiBold"
+                                             Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"/>
+                                  <TextBlock Text="{Binding Detail}" FontSize="9" TextWrapping="Wrap"
+                                             Foreground="{DynamicResource TextTertiary}" FontFamily="Segoe UI"/>
+                                </StackPanel>
+                              </DockPanel>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                       </StackPanel>
                     </Border>
 
@@ -1614,6 +1895,59 @@
             </Border>
             <ScrollViewer Grid.Row="1" Margin="16,12" VerticalScrollBarVisibility="Auto">
               <StackPanel>
+                <Border Background="{DynamicResource BgCard}" CornerRadius="10"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,12" Padding="14,12">
+                  <StackPanel>
+                    <TextBlock Text="YEDEK KARŞILAŞTIRMA" FontSize="9" FontFamily="Consolas"
+                               Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,8"/>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                      </Grid.ColumnDefinitions>
+                      <ComboBox Grid.Column="0" Style="{StaticResource ItchyComboBox}"
+                                ItemsSource="{Binding AvailableBackups}"
+                                SelectedItem="{Binding CompareBackupA}">
+                        <ComboBox.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock Text="{Binding Name}" FontSize="11" FontFamily="Segoe UI"/>
+                          </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                      </ComboBox>
+                      <ComboBox Grid.Column="2" Style="{StaticResource ItchyComboBox}"
+                                ItemsSource="{Binding AvailableBackups}"
+                                SelectedItem="{Binding CompareBackupB}">
+                        <ComboBox.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock Text="{Binding Name}" FontSize="11" FontFamily="Segoe UI"/>
+                          </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                      </ComboBox>
+                      <Button Grid.Column="3" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0"
+                              Command="{Binding CompareSelectedBackupsCommand}" Padding="12,7">
+                        <TextBlock Text="Karşılaştır" FontSize="11" FontFamily="Segoe UI"/>
+                      </Button>
+                    </Grid>
+                    <TextBlock Text="{Binding CompareSummary}" FontSize="10" FontFamily="Consolas"
+                               Foreground="{DynamicResource AccentLight}" Margin="0,8,0,0"/>
+                    <ItemsControl ItemsSource="{Binding CompareEntries}" MaxHeight="130">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <DockPanel Margin="0,4,0,0">
+                            <TextBlock Text="{Binding TypeText}" Width="86" FontSize="9" FontFamily="Consolas"
+                                       Foreground="{DynamicResource TextTertiary}"/>
+                            <TextBlock Text="{Binding RelativePath}" FontSize="10" FontFamily="Consolas"
+                                       Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
+                          </DockPanel>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+
                 <ItemsControl ItemsSource="{Binding BackupHistory}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type models:HistoryEntry}">
@@ -1689,7 +2023,14 @@
                                              VerticalAlignment="Center" Margin="0,0,4,0"/>
                                   <TextBlock Text="Konuma Git" FontFamily="Segoe UI" FontSize="10"
                                              VerticalAlignment="Center"/>
-                                </StackPanel>
+                                  </StackPanel>
+                                </Button>
+                              <Button Style="{StaticResource SecondaryButton}" Margin="0,6,0,0"
+                                      Padding="8,5" HorizontalAlignment="Right"
+                                      Command="{Binding DataContext.VerifyHistoryBackupCommand,
+                                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                      CommandParameter="{Binding}">
+                                <TextBlock Text="Checksum" FontFamily="Segoe UI" FontSize="10"/>
                               </Button>
                             </StackPanel>
                           </Grid>
@@ -2183,10 +2524,39 @@
                       <Separator Margin="0,8"/>
                       <TextBlock Text="ZIP Şifresi (gerekiyorsa)" FontSize="11"
                                  Foreground="{DynamicResource TextSecondary}" FontFamily="Segoe UI" Margin="0,0,0,4"/>
-                      <TextBox Style="{StaticResource ItchyTextBox}" Height="32"
-                               Text="{Binding RestoreZipPassword, UpdateSourceTrigger=PropertyChanged}"
-                               FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="*"/>
+                          <ColumnDefinition Width="6"/>
+                          <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <PasswordBox x:Name="RestoreZipPasswordBox"
+                                     PasswordChanged="RestoreZipPasswordBox_PasswordChanged"
+                                     Background="{DynamicResource BgQuaternary}"
+                                     Foreground="{DynamicResource TextPrimary}"
+                                     BorderBrush="{DynamicResource BorderBrush}"
+                                     BorderThickness="1" Height="32" Padding="6,3"
+                                     FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                        <TextBox x:Name="RestoreZipPasswordRevealBox" Grid.Column="0"
+                                 Style="{StaticResource ItchyTextBox}"
+                                 Text="{Binding RestoreZipPassword, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Consolas" Height="32" VerticalContentAlignment="Center"
+                                 Visibility="Collapsed"/>
+                        <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Padding="8,5"
+                                Click="RestoreZipPasswordReveal_Click" ToolTip="Şifreyi göster/gizle">
+                          <TextBlock Text="👁" FontFamily="Segoe UI Emoji" FontSize="12"/>
+                        </Button>
+                      </Grid>
                     </StackPanel>
+                    <Separator Margin="0,10,0,8"/>
+                    <DockPanel>
+                      <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}"
+                              Command="{Binding RefreshRestorePreviewCommand}" Padding="8,3">
+                        <TextBlock Text="Önizle" FontSize="10" FontFamily="Segoe UI"/>
+                      </Button>
+                      <TextBlock Text="{Binding RestorePreviewText}" FontSize="10" FontFamily="Consolas"
+                                 Foreground="{DynamicResource AccentLight}" TextWrapping="Wrap"/>
+                    </DockPanel>
                   </StackPanel>
                 </Border>
 
@@ -2476,6 +2846,18 @@
                   </Border>
                 </UniformGrid>
 
+                <Border Background="{DynamicResource BgCard}" CornerRadius="8"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        Margin="0,-8,0,12" Padding="12,8">
+                  <DockPanel>
+                    <TextBlock Text="BOYUT" FontSize="9" FontFamily="Consolas"
+                               Foreground="{DynamicResource TextTertiary}" VerticalAlignment="Center"
+                               DockPanel.Dock="Left" Margin="0,0,10,0"/>
+                    <TextBlock Text="{Binding LastBackupResult.TotalBytesText}" FontSize="12"
+                               Foreground="{DynamicResource TextPrimary}" FontFamily="Consolas"/>
+                  </DockPanel>
+                </Border>
+
                 <!-- Artımlı bilgi (yalnızca artımlı yedekte görünür) -->
                 <Border Background="{DynamicResource BgCard}" CornerRadius="8"
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
@@ -2551,6 +2933,36 @@
                     <Style TargetType="Border">
                       <Setter Property="Visibility" Value="Collapsed"/>
                       <Style.Triggers>
+                        <DataTrigger Binding="{Binding LastBackupResult.Warnings.Count, Converter={StaticResource HasItemsConverter}}" Value="True">
+                          <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <StackPanel>
+                    <TextBlock Text="UYARILAR" FontSize="9" FontFamily="Consolas"
+                               Foreground="{DynamicResource Warning}" Margin="16,12,16,8"/>
+                    <ItemsControl ItemsSource="{Binding LastBackupResult.Warnings}" MaxHeight="120">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Padding="16,4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                            <TextBlock Text="{Binding}" FontSize="10" FontFamily="Consolas"
+                                       Foreground="{DynamicResource Warning}" TextWrapping="Wrap"/>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+
+                <!-- Hata listesi -->
+                <Border Background="{DynamicResource BgCard}" CornerRadius="10"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16" Padding="0">
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                      <Style.Triggers>
                         <DataTrigger Binding="{Binding LastBackupResult.Errors.Count, Converter={StaticResource HasItemsConverter}}" Value="True">
                           <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
@@ -2595,6 +3007,10 @@
                 <Button Style="{StaticResource SecondaryButton}"
                         Command="{Binding OpenLogFolderCommand}" Padding="16,10" Height="40">
                   <TextBlock Text="📁  Log Klasörü" FontFamily="Segoe UI" FontSize="11"/>
+                </Button>
+                <Button Style="{StaticResource SecondaryButton}" Margin="8,0,0,0"
+                        Command="{Binding OpenBackupReportCommand}" Padding="16,10" Height="40">
+                  <TextBlock Text="HTML Rapor" FontFamily="Segoe UI" FontSize="11"/>
                 </Button>
               </DockPanel>
             </Border>
@@ -2644,7 +3060,7 @@
                           </LinearGradientBrush>
                         </TextBlock.Foreground>
                       </TextBlock>
-                      <TextBlock Text="v0.7 — Teknik Servis Dosya Yedekleme Aracı" FontSize="11"
+                      <TextBlock Text="v0.8.5 — Teknik Servis Dosya Yedekleme Aracı" FontSize="11"
                                  Foreground="{DynamicResource TextTertiary}" FontFamily="Segoe UI" Margin="0,3,0,0"/>
                       <TextBlock Text="Created by M.Mert" FontSize="12"
                                  Foreground="{DynamicResource AccentLight}" FontFamily="Segoe UI"
@@ -2708,9 +3124,9 @@
                           </StackPanel>
                         </Border>
                       </Button>
-                      <Button Command="{Binding SetThemeCommand}" CommandParameter="Light"
-                              Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
-                              Margin="8,0,0,0">
+                       <Button Command="{Binding SetThemeCommand}" CommandParameter="Light"
+                               Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
+                               Margin="8,0,0,0">
                         <Border CornerRadius="8" Padding="16,8" BorderThickness="2">
                           <Border.Style>
                             <Style TargetType="Border">
@@ -2726,6 +3142,29 @@
                           <StackPanel Orientation="Horizontal">
                             <TextBlock Text="☀️" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,6,0"/>
                             <TextBlock Text="Aydınlık" FontSize="12" FontFamily="Segoe UI"
+                                       Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                          </StackPanel>
+                         </Border>
+                       </Button>
+                      <Button Command="{Binding SetThemeCommand}" CommandParameter="Service"
+                              Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
+                              Margin="8,0,0,0">
+                        <Border CornerRadius="8" Padding="16,8" BorderThickness="2">
+                          <Border.Style>
+                            <Style TargetType="Border">
+                              <Setter Property="Background" Value="{DynamicResource BgTertiary}"/>
+                              <Setter Property="BorderBrush" Value="Transparent"/>
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding ThemeName}" Value="Service">
+                                  <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </Border.Style>
+                          <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="▦" FontSize="14" Margin="0,0,6,0"
+                                       Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Text="Servis" FontSize="12" FontFamily="Segoe UI"
                                        Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
                           </StackPanel>
                         </Border>
@@ -2923,10 +3362,136 @@
                                                 <TextBlock Text="Manuel yedek tamamlanınca klasörü otomatik aç" FontSize="11"
                                    Foreground="{DynamicResource TextTertiary}" FontFamily="Segoe UI"/>
                                             </StackPanel>
-                                        </DockPanel>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
+                                         </DockPanel>
+                                     </StackPanel>
+                                 </Border>
+
+                <TextBlock Text="BİLDİRİMLER" FontSize="9" FontFamily="Consolas"
+                           Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,10"/>
+                <Border Background="{DynamicResource BgCard}" CornerRadius="10"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16">
+                  <StackPanel>
+                    <DockPanel Margin="16,13">
+                      <CheckBox DockPanel.Dock="Right" Style="{StaticResource ItchyCheckBox}"
+                                IsChecked="{Binding EnableWebhookNotifications}" VerticalAlignment="Center"/>
+                      <StackPanel>
+                        <TextBlock Text="Webhook bildirimi" FontSize="13" FontWeight="Medium"
+                                   Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Discord, Telegram bot köprüsü veya benzer HTTP endpoint'e sonuç gönder"
+                                   FontSize="11" Foreground="{DynamicResource TextTertiary}" FontFamily="Segoe UI"/>
+                      </StackPanel>
+                    </DockPanel>
+                    <StackPanel Margin="16,0,16,13">
+                      <TextBlock Text="Webhook URL" FontSize="9" FontFamily="Consolas"
+                                 Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,4"/>
+                      <TextBox Style="{StaticResource ItchyTextBox}" Height="32"
+                               Text="{Binding WebhookUrl, UpdateSourceTrigger=PropertyChanged}"
+                               FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+                    <Separator/>
+                    <DockPanel Margin="16,13">
+                      <CheckBox DockPanel.Dock="Right" Style="{StaticResource ItchyCheckBox}"
+                                IsChecked="{Binding EnableEmailNotifications}" VerticalAlignment="Center"/>
+                      <StackPanel>
+                        <TextBlock Text="E-posta bildirimi" FontSize="13" FontWeight="Medium"
+                                   Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Yedek bitince SMTP üzerinden sonuç maili gönder"
+                                   FontSize="11" Foreground="{DynamicResource TextTertiary}" FontFamily="Segoe UI"/>
+                      </StackPanel>
+                    </DockPanel>
+                    <Grid Margin="16,0,16,13">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="80"/>
+                      </Grid.ColumnDefinitions>
+                      <StackPanel Grid.Column="0">
+                        <TextBlock Text="SMTP sunucusu" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,4"/>
+                        <TextBox Style="{StaticResource ItchyTextBox}" Height="32"
+                                 Text="{Binding SmtpHost, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                      </StackPanel>
+                      <StackPanel Grid.Column="2">
+                        <TextBlock Text="Port" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,4"/>
+                        <TextBox Style="{StaticResource ItchyTextBox}" Height="32"
+                                 Text="{Binding SmtpPort, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                      </StackPanel>
+                    </Grid>
+                    <Grid Margin="16,0,16,13">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                      </Grid.ColumnDefinitions>
+                      <StackPanel Grid.Column="0">
+                        <TextBlock Text="SMTP kullanıcı adı" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,4"/>
+                        <TextBox Style="{StaticResource ItchyTextBox}" Height="32"
+                                 Text="{Binding SmtpUsername, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                      </StackPanel>
+                      <StackPanel Grid.Column="2">
+                        <TextBlock Text="SMTP parolası" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,4"/>
+                        <Grid>
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="Auto"/>
+                          </Grid.ColumnDefinitions>
+                          <PasswordBox x:Name="SmtpPasswordBox"
+                                       PasswordChanged="SmtpPasswordBox_PasswordChanged"
+                                       Background="{DynamicResource BgQuaternary}"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       BorderBrush="{DynamicResource BorderBrush}"
+                                       BorderThickness="1" Height="32" Padding="6,3"
+                                       FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                          <TextBox x:Name="SmtpPasswordRevealBox" Grid.Column="0"
+                                   Style="{StaticResource ItchyTextBox}"
+                                   Text="{Binding SmtpPassword, UpdateSourceTrigger=PropertyChanged}"
+                                   FontFamily="Consolas" Height="32" VerticalContentAlignment="Center"
+                                   Visibility="Collapsed"/>
+                          <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Padding="8,5"
+                                  Click="SmtpPasswordReveal_Click" ToolTip="Şifreyi göster/gizle">
+                            <TextBlock Text="👁" FontFamily="Segoe UI Emoji" FontSize="12"/>
+                          </Button>
+                        </Grid>
+                      </StackPanel>
+                    </Grid>
+                    <Grid Margin="16,0,16,13">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                      </Grid.ColumnDefinitions>
+                      <StackPanel Grid.Column="0">
+                        <TextBlock Text="Gönderen e-posta" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,4"/>
+                        <TextBox Style="{StaticResource ItchyTextBox}" Height="32"
+                                 Text="{Binding EmailFrom, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                      </StackPanel>
+                      <StackPanel Grid.Column="2">
+                        <TextBlock Text="Alıcı e-posta" FontSize="9" FontFamily="Consolas"
+                                   Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,4"/>
+                        <TextBox Style="{StaticResource ItchyTextBox}" Height="32"
+                                 Text="{Binding EmailTo, UpdateSourceTrigger=PropertyChanged}"
+                                 FontFamily="Consolas" VerticalContentAlignment="Center"/>
+                      </StackPanel>
+                    </Grid>
+                    <DockPanel Margin="16,0,16,13">
+                      <CheckBox DockPanel.Dock="Right" Style="{StaticResource ItchyCheckBox}"
+                                IsChecked="{Binding SmtpSsl}" VerticalAlignment="Center"/>
+                      <TextBlock Text="SMTP SSL/TLS kullan" FontSize="12"
+                                 Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"/>
+                    </DockPanel>
+                  </StackPanel>
+                </Border>
+                             </StackPanel>
             </ScrollViewer>
             <Border Grid.Row="2" Background="{DynamicResource BgSecondary}"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
@@ -3038,6 +3603,14 @@
                      Foreground="{DynamicResource TextTertiary}" VerticalAlignment="Center"/>
         </DockPanel>
       </Border>
+
+      <!-- Tema geçiş animasyonu için fade overlay -->
+      <Border x:Name="ThemeTransitionOverlay"
+              Grid.RowSpan="4"
+              Opacity="0"
+              IsHitTestVisible="False"
+              Panel.ZIndex="9999"/>
+
     </Grid>
   </Border>
 </Window>

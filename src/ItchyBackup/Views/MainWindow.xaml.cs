@@ -1,5 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using ItchyBackup.Models;
 using ItchyBackup.ViewModels;
 
@@ -7,6 +9,8 @@ namespace ItchyBackup.Views;
 
 public partial class MainWindow : Window
 {
+    private bool _themeAnimating = false;
+
     public MainWindow() { InitializeComponent(); }
 
     private void HourSpinner_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -61,6 +65,35 @@ public partial class MainWindow : Window
             cat.SetAllSelected(cat.MasterChecked != true);
     }
 
+    private async void ThemeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (_themeAnimating) return;
+        _themeAnimating = true;
+
+        var vm = (MainViewModel)DataContext;
+        bool goingToLight = vm.ThemeName == "Dark";
+
+        // Hedef temanın arka plan rengini overlay'e ver
+        ThemeTransitionOverlay.Background = new SolidColorBrush(goingToLight
+            ? System.Windows.Media.Color.FromRgb(0xEC, 0xE6, 0xFC)   // aydınlık tema bg
+            : System.Windows.Media.Color.FromRgb(0x0C, 0x0B, 0x18)); // koyu tema bg
+
+        // Overlay fade-in
+        ThemeTransitionOverlay.BeginAnimation(OpacityProperty,
+            new DoubleAnimation(0, 0.65, new Duration(TimeSpan.FromMilliseconds(130))));
+        await Task.Delay(155);
+
+        // Tema uygula (overlay arkasında, kullanıcı görmez)
+        vm.SetThemeCommand.Execute(goingToLight ? "Light" : "Dark");
+
+        // Overlay fade-out — yeni tema ortaya çıkar
+        ThemeTransitionOverlay.BeginAnimation(OpacityProperty,
+            new DoubleAnimation(0.65, 0, new Duration(TimeSpan.FromMilliseconds(230))));
+        await Task.Delay(250);
+
+        _themeAnimating = false;
+    }
+
     private void GitHubBtn_Click(object sender, RoutedEventArgs e)
     {
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -68,5 +101,60 @@ public partial class MainWindow : Window
             FileName = "https://github.com/Bogazitchy/Itchy-Backup",
             UseShellExecute = true
         });
+    }
+
+    private void NetworkPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm && sender is System.Windows.Controls.PasswordBox box)
+            vm.NetworkPassword = box.Password;
+    }
+
+    private void ZipPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm && sender is System.Windows.Controls.PasswordBox box)
+            vm.ZipPassword = box.Password;
+    }
+
+    private void RestoreZipPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm && sender is System.Windows.Controls.PasswordBox box)
+            vm.RestoreZipPassword = box.Password;
+    }
+
+    private void SmtpPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm && sender is System.Windows.Controls.PasswordBox box)
+            vm.SmtpPassword = box.Password;
+    }
+
+    private void NetworkPasswordReveal_Click(object sender, RoutedEventArgs e)
+        => TogglePasswordReveal(NetworkPasswordBox, NetworkPasswordRevealBox);
+
+    private void ZipPasswordReveal_Click(object sender, RoutedEventArgs e)
+        => TogglePasswordReveal(ZipPasswordBox, ZipPasswordRevealBox);
+
+    private void RestoreZipPasswordReveal_Click(object sender, RoutedEventArgs e)
+        => TogglePasswordReveal(RestoreZipPasswordBox, RestoreZipPasswordRevealBox);
+
+    private void SmtpPasswordReveal_Click(object sender, RoutedEventArgs e)
+        => TogglePasswordReveal(SmtpPasswordBox, SmtpPasswordRevealBox);
+
+    private static void TogglePasswordReveal(System.Windows.Controls.PasswordBox passwordBox, System.Windows.Controls.TextBox revealBox)
+    {
+        if (revealBox.Visibility == Visibility.Visible)
+        {
+            passwordBox.Password = revealBox.Text;
+            revealBox.Visibility = Visibility.Collapsed;
+            passwordBox.Visibility = Visibility.Visible;
+            passwordBox.Focus();
+        }
+        else
+        {
+            revealBox.Text = passwordBox.Password;
+            passwordBox.Visibility = Visibility.Collapsed;
+            revealBox.Visibility = Visibility.Visible;
+            revealBox.Focus();
+            revealBox.CaretIndex = revealBox.Text.Length;
+        }
     }
 }

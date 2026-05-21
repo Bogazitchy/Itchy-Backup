@@ -20,6 +20,9 @@ public partial class MainViewModel : ObservableObject
     public ObservableCollection<HistoryEntry> BackupHistory { get; } = new();
     public ObservableCollection<IncrementalBaseOption> IncrementalBaseOptions { get; } = new();
     public ObservableCollection<string> AdditionalDestinations { get; } = new();
+    public ObservableCollection<PreflightCheckItem> PreflightChecks { get; } = new();
+    public ObservableCollection<BackupPreset> BackupPresets { get; } = new();
+    public ObservableCollection<CompareEntry> CompareEntries { get; } = new();
 
     // Panel navigasyon
     [ObservableProperty] private ActivePanel _activePanel = ActivePanel.Backup;
@@ -89,6 +92,12 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _selectedSummary = "Hiç öğe seçilmedi";
     [ObservableProperty] private string _selectedSizeText = "";
     [ObservableProperty] private string _fileCountText = "";
+    [ObservableProperty] private string _preflightSummary = "Kontrol bekleniyor";
+    [ObservableProperty] private bool _preflightHasErrors = false;
+    [ObservableProperty] private AvailableBackup? _compareBackupA;
+    [ObservableProperty] private AvailableBackup? _compareBackupB;
+    [ObservableProperty] private string _compareSummary = "İki yedek seçip karşılaştırabilirsiniz.";
+    [ObservableProperty] private bool _isComparingBackups = false;
 
     // Profil düzenleme modu
     [ObservableProperty] private BackupProfile? _editingProfile;
@@ -111,12 +120,29 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _defaultDestination = "";
     [ObservableProperty] private string _themeName = "Dark";
     [ObservableProperty] private string _accentColor = "#6C5CE7";
+    [ObservableProperty] private bool _enableWebhookNotifications = false;
+    [ObservableProperty] private string _webhookUrl = "";
+    [ObservableProperty] private bool _enableEmailNotifications = false;
+    [ObservableProperty] private string _smtpHost = "";
+    [ObservableProperty] private int _smtpPort = 587;
+    [ObservableProperty] private bool _smtpSsl = true;
+    [ObservableProperty] private string _smtpUsername = "";
+    [ObservableProperty] private string _smtpPassword = "";
+    [ObservableProperty] private string _emailFrom = "";
+    [ObservableProperty] private string _emailTo = "";
 
     private bool _suppressThemeApply;
 
+    public bool IsDarkTheme => ThemeName == "Dark";
+
     partial void OnThemeNameChanged(string value)
     {
-        if (!_suppressThemeApply) ThemeService.Apply(value, AccentColor);
+        if (!_suppressThemeApply)
+        {
+            ThemeService.Apply(value, AccentColor);
+            SaveSettingsSilent();
+        }
+        OnPropertyChanged(nameof(IsDarkTheme));
     }
 
     partial void OnAccentColorChanged(string value)
@@ -195,6 +221,7 @@ public partial class MainViewModel : ObservableObject
     {
         ProfileService.EnsureDefaultProfiles();
         LoadCategories();
+        LoadPresetTemplates();
         LoadCustomFolders();
         LoadProfiles();
         LoadLastDestination();
@@ -228,6 +255,39 @@ public partial class MainViewModel : ObservableObject
             SavedProfiles.Add(p);
     }
 
+    private void LoadPresetTemplates()
+    {
+        BackupPresets.Clear();
+        BackupPresets.Add(new BackupPreset
+        {
+            Name = "Standart Servis",
+            Description = "Masaüstü, belgeler, indirilenler, tarayıcılar ve WiFi profilleri.",
+            Icon = "🧰",
+            ItemIds = new() { "desktop", "documents", "downloads", "pictures", "chrome", "firefox", "edge", "wifiProfiles" }
+        });
+        BackupPresets.Add(new BackupPreset
+        {
+            Name = "Muhasebe PC",
+            Description = "Belgeler, masaüstü, Outlook ve veritabanı odaklı seçim.",
+            Icon = "₺",
+            ItemIds = new() { "desktop", "documents", "outlookPst", "outlookOst", "firebird", "sqlite", "sqlserver", "access" }
+        });
+        BackupPresets.Add(new BackupPreset
+        {
+            Name = "Tarayıcı Kurtarma",
+            Description = "Sık kullanılan tarayıcı profilleri ve bulut klasörleri.",
+            Icon = "🌐",
+            ItemIds = new() { "chrome", "firefox", "edge", "opera", "brave", "vivaldi", "onedrive", "googledrive", "dropbox" }
+        });
+        BackupPresets.Add(new BackupPreset
+        {
+            Name = "Tam Kullanıcı",
+            Description = "Kullanıcı klasörleri, AppData, tarayıcılar ve bulut verileri.",
+            Icon = "👤",
+            ItemIds = new() { "desktop", "documents", "downloads", "pictures", "videos", "music", "appdata", "chrome", "firefox", "edge", "onedrive", "googledrive", "dropbox" }
+        });
+    }
+
     private void LoadLastDestination()
     {
         var p = Path.Combine(
@@ -257,6 +317,23 @@ public partial class MainViewModel : ObservableObject
     {
         foreach (var cat in Categories) cat.SetAllSelected(false);
         UpdateSummary();
+    }
+
+    [RelayCommand]
+    public void ApplyPreset(BackupPreset preset)
+    {
+        var ids = preset.ItemIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var cat in Categories)
+            foreach (var item in cat.Items)
+                item.IsSelected = ids.Contains(item.Id);
+        UpdateSummary();
+        PreflightSummary = $"{preset.Name} şablonu uygulandı";
+    }
+
+    [RelayCommand]
+    public async Task RunPreflightAsync()
+    {
+        await RefreshPreflightAsync();
     }
 
     [RelayCommand]
@@ -313,6 +390,14 @@ public partial class MainViewModel : ObservableObject
         {
             System.Windows.MessageBox.Show("AES-256 için şifre girmeniz gerekiyor.", "Itchy Backup",
                 System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        await RefreshPreflightAsync();
+        if (PreflightHasErrors)
+        {
+            System.Windows.MessageBox.Show("Yedek öncesi kontrollerde kritik hata var. Lütfen kırmızı maddeleri düzeltin.",
+                "Yedek Öncesi Kontrol", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             return;
         }
 
@@ -406,6 +491,9 @@ public partial class MainViewModel : ObservableObject
             SaveLastDestination();
             ShowResultReport = true;
             ActivePanel = ActivePanel.Result;
+            await NotificationService.SendExternalAsync(BuildNotificationOptions(),
+                "Itchy Backup tamamlandı",
+                $"{selected.Count} kategori, {LastBackupResult.FilesCopied} dosya, {LastBackupResult.Errors.Count} hata. Rapor: {LastBackupResult.ReportPath}");
         }
         catch (OperationCanceledException)
         {
@@ -431,6 +519,41 @@ public partial class MainViewModel : ObservableObject
             System.Diagnostics.Process.Start("explorer.exe", LastBackupResult.BackupPath);
         }
     }
+
+    private async Task RefreshPreflightAsync()
+    {
+        var selected = Categories.SelectMany(c => c.Items.Where(i => i.IsSelected)).ToList();
+        PreflightChecks.Clear();
+        var checks = await BackupPreflightService.RunAsync(
+            DestinationPath,
+            selected,
+            UseVss,
+            UseZip,
+            UsePassword,
+            IsIncremental);
+
+        foreach (var check in checks)
+            PreflightChecks.Add(check);
+
+        var errors = checks.Count(c => c.Status == PreflightStatus.Error);
+        var warnings = checks.Count(c => c.Status == PreflightStatus.Warning);
+        PreflightHasErrors = errors > 0;
+        PreflightSummary = $"{checks.Count} kontrol • {errors} hata • {warnings} uyarı";
+    }
+
+    private NotificationOptions BuildNotificationOptions() => new()
+    {
+        EnableWebhook = EnableWebhookNotifications,
+        WebhookUrl = WebhookUrl,
+        EnableEmail = EnableEmailNotifications,
+        SmtpHost = SmtpHost,
+        SmtpPort = SmtpPort,
+        SmtpSsl = SmtpSsl,
+        SmtpUsername = SmtpUsername,
+        SmtpPassword = SmtpPassword,
+        EmailFrom = EmailFrom,
+        EmailTo = EmailTo
+    };
 
     [RelayCommand] public void CancelBackup() => _cts?.Cancel();
 
@@ -555,10 +678,76 @@ public partial class MainViewModel : ObservableObject
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ItchyBackup", "Logs"));
     }
 
+    [RelayCommand]
+    public void OpenBackupReport()
+    {
+        var path = LastBackupResult?.ReportPath;
+        if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = path, UseShellExecute = true });
+    }
+
+    [RelayCommand]
+    public async Task VerifyHistoryBackupAsync(HistoryEntry entry)
+    {
+        if (entry == null || string.IsNullOrWhiteSpace(entry.DestinationPath) || !Directory.Exists(entry.DestinationPath))
+        {
+            System.Windows.MessageBox.Show("Doğrulanacak yedek klasörü bulunamadı.", "Itchy Backup",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            var report = await ChecksumService.VerifyManifestAsync(entry.DestinationPath, null, CancellationToken.None);
+            System.Windows.MessageBox.Show(report.Summary, "Yedek Doğrulama",
+                System.Windows.MessageBoxButton.OK,
+                report.IsAllValid ? System.Windows.MessageBoxImage.Information : System.Windows.MessageBoxImage.Warning);
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Doğrulama hatası:\n{ex.Message}", "Hata",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    public async Task CompareSelectedBackupsAsync()
+    {
+        if (CompareBackupA == null || CompareBackupB == null)
+        {
+            System.Windows.MessageBox.Show("Karşılaştırmak için iki yedek seçin.", "Itchy Backup",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var pathA = Directory.Exists(CompareBackupA.Path) ? CompareBackupA.Path : Path.GetDirectoryName(CompareBackupA.Path) ?? "";
+        var pathB = Directory.Exists(CompareBackupB.Path) ? CompareBackupB.Path : Path.GetDirectoryName(CompareBackupB.Path) ?? "";
+        CompareEntries.Clear();
+        IsComparingBackups = true;
+        CompareSummary = "Karşılaştırılıyor...";
+
+        try
+        {
+            var report = await BackupCompareService.CompareAsync(pathA, pathB, new Progress<string>(s => CompareSummary = s), CancellationToken.None);
+            CompareSummary = report.Summary;
+            foreach (var entry in report.Modified.Concat(report.OnlyInA).Concat(report.OnlyInB).Take(100))
+                CompareEntries.Add(entry);
+        }
+        catch (Exception ex)
+        {
+            CompareSummary = $"Karşılaştırma hatası: {ex.Message}";
+        }
+        finally
+        {
+            IsComparingBackups = false;
+        }
+    }
+
     // ── Geçmiş ──────────────────────────────────────────────────────────────
     private void LoadBackupHistory()
     {
         BackupHistory.Clear();
+        LoadAvailableBackups();
         if (string.IsNullOrEmpty(DestinationPath) || !Directory.Exists(DestinationPath)) return;
         var dirs = Directory.GetDirectories(DestinationPath, "Yedek_*")
             .OrderByDescending(d => d).Take(50);
@@ -687,12 +876,48 @@ public partial class MainViewModel : ObservableObject
             DefaultDestination    = DefaultDestination,
             ThemeName             = ThemeName,
             AccentColor           = AccentColor,
+            EnableWebhookNotifications = EnableWebhookNotifications,
+            WebhookUrl = WebhookUrl,
+            EnableEmailNotifications = EnableEmailNotifications,
+            SmtpHost = SmtpHost,
+            SmtpPort = SmtpPort,
+            SmtpSsl = SmtpSsl,
+            SmtpUsername = SmtpUsername,
+            SmtpPassword = SmtpPassword,
+            EmailFrom = EmailFrom,
+            EmailTo = EmailTo,
         };
         vm.Save();
         if (!string.IsNullOrEmpty(DefaultDestination) && string.IsNullOrEmpty(DestinationPath))
             DestinationPath = DefaultDestination;
         System.Windows.MessageBox.Show("Ayarlar kaydedildi.", "Itchy Backup",
             System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+    }
+
+    private void SaveSettingsSilent()
+    {
+        var vm = new SettingsViewModel
+        {
+            StartWithWindows      = StartWithWindows,
+            MinimizeToTray        = MinimizeToTray,
+            AutoChecksum          = AutoChecksum,
+            SoundNotification     = SoundNotification,
+            OpenFolderAfterBackup = OpenFolderAfterBackup,
+            DefaultDestination    = DefaultDestination,
+            ThemeName             = ThemeName,
+            AccentColor           = AccentColor,
+            EnableWebhookNotifications = EnableWebhookNotifications,
+            WebhookUrl = WebhookUrl,
+            EnableEmailNotifications = EnableEmailNotifications,
+            SmtpHost = SmtpHost,
+            SmtpPort = SmtpPort,
+            SmtpSsl = SmtpSsl,
+            SmtpUsername = SmtpUsername,
+            SmtpPassword = SmtpPassword,
+            EmailFrom = EmailFrom,
+            EmailTo = EmailTo,
+        };
+        vm.Save();
     }
 
     private void LoadSettings()
@@ -704,6 +929,16 @@ public partial class MainViewModel : ObservableObject
         SoundNotification     = vm.SoundNotification;
         OpenFolderAfterBackup = vm.OpenFolderAfterBackup;
         DefaultDestination    = vm.DefaultDestination;
+        EnableWebhookNotifications = vm.EnableWebhookNotifications;
+        WebhookUrl = vm.WebhookUrl;
+        EnableEmailNotifications = vm.EnableEmailNotifications;
+        SmtpHost = vm.SmtpHost;
+        SmtpPort = vm.SmtpPort;
+        SmtpSsl = vm.SmtpSsl;
+        SmtpUsername = vm.SmtpUsername;
+        SmtpPassword = vm.SmtpPassword;
+        EmailFrom = vm.EmailFrom;
+        EmailTo = vm.EmailTo;
         _suppressThemeApply = true;
         ThemeName   = vm.ThemeName;
         AccentColor = vm.AccentColor;

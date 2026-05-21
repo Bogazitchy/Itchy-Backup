@@ -22,10 +22,46 @@ public static class ThemeService
         var app = WpfApp.Current;
         if (app == null) return;
         ApplyAccent(app, accentHex);          // base accent colors first
-        if (themeName == "Light")
+        if (themeName == "Service")
+            ApplyService(app);
+        else if (themeName == "Light")
             ApplyLight(app, accentHex);       // light theme overrides (including accent variants)
         else
             ApplyDark(app);
+    }
+
+    private static void ApplyService(WpfApp app)
+    {
+        Set(app, "BgPrimary",    Brush(0xF7, 0xF8, 0xFA));
+        Set(app, "BgSecondary",  Brush(0xEC, 0xF0, 0xF3));
+        Set(app, "BgTertiary",   Brush(0xE0, 0xE7, 0xEC));
+        Set(app, "BgQuaternary", Brush(0xD4, 0xDE, 0xE6));
+        Set(app, "TextPrimary",  Brush(0x14, 0x1A, 0x22));
+        Set(app, "TextSecondary",Brush(0x3B, 0x4A, 0x5A));
+        Set(app, "TextTertiary", Brush(0x63, 0x72, 0x82));
+        Set(app, "TextMuted",    Brush(0x8A, 0x95, 0xA3));
+        Set(app, "BorderBrush",  Brush(0xC9, 0xD4, 0xDD));
+        Set(app, "BorderHoverBrush", Brush(0x8D, 0xA1, 0xB2));
+        Set(app, "GlassBorder",  BrushA(0x30, 0x14, 0x1A, 0x22));
+        Set(app, "GlassHighlight", BrushA(0x80, 0xFF, 0xFF, 0xFF));
+        Set(app, "GlassSurface",  BrushA(0x40, 0xFF, 0xFF, 0xFF));
+        Set(app, "Accent",       Brush(0x00, 0x78, 0xD4));
+        Set(app, "AccentLight",  Brush(0x00, 0x78, 0xD4));
+        Set(app, "AccentDark",   Brush(0x00, 0x58, 0xA8));
+        Set(app, "AccentSubtle", BrushA(0x25, 0x00, 0x78, 0xD4));
+        Set(app, "BgCard", MakeGradient(
+            new[] { (WpfColor.FromRgb(0xFF, 0xFF, 0xFF), 0.0),
+                    (WpfColor.FromRgb(0xF3, 0xF6, 0xF8), 1.0) },
+            new WpfPoint(0, 0), new WpfPoint(0, 1)));
+        Set(app, "WindowBgBrush", MakeGradient(
+            new[] { (WpfColor.FromRgb(0xF8, 0xFA, 0xFC), 0.0),
+                    (WpfColor.FromRgb(0xEF, 0xF3, 0xF6), 1.0) },
+            new WpfPoint(0, 0), new WpfPoint(1, 1)));
+        Set(app, "TitleBarBrush", MakeGradient(
+            new[] { (WpfColor.FromRgb(0xEC, 0xF0, 0xF3), 0.0),
+                    (WpfColor.FromRgb(0xE2, 0xE8, 0xEE), 1.0) },
+            new WpfPoint(0, 0), new WpfPoint(0, 1)));
+        Set(app, "WindowBorderBrush", Brush(0x9A, 0xAD, 0xBD));
     }
 
     private static void ApplyDark(WpfApp app)

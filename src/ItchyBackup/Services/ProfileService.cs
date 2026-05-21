@@ -55,32 +55,87 @@ public static class ProfileService
 
     public static void EnsureDefaultProfiles()
     {
-        const string name = "Hızlı Format";
-        var path = Path.Combine(ProfileDir, SanitizeFileName(name) + ".json");
-        if (File.Exists(path)) return;
+        var createdAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-        var profile = new BackupProfile
+        EnsureProfile(new BackupProfile
         {
-            ProfileName = name,
-            CreatedAt   = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            Icon        = "flash",
-            UseVss      = true,
+            ProfileName = "Hızlı Format",
+            CreatedAt = createdAt,
+            Icon = "flash",
+            UseVss = true,
             VerifyChecksum = true,
             SelectedItemIds = new List<string>
             {
-                // Kullanıcı klasörleri
                 "desktop", "documents", "downloads", "pictures", "videos", "music",
-                // Tarayıcılar
                 "chrome", "firefox", "edge", "opera", "brave", "vivaldi",
-                // Sistem araçları
                 "wifiProfiles", "winDrivers",
-                // Outlook
                 "pst", "ost", "sig", "templ", "nk2",
             }
-        };
+        });
+
+        EnsureProfile(new BackupProfile
+        {
+            ProfileName = "Standart Servis",
+            CreatedAt = createdAt,
+            Icon = "tool",
+            UseVss = true,
+            VerifyChecksum = true,
+            SelectedItemIds = new List<string>
+            {
+                "desktop", "documents", "downloads", "pictures",
+                "chrome", "firefox", "edge", "wifiProfiles"
+            }
+        });
+
+        EnsureProfile(new BackupProfile
+        {
+            ProfileName = "Muhasebe PC",
+            CreatedAt = createdAt,
+            Icon = "briefcase",
+            UseVss = true,
+            VerifyChecksum = true,
+            SelectedItemIds = new List<string>
+            {
+                "desktop", "documents", "pst", "ost", "firebird", "sqlite", "sqlserver", "access"
+            }
+        });
+
+        EnsureProfile(new BackupProfile
+        {
+            ProfileName = "Tarayıcı Kurtarma",
+            CreatedAt = createdAt,
+            Icon = "globe",
+            UseVss = false,
+            VerifyChecksum = true,
+            SelectedItemIds = new List<string>
+            {
+                "chrome", "firefox", "edge", "opera", "brave", "vivaldi",
+                "onedrive", "googledrive", "dropbox"
+            }
+        });
+
+        EnsureProfile(new BackupProfile
+        {
+            ProfileName = "Tam Kullanıcı",
+            CreatedAt = createdAt,
+            Icon = "person",
+            UseVss = true,
+            VerifyChecksum = true,
+            SelectedItemIds = new List<string>
+            {
+                "desktop", "documents", "downloads", "pictures", "videos", "music", "appdata",
+                "chrome", "firefox", "edge", "onedrive", "googledrive", "dropbox"
+            }
+        });
+    }
+
+    private static void EnsureProfile(BackupProfile profile)
+    {
+        var path = Path.Combine(ProfileDir, SanitizeFileName(profile.ProfileName) + ".json");
+        if (File.Exists(path)) return;
         var json = JsonConvert.SerializeObject(profile, Formatting.Indented);
         File.WriteAllText(path, json);
-        LogService.Info("Varsayılan profil oluşturuldu: Hızlı Format");
+        LogService.Info($"Varsayılan profil oluşturuldu: {profile.ProfileName}");
     }
 
     private static string SanitizeFileName(string name) =>

@@ -30,6 +30,7 @@ public partial class MainViewModel
     [ObservableProperty] private double _restoreProgressPercent = 0;
     [ObservableProperty] private string _restoreProgressText = "Hazır";
     [ObservableProperty] private string _restoreCurrentFile = "";
+    [ObservableProperty] private string _restorePreviewText = "Önizleme bekleniyor";
 
     private CancellationTokenSource? _restoreCts;
 
@@ -136,6 +137,7 @@ public partial class MainViewModel
             }
 
             RestoreProgressText = $"{RestoreItems.Count} dosya, {RestoreFolders.Count} klasör yüklendi";
+            RefreshRestorePreview();
         }
         catch (Exception ex)
         {
@@ -198,6 +200,19 @@ public partial class MainViewModel
                 return true;
         }
         return false;
+    }
+
+    [RelayCommand]
+    public void RefreshRestorePreview()
+    {
+        var selected = RestorePartial
+            ? GetSelectedFilePaths()
+            : RestoreItems.Select(i => i.RelativePath).ToList();
+        var selectedSet = selected.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var totalBytes = RestoreItems
+            .Where(i => selectedSet.Contains(i.RelativePath))
+            .Sum(i => i.Size);
+        RestorePreviewText = $"{selected.Count} dosya • {DiskSpaceChecker.FormatBytes(totalBytes)} • hedef: {(string.IsNullOrWhiteSpace(RestoreTargetPath) ? "seçilmedi" : RestoreTargetPath)}";
     }
 
     [RelayCommand]

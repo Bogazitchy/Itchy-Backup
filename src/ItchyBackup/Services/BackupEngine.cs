@@ -45,6 +45,8 @@ public class BackupResult
     public VerificationReport? VerificationReport { get; set; }
     public bool IsIncremental { get; set; }
     public string IncrementalBase { get; set; } = "";
+    public string ReportPath { get; set; } = "";
+    public string TotalBytesText => DiskSpaceChecker.FormatBytes(TotalBytes);
 }
 
 public class BackupEngine
@@ -179,7 +181,7 @@ public class BackupEngine
         {
             Report("ZIP oluşturuluyor...", "Sıkıştırma");
             var zipPath = Path.Combine(backupFolder,
-                $"{folderName}{(_options.UsePassword ? "_sifireli" : "")}.zip");
+                $"{folderName}{(_options.UsePassword ? "_sifreli" : "")}.zip");
             await CreateZipAsync(workFolder, zipPath);
             try { Directory.Delete(workFolder, true); } catch { }
             LogService.Info($"ZIP oluşturuldu: {zipPath}");
@@ -244,6 +246,7 @@ public class BackupEngine
         Result.Warnings = _state.Warnings.ToList();
         Result.IsIncremental = _options.IsIncremental;
         Result.IncrementalBase = _incrementalBase != null ? Path.GetFileName(_incrementalBase) : "";
+        Result.ReportPath = await BackupReportService.WriteHtmlReportAsync(Result, _options, backupFolder);
 
         LogService.Info($"=== Tamamlandı. Süre: {_sw.Elapsed:mm\\:ss} Dosya: {_state.FilesCopied} Değişmedi: {_state.FilesUnchanged} Hata: {_state.Errors.Count} ===");
 
@@ -451,7 +454,7 @@ Kategori Sayısı: {_options.SelectedItems.Count}
         {
             using var fsOut = new FileStream(zipPath, FileMode.Create, FileAccess.Write);
             using var zip = new ZipOutputStream(fsOut);
-            zip.SetLevel(6);
+            zip.SetLevel((int)_options.CompressionLevel);
             if (_options.UsePassword && !string.IsNullOrEmpty(_options.Password))
                 zip.Password = _options.Password;
 
