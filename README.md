@@ -2,7 +2,11 @@
 
 Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme aracı.
 
-![Version](https://img.shields.io/badge/version-v0.8.5-6C5CE7?style=flat-square)
+<p align="center">
+  <img src="src/ItchyBackup/Resources/Icons/app-logo.png" width="520" alt="Itchy Backup Logo">
+</p>
+
+![Version](https://img.shields.io/badge/version-v0.8.5-007A4D?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)
 
@@ -82,6 +86,8 @@ Bildirim ekranındaki alanlar etiketlidir:
 
 ### Arayüz
 
+- Yeni Itchy Backup logosu ve uygulama ikonu
+- Logo paletine uyarlanmış zümrüt yeşili ana tema
 - Dark, Light ve sade Servis teması
 - Accent renk seçimi
 - Tek pencere navigasyon

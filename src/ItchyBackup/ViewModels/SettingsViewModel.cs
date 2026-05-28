@@ -17,7 +17,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _openFolderAfterBackup = false;
     [ObservableProperty] private string _defaultDestination = "";
     [ObservableProperty] private string _themeName = "Dark";
-    [ObservableProperty] private string _accentColor = "#6C5CE7";
+    [ObservableProperty] private string _accentColor = "#007A4D";
     [ObservableProperty] private bool _enableWebhookNotifications = false;
     [ObservableProperty] private string _webhookUrl = "";
     [ObservableProperty] private bool _enableEmailNotifications = false;
@@ -45,7 +45,7 @@ public partial class SettingsViewModel : ObservableObject
             OpenFolderAfterBackup = s.OpenFolderAfterBackup;
             DefaultDestination    = s.DefaultDestination;
             ThemeName             = s.ThemeName;
-            AccentColor           = s.AccentColor;
+            AccentColor           = s.AccentColor == "#6C5CE7" ? "#007A4D" : s.AccentColor;
             EnableWebhookNotifications = s.EnableWebhookNotifications;
             WebhookUrl = s.WebhookUrl;
             EnableEmailNotifications = s.EnableEmailNotifications;
@@ -99,7 +99,7 @@ public partial class SettingsViewModel : ObservableObject
         public bool OpenFolderAfterBackup { get; set; } = false;
         public string DefaultDestination { get; set; } = "";
         public string ThemeName { get; set; } = "Dark";
-        public string AccentColor { get; set; } = "#6C5CE7";
+        public string AccentColor { get; set; } = "#007A4D";
         public bool EnableWebhookNotifications { get; set; }
         public string WebhookUrl { get; set; } = "";
         public bool EnableEmailNotifications { get; set; }

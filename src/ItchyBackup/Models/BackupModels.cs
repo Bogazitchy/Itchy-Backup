@@ -55,7 +55,7 @@ public partial class BackupCategory : ObservableObject
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
-    public string AccentColor { get; set; } = "#6C5CE7";
+    public string AccentColor { get; set; } = "#007A4D";
     public CategoryType Type { get; set; }
     public ObservableCollection<BackupItem> Items { get; set; } = new();
 

@@ -119,7 +119,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _openFolderAfterBackup = false;
     [ObservableProperty] private string _defaultDestination = "";
     [ObservableProperty] private string _themeName = "Dark";
-    [ObservableProperty] private string _accentColor = "#6C5CE7";
+    [ObservableProperty] private string _accentColor = "#007A4D";
     [ObservableProperty] private bool _enableWebhookNotifications = false;
     [ObservableProperty] private string _webhookUrl = "";
     [ObservableProperty] private bool _enableEmailNotifications = false;
@@ -941,9 +941,9 @@ public partial class MainViewModel : ObservableObject
         EmailTo = vm.EmailTo;
         _suppressThemeApply = true;
         ThemeName   = vm.ThemeName;
-        AccentColor = vm.AccentColor;
+        AccentColor = vm.AccentColor == "#6C5CE7" ? "#007A4D" : vm.AccentColor;
         _suppressThemeApply = false;
-        ThemeService.Apply(vm.ThemeName, vm.AccentColor);
+        ThemeService.Apply(ThemeName, AccentColor);
         if (string.IsNullOrEmpty(DestinationPath) && !string.IsNullOrEmpty(DefaultDestination))
             DestinationPath = DefaultDestination;
     }

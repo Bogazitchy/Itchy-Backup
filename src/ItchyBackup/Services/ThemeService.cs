@@ -9,12 +9,12 @@ public static class ThemeService
 {
     public static readonly string[] AccentPresets =
     {
-        "#6C5CE7", // Mor (varsayılan)
+        "#007A4D", // Itchy yeşili (varsayılan)
+        "#00B875", // Parlak yeşil
+        "#00462D", // Koyu yeşil
         "#00CEC9", // Turkuaz
-        "#00B894", // Yeşil
         "#FDCB6E", // Altın
         "#E17055", // Turuncu
-        "#E84393", // Pembe
     };
 
     public static void Apply(string themeName, string accentHex)
@@ -45,10 +45,10 @@ public static class ThemeService
         Set(app, "GlassBorder",  BrushA(0x30, 0x14, 0x1A, 0x22));
         Set(app, "GlassHighlight", BrushA(0x80, 0xFF, 0xFF, 0xFF));
         Set(app, "GlassSurface",  BrushA(0x40, 0xFF, 0xFF, 0xFF));
-        Set(app, "Accent",       Brush(0x00, 0x78, 0xD4));
-        Set(app, "AccentLight",  Brush(0x00, 0x78, 0xD4));
-        Set(app, "AccentDark",   Brush(0x00, 0x58, 0xA8));
-        Set(app, "AccentSubtle", BrushA(0x25, 0x00, 0x78, 0xD4));
+        Set(app, "Accent",       Brush(0x00, 0x7A, 0x4D));
+        Set(app, "AccentLight",  Brush(0x00, 0x7A, 0x4D));
+        Set(app, "AccentDark",   Brush(0x00, 0x46, 0x2D));
+        Set(app, "AccentSubtle", BrushA(0x28, 0x00, 0x7A, 0x4D));
         Set(app, "BgCard", MakeGradient(
             new[] { (WpfColor.FromRgb(0xFF, 0xFF, 0xFF), 0.0),
                     (WpfColor.FromRgb(0xF3, 0xF6, 0xF8), 1.0) },
@@ -66,65 +66,64 @@ public static class ThemeService
 
     private static void ApplyDark(WpfApp app)
     {
-        Set(app, "BgPrimary",    Brush(0x0C, 0x0B, 0x18));
-        Set(app, "BgSecondary",  Brush(0x11, 0x10, 0x1E));
-        Set(app, "BgTertiary",   Brush(0x1A, 0x19, 0x2E));
-        Set(app, "BgQuaternary", Brush(0x22, 0x20, 0x3A));
+        Set(app, "BgPrimary",    Brush(0x07, 0x11, 0x0D));
+        Set(app, "BgSecondary",  Brush(0x08, 0x1A, 0x14));
+        Set(app, "BgTertiary",   Brush(0x0D, 0x24, 0x1C));
+        Set(app, "BgQuaternary", Brush(0x12, 0x32, 0x28));
         Set(app, "TextPrimary",  Brush(0xE8, 0xE8, 0xF0));
-        Set(app, "TextSecondary",Brush(0x98, 0x98, 0xB0));
-        Set(app, "TextTertiary", Brush(0x5A, 0x5A, 0x72));
-        Set(app, "TextMuted",    Brush(0x3A, 0x3A, 0x50));
-        Set(app, "BorderBrush",  Brush(0x22, 0x20, 0x5A));
-        Set(app, "BorderHoverBrush", Brush(0x30, 0x28, 0x70));
+        Set(app, "TextSecondary",Brush(0x9A, 0xB4, 0xAA));
+        Set(app, "TextTertiary", Brush(0x5F, 0x7E, 0x72));
+        Set(app, "TextMuted",    Brush(0x35, 0x52, 0x48));
+        Set(app, "BorderBrush",  Brush(0x12, 0x3B, 0x2C));
+        Set(app, "BorderHoverBrush", Brush(0x17, 0x60, 0x44));
         Set(app, "GlassBorder",  BrushA(0x22, 0xFF, 0xFF, 0xFF));
         Set(app, "GlassHighlight", BrushA(0x12, 0xFF, 0xFF, 0xFF));
         Set(app, "GlassSurface",  BrushA(0x08, 0xFF, 0xFF, 0xFF));
         Set(app, "BgCard", MakeGradient(
-            new[] { (WpfColor.FromRgb(0x18, 0x18, 0x3C), 0.0),
-                    (WpfColor.FromRgb(0x0E, 0x0E, 0x24), 1.0) },
+            new[] { (WpfColor.FromRgb(0x0D, 0x28, 0x1F), 0.0),
+                    (WpfColor.FromRgb(0x06, 0x17, 0x11), 1.0) },
             new WpfPoint(0, 0), new WpfPoint(0, 1)));
         Set(app, "WindowBgBrush", MakeGradient(
-            new[] { (WpfColor.FromRgb(0x0E, 0x0B, 0x1C), 0.0),
-                    (WpfColor.FromRgb(0x0C, 0x0B, 0x18), 0.5),
-                    (WpfColor.FromRgb(0x11, 0x0C, 0x22), 1.0) },
+            new[] { (WpfColor.FromRgb(0x06, 0x12, 0x0E), 0.0),
+                    (WpfColor.FromRgb(0x07, 0x11, 0x0D), 0.5),
+                    (WpfColor.FromRgb(0x08, 0x20, 0x18), 1.0) },
             new WpfPoint(0, 0), new WpfPoint(1, 1)));
         Set(app, "TitleBarBrush", MakeGradient(
-            new[] { (WpfColor.FromRgb(0x16, 0x15, 0x2E), 0.0),
-                    (WpfColor.FromRgb(0x11, 0x10, 0x1E), 1.0) },
+            new[] { (WpfColor.FromRgb(0x0A, 0x1F, 0x18), 0.0),
+                    (WpfColor.FromRgb(0x08, 0x1A, 0x14), 1.0) },
             new WpfPoint(0, 0), new WpfPoint(0, 1)));
-        Set(app, "WindowBorderBrush", Brush(0x4A, 0x38, 0x90));
+        Set(app, "WindowBorderBrush", Brush(0x00, 0x6B, 0x43));
     }
 
     private static void ApplyLight(WpfApp app, string accentHex)
     {
-        // Soft violet/lavender palette — matches the app's purple identity
-        Set(app, "BgPrimary",    Brush(0xF0, 0xEC, 0xFB)); // #F0ECFB — en açık, pencere içi
-        Set(app, "BgSecondary",  Brush(0xE6, 0xDF, 0xF7)); // #E6DFF7 — sidebar, panel arkaplan
-        Set(app, "BgTertiary",   Brush(0xDA, 0xD2, 0xF0)); // #DAD2F0 — hover, belirgin yüzey
-        Set(app, "BgQuaternary", Brush(0xCE, 0xC5, 0xE8)); // #CEC5E8 — input, combobox
-        Set(app, "TextPrimary",  Brush(0x1A, 0x10, 0x30)); // #1A1030 — koyu mor-lacivert, 10.5:1
-        Set(app, "TextSecondary",Brush(0x48, 0x3A, 0x72)); // #483A72 — orta mor, 8.6:1
-        Set(app, "TextTertiary", Brush(0x5A, 0x4E, 0x7A)); // #5A4E7A — soluk ama okunabilir, 6.3:1
-        Set(app, "TextMuted",    Brush(0x7A, 0x6E, 0x94)); // #7A6E94 — en soluk, 3.9:1
-        Set(app, "BorderBrush",  Brush(0xC4, 0xB8, 0xE2)); // #C4B8E2 — hafif mor kenar
-        Set(app, "BorderHoverBrush", Brush(0xA8, 0x98, 0xD4)); // #A898D4 — hover kenar
-        Set(app, "GlassBorder",  BrushA(0x28, 0x6C, 0x5C, 0xE7)); // accent-tinted glass
+        Set(app, "BgPrimary",    Brush(0xEC, 0xF7, 0xF1));
+        Set(app, "BgSecondary",  Brush(0xDF, 0xEE, 0xE7));
+        Set(app, "BgTertiary",   Brush(0xCE, 0xE2, 0xD8));
+        Set(app, "BgQuaternary", Brush(0xBF, 0xD5, 0xCA));
+        Set(app, "TextPrimary",  Brush(0x0C, 0x24, 0x1A));
+        Set(app, "TextSecondary",Brush(0x2A, 0x54, 0x42));
+        Set(app, "TextTertiary", Brush(0x4E, 0x72, 0x63));
+        Set(app, "TextMuted",    Brush(0x70, 0x8D, 0x80));
+        Set(app, "BorderBrush",  Brush(0xB2, 0xD0, 0xC2));
+        Set(app, "BorderHoverBrush", Brush(0x78, 0xAE, 0x95));
+        Set(app, "GlassBorder",  BrushA(0x28, 0x00, 0x7A, 0x4D));
         Set(app, "GlassHighlight", BrushA(0x70, 0xFF, 0xFF, 0xFF));
         Set(app, "GlassSurface",  BrushA(0x40, 0xFF, 0xFF, 0xFF));
         Set(app, "BgCard", MakeGradient(
-            new[] { (WpfColor.FromRgb(0xEC, 0xE6, 0xFA), 0.0),
-                    (WpfColor.FromRgb(0xE4, 0xDD, 0xF5), 1.0) },
+            new[] { (WpfColor.FromRgb(0xF4, 0xFB, 0xF7), 0.0),
+                    (WpfColor.FromRgb(0xE5, 0xF1, 0xEB), 1.0) },
             new WpfPoint(0, 0), new WpfPoint(0, 1)));
         Set(app, "WindowBgBrush", MakeGradient(
-            new[] { (WpfColor.FromRgb(0xEC, 0xE6, 0xFC), 0.0),
-                    (WpfColor.FromRgb(0xE8, 0xE0, 0xF8), 0.5),
-                    (WpfColor.FromRgb(0xEE, 0xE6, 0xFF), 1.0) },
+            new[] { (WpfColor.FromRgb(0xF3, 0xFB, 0xF7), 0.0),
+                    (WpfColor.FromRgb(0xE9, 0xF4, 0xEF), 0.5),
+                    (WpfColor.FromRgb(0xF5, 0xFF, 0xFA), 1.0) },
             new WpfPoint(0, 0), new WpfPoint(1, 1)));
         Set(app, "TitleBarBrush", MakeGradient(
-            new[] { (WpfColor.FromRgb(0xDC, 0xD4, 0xF5), 0.0),
-                    (WpfColor.FromRgb(0xD5, 0xCC, 0xF0), 1.0) },
+            new[] { (WpfColor.FromRgb(0xD9, 0xEC, 0xE4), 0.0),
+                    (WpfColor.FromRgb(0xCD, 0xE3, 0xD8), 1.0) },
             new WpfPoint(0, 0), new WpfPoint(0, 1)));
-        Set(app, "WindowBorderBrush", Brush(0xAA, 0x92, 0xDC)); // #AA92DC
+        Set(app, "WindowBorderBrush", Brush(0x66, 0xA8, 0x88));
 
         // Açık temada ikon/metin görünürlüğü için accent varyantlarını düzelt.
         // ApplyAccent'ten gelen AccentLight çok açık renk; açık zemin üzerinde

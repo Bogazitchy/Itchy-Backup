@@ -2,27 +2,27 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <!-- ── Glass Dark Palette ─────────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="BgPrimary"      Color="#0C0B18"/>
-  <SolidColorBrush x:Key="BgSecondary"    Color="#11101E"/>
-  <SolidColorBrush x:Key="BgTertiary"     Color="#1A192E"/>
-  <SolidColorBrush x:Key="BgQuaternary"   Color="#22203A"/>
+  <SolidColorBrush x:Key="BgPrimary"      Color="#07110D"/>
+  <SolidColorBrush x:Key="BgSecondary"    Color="#081A14"/>
+  <SolidColorBrush x:Key="BgTertiary"     Color="#0D241C"/>
+  <SolidColorBrush x:Key="BgQuaternary"   Color="#123228"/>
   <LinearGradientBrush x:Key="BgCard" StartPoint="0,0" EndPoint="0,1">
-    <GradientStop Color="#18183C" Offset="0"/>
-    <GradientStop Color="#0E0E24" Offset="1"/>
+    <GradientStop Color="#0D281F" Offset="0"/>
+    <GradientStop Color="#061711" Offset="1"/>
   </LinearGradientBrush>
 
-  <!-- ── Purple Accent ──────────────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="Accent"         Color="#6C5CE7"/>
-  <SolidColorBrush x:Key="AccentLight"    Color="#A29BFE"/>
-  <SolidColorBrush x:Key="AccentDark"     Color="#4A3CB5"/>
-  <SolidColorBrush x:Key="AccentGlow"     Color="#6C5CE7"/>
-  <SolidColorBrush x:Key="AccentSubtle"   Color="#201A5C"/>
-  <SolidColorBrush x:Key="AccentBright"   Color="#8B7BFF"/>
+  <!-- ── Itchy Green Accent ─────────────────────────────────────────────── -->
+  <SolidColorBrush x:Key="Accent"         Color="#007A4D"/>
+  <SolidColorBrush x:Key="AccentLight"    Color="#00B875"/>
+  <SolidColorBrush x:Key="AccentDark"     Color="#00462D"/>
+  <SolidColorBrush x:Key="AccentGlow"     Color="#007A4D"/>
+  <SolidColorBrush x:Key="AccentSubtle"   Color="#063323"/>
+  <SolidColorBrush x:Key="AccentBright"   Color="#00D084"/>
 
   <!-- ── Neon Glow Colors ────────────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="NeonPurple"     Color="#9D8FFF"/>
+  <SolidColorBrush x:Key="NeonPurple"     Color="#00C47A"/>
   <SolidColorBrush x:Key="NeonCyan"       Color="#00FFE7"/>
-  <Color x:Key="NeonPurpleColor"          >#9D8FFF</Color>
+  <Color x:Key="NeonPurpleColor"          >#00C47A</Color>
   <Color x:Key="NeonCyanColor"            >#00FFE7</Color>
 
   <!-- ── Semantic Colors ────────────────────────────────────────────────── -->
@@ -38,8 +38,8 @@
   <SolidColorBrush x:Key="TextMuted"      Color="#3A3A50"/>
 
   <!-- ── Borders ────────────────────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="BorderBrush"        Color="#22205A"/>
-  <SolidColorBrush x:Key="BorderHoverBrush"   Color="#302870"/>
+  <SolidColorBrush x:Key="BorderBrush"        Color="#123B2C"/>
+  <SolidColorBrush x:Key="BorderHoverBrush"   Color="#176044"/>
 
   <!-- ── Glass Effects ─────────────────────────────────────────────────── -->
   <SolidColorBrush x:Key="GlassBorder"        Color="#22FFFFFF"/>
@@ -47,7 +47,7 @@
   <SolidColorBrush x:Key="GlassSurface"       Color="#08FFFFFF"/>
 
   <!-- ── Category Accent Colors ────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="CatUserFolders"  Color="#6C5CE7"/>
+  <SolidColorBrush x:Key="CatUserFolders"  Color="#007A4D"/>
   <SolidColorBrush x:Key="CatBrowsers"     Color="#00CEC9"/>
   <SolidColorBrush x:Key="CatOutlook"      Color="#0078D4"/>
   <SolidColorBrush x:Key="CatDatabases"    Color="#FDCB6E"/>
@@ -57,21 +57,21 @@
 
   <!-- ── Progress Fill (ThemeService bu kaynağı accent rengine göre günceller) ── -->
   <LinearGradientBrush x:Key="ProgressFillBrush" StartPoint="0,0" EndPoint="1,0">
-    <GradientStop Color="#4A3CB5" Offset="0"/>
-    <GradientStop Color="#6C5CE7" Offset="0.6"/>
-    <GradientStop Color="#A29BFE" Offset="1"/>
+    <GradientStop Color="#00462D" Offset="0"/>
+    <GradientStop Color="#007A4D" Offset="0.6"/>
+    <GradientStop Color="#00B875" Offset="1"/>
   </LinearGradientBrush>
 
   <!-- ── Runtime Theme Brushes (ThemeService bu kaynakları override eder) ── -->
   <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="1,1">
-    <GradientStop Color="#0E0B1C" Offset="0"/>
-    <GradientStop Color="#0C0B18" Offset="0.5"/>
-    <GradientStop Color="#110C22" Offset="1"/>
+    <GradientStop Color="#06120E" Offset="0"/>
+    <GradientStop Color="#07110D" Offset="0.5"/>
+    <GradientStop Color="#082018" Offset="1"/>
   </LinearGradientBrush>
   <LinearGradientBrush x:Key="TitleBarBrush" StartPoint="0,0" EndPoint="0,1">
-    <GradientStop Color="#16152E" Offset="0"/>
-    <GradientStop Color="#11101E" Offset="1"/>
+    <GradientStop Color="#0A1F18" Offset="0"/>
+    <GradientStop Color="#081A14" Offset="1"/>
   </LinearGradientBrush>
-  <SolidColorBrush x:Key="WindowBorderBrush" Color="#4A3890"/>
+  <SolidColorBrush x:Key="WindowBorderBrush" Color="#006B43"/>
 
 </ResourceDictionary>

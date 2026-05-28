@@ -31,7 +31,7 @@ public static class CategoryBuilder
     private static BackupCategory BuildSystemTools() => new()
     {
         Id = "system_tools", Name = "Sistem Araçları",
-        Description = "Windows sürücüleri ve WiFi profilleri", AccentColor = "#A29BFE",
+        Description = "Windows sürücüleri ve WiFi profilleri", AccentColor = "#00B875",
         Type = CategoryType.SystemTools,
         Items = new()
         {
@@ -54,7 +54,7 @@ public static class CategoryBuilder
         return new BackupCategory
         {
             Id = "user_folders", Name = "Kullanıcı Klasörleri",
-            Description = "%USERPROFILE% dizini", AccentColor = "#6C5CE7",
+            Description = "%USERPROFILE% dizini", AccentColor = "#007A4D",
             Type = CategoryType.UserFolders,
             Items = new()
             {

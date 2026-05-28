@@ -85,7 +85,7 @@
               <Setter TargetName="Root" Property="Background" Value="#7D6DF0"/>
               <Setter TargetName="Root" Property="Effect">
                 <Setter.Value>
-                  <DropShadowEffect Color="#6C5CE7" BlurRadius="20" ShadowDepth="0" Opacity="0.65"/>
+                  <DropShadowEffect Color="#007A4D" BlurRadius="20" ShadowDepth="0" Opacity="0.65"/>
                 </Setter.Value>
               </Setter>
             </Trigger>
@@ -125,7 +125,7 @@
           <Border x:Name="Root" Background="{TemplateBinding Background}"
                   CornerRadius="8" Padding="{TemplateBinding Padding}">
             <Border.Effect>
-              <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
+              <DropShadowEffect Color="#007A4D" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
             </Border.Effect>
             <Grid>
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -160,7 +160,7 @@
               </Setter>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-              <Setter TargetName="Root" Property="Background" Value="#4A3CB5"/>
+              <Setter TargetName="Root" Property="Background" Value="#00462D"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
               <Setter TargetName="Root" Property="Background" Value="{DynamicResource BgQuaternary}"/>
@@ -201,7 +201,7 @@
               <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
               <Setter TargetName="Root" Property="Effect">
                 <Setter.Value>
-                  <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.22"/>
+                  <DropShadowEffect Color="#007A4D" BlurRadius="8" ShadowDepth="0" Opacity="0.22"/>
                 </Setter.Value>
               </Setter>
             </Trigger>
@@ -241,7 +241,7 @@
               <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Accent}"/>
               <Setter TargetName="Root" Property="Effect">
                 <Setter.Value>
-                  <DropShadowEffect Color="#6C5CE7" BlurRadius="8" ShadowDepth="0" Opacity="0.3"/>
+                  <DropShadowEffect Color="#007A4D" BlurRadius="8" ShadowDepth="0" Opacity="0.3"/>
                 </Setter.Value>
               </Setter>
             </Trigger>
@@ -266,7 +266,7 @@
               <Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="6"
                       Background="{DynamicResource ProgressFillBrush}">
                 <Border.Effect>
-                  <DropShadowEffect Color="#6C5CE7" BlurRadius="10" ShadowDepth="0" Opacity="0.6"/>
+                  <DropShadowEffect Color="#007A4D" BlurRadius="10" ShadowDepth="0" Opacity="0.6"/>
                 </Border.Effect>
               </Border>
             </Border>
@@ -338,7 +338,7 @@
                       MinWidth="{TemplateBinding ActualWidth}"
                       MaxHeight="{TemplateBinding MaxDropDownHeight}">
                 <Border.Effect>
-                  <DropShadowEffect Color="#6C5CE7" BlurRadius="12" ShadowDepth="0" Opacity="0.3"/>
+                  <DropShadowEffect Color="#007A4D" BlurRadius="12" ShadowDepth="0" Opacity="0.3"/>
                 </Border.Effect>
                 <ScrollViewer Margin="3" SnapsToDevicePixels="True">
                   <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
@@ -449,7 +449,7 @@
                               Background="{DynamicResource Accent}"
                               BorderBrush="{DynamicResource BgPrimary}" BorderThickness="2">
                         <Border.Effect>
-                          <DropShadowEffect Color="#6C5CE7" BlurRadius="6" ShadowDepth="0" Opacity="0.5"/>
+                          <DropShadowEffect Color="#007A4D" BlurRadius="6" ShadowDepth="0" Opacity="0.5"/>
                         </Border.Effect>
                       </Border>
                     </ControlTemplate>

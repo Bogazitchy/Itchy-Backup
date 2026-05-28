@@ -11,25 +11,20 @@
   <Border CornerRadius="16" ClipToBounds="True">
     <Border.Background>
       <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#0E0B1C" Offset="0"/>
-        <GradientStop Color="#110C22" Offset="1"/>
+        <GradientStop Color="#06120E" Offset="0"/>
+        <GradientStop Color="#082018" Offset="1"/>
       </LinearGradientBrush>
     </Border.Background>
     <Border.Effect>
-      <DropShadowEffect Color="#6C5CE7" BlurRadius="48" ShadowDepth="0" Opacity="0.6"/>
+      <DropShadowEffect Color="#007A4D" BlurRadius="48" ShadowDepth="0" Opacity="0.6"/>
     </Border.Effect>
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
 
       <!-- Logo -->
-      <Border Width="80" Height="80" CornerRadius="22" HorizontalAlignment="Center" Margin="0,0,0,22">
-        <Border.Background>
-          <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#4A3CB5" Offset="0"/>
-            <GradientStop Color="#6C5CE7" Offset="1"/>
-          </LinearGradientBrush>
-        </Border.Background>
+      <Border Width="300" Height="90" CornerRadius="12" HorizontalAlignment="Center" Margin="0,0,0,18"
+              Background="#06120E">
         <Border.Effect>
-          <DropShadowEffect Color="#6C5CE7" BlurRadius="22" ShadowDepth="0" Opacity="0.75"/>
+          <DropShadowEffect Color="#007A4D" BlurRadius="24" ShadowDepth="0" Opacity="0.65"/>
         </Border.Effect>
         <Border.Triggers>
           <EventTrigger RoutedEvent="Border.Loaded">
@@ -43,45 +38,34 @@
             </BeginStoryboard>
           </EventTrigger>
         </Border.Triggers>
-        <Viewbox Width="44" Height="44">
-          <Canvas Width="24" Height="24">
-            <Rectangle Canvas.Left="1" Canvas.Top="4" Width="22" Height="16"
-                       RadiusX="2" RadiusY="2"
-                       Stroke="White" StrokeThickness="1.5" Fill="Transparent" Opacity="0.9"/>
-            <Ellipse Canvas.Left="4" Canvas.Top="8" Width="5" Height="5"
-                     Stroke="White" StrokeThickness="1.2" Fill="Transparent" Opacity="0.9"/>
-            <Ellipse Canvas.Left="15" Canvas.Top="8" Width="5" Height="5"
-                     Stroke="White" StrokeThickness="1.2" Fill="Transparent" Opacity="0.9"/>
-            <Path Data="M7,14 Q12,12 17,14" Stroke="White" StrokeThickness="1.2"
-                  Fill="Transparent" Opacity="0.9"/>
-            <Rectangle Canvas.Left="10" Canvas.Top="17" Width="4" Height="2"
-                       RadiusX="1" RadiusY="1" Fill="White" Opacity="0.7"/>
-          </Canvas>
-        </Viewbox>
+        <Image Source="/Resources/Icons/app-logo.png"
+               Width="276" Height="82"
+               Stretch="Uniform"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               RenderOptions.BitmapScalingMode="HighQuality"/>
       </Border>
 
       <!-- Başlık -->
-      <TextBlock Text="Itchy Backup" FontSize="26" FontWeight="Bold" FontFamily="Segoe UI"
-                 Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,5"/>
       <TextBlock Text="Teknik Servis Dosya Yedekleme Aracı" FontSize="10" FontFamily="Consolas"
-                 Foreground="#7070A0" HorizontalAlignment="Center" Margin="0,0,0,28"/>
+                 Foreground="#5F7E72" HorizontalAlignment="Center" Margin="0,0,0,28"/>
 
       <!-- Yükleme çubuğu (track) -->
-      <Border Width="220" Height="3" CornerRadius="1.5" Background="#22205A" HorizontalAlignment="Center">
+      <Border Width="220" Height="3" CornerRadius="1.5" Background="#123B2C" HorizontalAlignment="Center">
         <Border x:Name="LoadingBar" Width="0" HorizontalAlignment="Left" CornerRadius="1.5">
           <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-              <GradientStop Color="#4A3CB5" Offset="0"/>
-              <GradientStop Color="#A29BFE" Offset="1"/>
+              <GradientStop Color="#00462D" Offset="0"/>
+              <GradientStop Color="#00B875" Offset="1"/>
             </LinearGradientBrush>
           </Border.Background>
           <Border.Effect>
-            <DropShadowEffect Color="#6C5CE7" BlurRadius="6" ShadowDepth="0" Opacity="0.7"/>
+            <DropShadowEffect Color="#007A4D" BlurRadius="6" ShadowDepth="0" Opacity="0.7"/>
           </Border.Effect>
         </Border>
       </Border>
 
-      <TextBlock Text="v0.8" FontSize="10" FontFamily="Consolas"
+      <TextBlock Text="v0.8.5" FontSize="10" FontFamily="Consolas"
                  Foreground="#5A5A72" HorizontalAlignment="Center" Margin="0,14,0,0"/>
     </StackPanel>
   </Border>
