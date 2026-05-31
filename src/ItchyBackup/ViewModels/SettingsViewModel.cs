@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.IO;
 using Newtonsoft.Json;
+using ItchyBackup.Services;
 
 namespace ItchyBackup.ViewModels;
 
@@ -53,7 +54,7 @@ public partial class SettingsViewModel : ObservableObject
             SmtpPort = s.SmtpPort;
             SmtpSsl = s.SmtpSsl;
             SmtpUsername = s.SmtpUsername;
-            SmtpPassword = s.SmtpPassword;
+            SmtpPassword = SecretService.Unprotect(s.SmtpPassword);
             EmailFrom = s.EmailFrom;
             EmailTo = s.EmailTo;
         }
@@ -82,7 +83,7 @@ public partial class SettingsViewModel : ObservableObject
                 SmtpPort = SmtpPort,
                 SmtpSsl = SmtpSsl,
                 SmtpUsername = SmtpUsername,
-                SmtpPassword = SmtpPassword,
+                SmtpPassword = SecretService.Protect(SmtpPassword),
                 EmailFrom = EmailFrom,
                 EmailTo = EmailTo,
             }, Formatting.Indented));

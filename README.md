@@ -1,14 +1,25 @@
 # Itchy Backup
 
-Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme aracı.
+Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme ve geri yükleme aracı.
 
 <p align="center">
   <img src="src/ItchyBackup/Resources/Icons/app-logo.png" width="520" alt="Itchy Backup Logo">
 </p>
 
-![Version](https://img.shields.io/badge/version-v0.8.5-007A4D?style=flat-square)
+![Version](https://img.shields.io/badge/version-v1.0.0-007A4D?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)
+
+## v1.0 Özeti
+
+- Yeni Itchy Backup logosu, uygulama ikonu ve zümrüt yeşili marka teması
+- `backup_manifest.json` ile yedek kimliği, seçilen öğeler, dosya listesi ve meta bilgiler
+- SHA-256 doğrulama, HTML servis raporu ve restore raporu
+- Güçlendirilmiş geri yükleme: kısmi restore, çakışma politikası, ZIP parola desteği
+- Windows Sistem Geri Yükleme noktası oluşturma, listeleme ve Windows restore ekranına erişim
+- Profil içe/dışa aktarma, hazır profiller ve zamanlayıcı
+- Webhook/SMTP test bildirimi
+- SMTP parolası için Windows kullanıcı hesabına bağlı DPAPI koruması
 
 ## Özellikler
 
@@ -22,28 +33,30 @@ Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme arac�
 | Veritabanları | Firebird, SQLite, SQL Server, Access |
 | Sanal makineler | VMware, VirtualBox, Hyper-V dosyaları |
 | Bulut depolama | OneDrive, Google Drive, MEGA, Dropbox yerel dosyaları |
-| Sistem araçları | Windows sürücüleri ve WiFi profilleri dışa aktarımı |
+| Sistem araçları | Windows sürücüleri, WiFi profilleri ve Windows Sistem Geri Yükleme |
 | Özel klasörler | Kullanıcının seçtiği klasör ve dosya konumları |
 
 ### Güvenlik ve Doğrulama
 
 - ZIP + AES-256 parola koruması
-- SHA-256 checksum manifesti ve doğrulama
+- SHA-256 checksum manifesti ve otomatik doğrulama
+- `backup_manifest.json` ile yedek içeriği ve meta veri kaydı
 - VSS ile açık dosya desteği
 - Outlook/veritabanı gibi hot backup riskleri için uyarı
 - Yedek öncesi disk alanı, hedef, VSS, OneDrive, FAT32 ve yönetici yetkisi kontrolü
-- Parola alanlarında maskeli giriş
-- Parola alanlarının yanında göz butonu ile geçici göster/gizle desteği
+- Parola alanlarında maskeli giriş ve göz butonu
+- SMTP parolasını düz metin yerine Windows DPAPI ile koruma
 
 ### Profil ve Otomasyon
 
 - Profil sistemi
-- Varsayılan hazır profiller:
+- Hazır profiller:
   - Hızlı Format
   - Standart Servis
   - Muhasebe PC
   - Tarayıcı Kurtarma
   - Tam Kullanıcı
+- Profil içe/dışa aktarma
 - Windows Görev Zamanlayıcısı entegrasyonu
 - Artımlı yedekleme
 - Çoklu hedef klasörüne kopyalama
@@ -56,8 +69,19 @@ Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme arac�
 - ZIP veya klasör yedeğinden geri yükleme
 - Kısmi geri yükleme ve klasör ağacı
 - Geri yükleme önizlemesi
-- Var olan dosyaların üzerine yazma seçeneği
+- Var olan dosyalar için çakışma politikası:
+  - Atla
+  - Üzerine yaz
+  - Yeni isimle geri yükle
 - Şifreli ZIP geri yükleme için maskeli/gösterilebilir parola alanı
+- Restore sonrası `restore_report_*.txt`
+
+### Windows Sistem Geri Yükleme
+
+- Program içinden sistem geri yükleme noktası oluşturma
+- Son geri yükleme noktalarını listeleme
+- Windows Geri Yükleme ekranını açma
+- Sistem Koruması ayarlarına erişme
 
 ### İzleme ve Raporlama
 
@@ -69,26 +93,12 @@ Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme arac�
 - İki yedeği karşılaştırma
 - Windows toast bildirimi
 - Webhook bildirimi
-- SMTP e-posta bildirimi
-
-### Bildirim Ayarları
-
-Bildirim ekranındaki alanlar etiketlidir:
-
-- Webhook URL
-- SMTP sunucusu
-- Port
-- SMTP kullanıcı adı
-- SMTP parolası
-- Gönderen e-posta
-- Alıcı e-posta
-- SMTP SSL/TLS seçeneği
+- SMTP e-posta bildirimi ve test butonu
 
 ### Arayüz
 
-- Yeni Itchy Backup logosu ve uygulama ikonu
-- Logo paletine uyarlanmış zümrüt yeşili ana tema
 - Dark, Light ve sade Servis teması
+- Logo paletine uyarlanmış zümrüt yeşili ana tema
 - Accent renk seçimi
 - Tek pencere navigasyon
 - Hazır yedek profilleri sol profil listesinde
@@ -98,14 +108,14 @@ Bildirim ekranındaki alanlar etiketlidir:
 
 ## Kurulum
 
-### Kullanıcılar için
+### Kullanıcılar İçin
 
 1. Releases sayfasından Setup veya Portable sürümü indirin.
-2. VSS, sürücü dışa aktarımı ve bazı sistem konumları için uygulamayı yönetici olarak çalıştırın.
+2. VSS, sürücü dışa aktarımı, WiFi profilleri ve Windows geri yükleme noktası için uygulamayı yönetici olarak çalıştırın.
 3. İlk açılışta varsayılan yedek hedefini ve tercih ettiğiniz temayı ayarlayın.
 4. Profil listesinden hazır profillerden birini seçebilir veya kendi profilinizi kaydedebilirsiniz.
 
-### Geliştiriciler için
+### Geliştiriciler İçin
 
 Gereksinimler:
 
@@ -129,36 +139,31 @@ build.bat
 
 ```text
 ItchyBackup/
-├── src/ItchyBackup/
-│   ├── Models/
-│   ├── ViewModels/
-│   ├── Views/
-│   ├── Services/
-│   └── Resources/Styles/
-├── installer/
-├── build.bat
-└── README.md
+|-- src/ItchyBackup/
+|   |-- Models/
+|   |-- ViewModels/
+|   |-- Views/
+|   |-- Services/
+|   `-- Resources/Styles/
+|-- installer/
+|-- build.bat
+`-- README.md
 ```
 
 Öne çıkan servisler:
 
 - `BackupEngine`: Ana yedekleme motoru
 - `RestoreEngine`: Geri yükleme motoru
-- `ProfileService`: Varsayılan/hazır profiller ve profil yönetimi
+- `SystemRestoreService`: Windows sistem geri yükleme noktası yönetimi
+- `BackupManifestService`: v1 yedek manifesti
+- `ProfileService`: Hazır profiller, profil içe/dışa aktarma
 - `BackupPreflightService`: Yedek öncesi kontrol
 - `BackupCompareService`: İki yedeği karşılaştırma
 - `BackupReportService`: HTML sonuç raporu
 - `ChecksumService`: SHA-256 manifest ve doğrulama
 - `NotificationService`: Toast, webhook ve SMTP bildirimi
+- `SecretService`: DPAPI tabanlı yerel parola koruması
 - `ThemeService`: Tema ve accent renk yönetimi
-
-## Yol Haritası
-
-- Daha ayrıntılı e-posta şablonları
-- ZIP içeriği için doğrudan yedek karşılaştırma
-- Checksum tabanlı güvenli artımlı mod
-- Otomatik güncelleme kontrolü
-- Daha ayrıntılı müşteri teslim raporu
 
 ## Teknolojiler
 
@@ -167,7 +172,7 @@ ItchyBackup/
 - CommunityToolkit.Mvvm
 - SharpZipLib
 - Newtonsoft.Json
-- Windows Task Scheduler, VSS, pnputil, netsh
+- Windows Task Scheduler, VSS, pnputil, netsh, System Restore
 
 ## Geliştirici
 

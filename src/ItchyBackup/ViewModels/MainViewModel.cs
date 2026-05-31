@@ -654,6 +654,38 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void ExportProfile(BackupProfile profile)
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "Profili dışa aktar",
+            FileName = $"{profile.ProfileName}.itchyprofile.json",
+            Filter = "Itchy Backup Profili (*.itchyprofile.json)|*.itchyprofile.json|JSON (*.json)|*.json"
+        };
+        if (dialog.ShowDialog() != true) return;
+
+        ProfileService.Export(profile, dialog.FileName);
+        System.Windows.MessageBox.Show("Profil dışa aktarıldı.", "Itchy Backup",
+            System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+    }
+
+    [RelayCommand]
+    public void ImportProfile()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Profil içe aktar",
+            Filter = "Itchy Backup Profili (*.itchyprofile.json;*.json)|*.itchyprofile.json;*.json|Tüm dosyalar (*.*)|*.*"
+        };
+        if (dialog.ShowDialog() != true) return;
+
+        var profile = ProfileService.Import(dialog.FileName);
+        LoadProfiles();
+        System.Windows.MessageBox.Show($"Profil içe aktarıldı: {profile.ProfileName}", "Itchy Backup",
+            System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+    }
+
+    [RelayCommand]
     public void OpenHistoryFolder(string path)
     {
         if (string.IsNullOrEmpty(path)) return;
@@ -820,8 +852,8 @@ public partial class MainViewModel : ObservableObject
     {
         try
         {
-            var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location
-                .Replace(".dll", ".exe");
+            var exePath = Environment.ProcessPath
+                ?? Path.Combine(AppContext.BaseDirectory, "ItchyBackup.exe");
             var parts = time.Split(':');
             var hour = parts[0];
             var minute = parts.Length > 1 ? parts[1] : "00";
@@ -888,6 +920,7 @@ public partial class MainViewModel : ObservableObject
             EmailTo = EmailTo,
         };
         vm.Save();
+        StartupService.SetEnabled(StartWithWindows);
         if (!string.IsNullOrEmpty(DefaultDestination) && string.IsNullOrEmpty(DestinationPath))
             DestinationPath = DefaultDestination;
         System.Windows.MessageBox.Show("Ayarlar kaydedildi.", "Itchy Backup",
@@ -918,6 +951,7 @@ public partial class MainViewModel : ObservableObject
             EmailTo = EmailTo,
         };
         vm.Save();
+        StartupService.SetEnabled(StartWithWindows);
     }
 
     private void LoadSettings()
@@ -955,6 +989,17 @@ public partial class MainViewModel : ObservableObject
         { Description = "Varsayılan yedek klasörü", SelectedPath = DefaultDestination };
         if (d.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             DefaultDestination = d.SelectedPath;
+    }
+
+    [RelayCommand]
+    public async Task TestNotificationsAsync()
+    {
+        await NotificationService.SendExternalAsync(BuildNotificationOptions(),
+            "Itchy Backup test bildirimi",
+            $"Bildirim altyapısı çalışıyor. Bilgisayar: {Environment.MachineName}, kullanıcı: {Environment.UserName}");
+        NotificationService.ShowSuccess("Itchy Backup", "Test bildirimi gönderildi.");
+        System.Windows.MessageBox.Show("Test bildirimi gönderildi. Webhook/SMTP ayarlarınız doğruysa dış bildirim de ulaşmış olmalı.",
+            "Itchy Backup", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
     }
 
     // ── Yardımcı ────────────────────────────────────────────────────────────

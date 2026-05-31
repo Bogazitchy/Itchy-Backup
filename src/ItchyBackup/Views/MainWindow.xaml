@@ -77,7 +77,7 @@
               <Border.Effect>
                 <DropShadowEffect Color="#007A4D" BlurRadius="8" ShadowDepth="0" Opacity="0.6"/>
               </Border.Effect>
-              <TextBlock Text="v0.8.5" FontSize="10" FontFamily="Consolas"
+              <TextBlock Text="v1.0.0" FontSize="10" FontFamily="Consolas"
                          Foreground="{DynamicResource AccentLight}"
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
@@ -749,6 +749,11 @@
                 <TextBlock Text="PROFİLLER" FontSize="9" FontFamily="Consolas"
                            Foreground="{DynamicResource TextTertiary}"
                            Margin="10,18,0,10"/>
+                <Button Style="{StaticResource SecondaryButton}"
+                        Command="{Binding ImportProfileCommand}"
+                        Margin="8,0,8,8" Padding="8,5" Height="30">
+                  <TextBlock Text="Profil İçe Aktar" FontSize="11" FontFamily="Segoe UI"/>
+                </Button>
 
                 <ItemsControl ItemsSource="{Binding SavedProfiles}">
                   <ItemsControl.ItemTemplate>
@@ -820,6 +825,16 @@
                                       Fill="{DynamicResource Danger}"/>
                               </Canvas>
                             </Viewbox>
+                          </Button>
+                          <!-- Dışa aktar butonu -->
+                          <Button DockPanel.Dock="Right" VerticalAlignment="Center"
+                                  Width="20" Height="20" Margin="0,0,4,0"
+                                  Command="{Binding DataContext.ExportProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                  CommandParameter="{Binding}"
+                                  ToolTip="Profili Dışa Aktar"
+                                  Background="Transparent" BorderThickness="0" Cursor="Hand">
+                            <TextBlock Text="⇧" Foreground="{DynamicResource AccentLight}"
+                                       FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                           </Button>
                           <!-- Düzenle butonu -->
                           <Button DockPanel.Dock="Right" VerticalAlignment="Center"
@@ -2488,11 +2503,15 @@
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                         Margin="0,0,0,16" Padding="14,12">
                   <StackPanel>
-                    <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding RestoreOverwrite}"
-                              Margin="0,0,0,8">
-                      <TextBlock Text="Mevcut dosyaların üzerine yaz" FontFamily="Segoe UI" FontSize="12"
-                                 Foreground="{DynamicResource TextPrimary}"/>
-                    </CheckBox>
+                    <TextBlock Text="Çakışma davranışı" FontSize="11"
+                               Foreground="{DynamicResource TextSecondary}" FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                    <ComboBox Style="{StaticResource ItchyComboBox}"
+                              SelectedIndex="{Binding RestoreConflictPolicyIndex}"
+                              Height="32" Margin="0,0,0,8">
+                      <ComboBoxItem Content="Var olan dosyayı atla"/>
+                      <ComboBoxItem Content="Var olan dosyanın üzerine yaz"/>
+                      <ComboBoxItem Content="Yeni isimle geri yükle"/>
+                    </ComboBox>
                     <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding RestorePartial}">
                       <TextBlock Text="Kısmi geri yükleme (sadece seçilen dosyalar)"
                                  FontFamily="Segoe UI" FontSize="12"
@@ -2682,6 +2701,76 @@
                     </ScrollViewer>
                   </Border>
                 </StackPanel>
+
+                <!-- 5. Windows Sistem Geri Yükleme -->
+                <TextBlock Text="5. WINDOWS SİSTEM GERİ YÜKLEME" FontSize="9" FontFamily="Consolas"
+                           Foreground="{DynamicResource TextTertiary}" Margin="0,18,0,8"/>
+                <Border Background="{DynamicResource BgCard}" CornerRadius="10"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        Padding="14,12">
+                  <StackPanel>
+                    <TextBlock Text="Windows geri yükleme noktası oluşturma ve Windows geri yükleme ekranlarına erişim"
+                               TextWrapping="Wrap" FontSize="12" FontFamily="Segoe UI"
+                               Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,10"/>
+                    <Grid Margin="0,0,0,10">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                      </Grid.ColumnDefinitions>
+                      <TextBox Grid.Column="0" Style="{StaticResource ItchyTextBox}"
+                               Text="{Binding SystemRestoreDescription, UpdateSourceTrigger=PropertyChanged}"
+                               Height="34" FontFamily="Segoe UI" FontSize="12"
+                               VerticalContentAlignment="Center"/>
+                      <Button Grid.Column="1" Style="{StaticResource PrimaryButton}"
+                              Command="{Binding CreateSystemRestorePointCommand}"
+                              Margin="8,0,0,0" Padding="14,6" Height="34">
+                        <TextBlock Text="Nokta Oluştur" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                      </Button>
+                    </Grid>
+                    <WrapPanel Margin="0,0,0,8">
+                      <Button Style="{StaticResource SecondaryButton}"
+                              Command="{Binding LoadSystemRestorePointsCommand}"
+                              Padding="10,5" Margin="0,0,6,6">
+                        <TextBlock Text="Noktaları Listele" FontSize="11"/>
+                      </Button>
+                      <Button Style="{StaticResource SecondaryButton}"
+                              Command="{Binding OpenWindowsSystemRestoreCommand}"
+                              Padding="10,5" Margin="0,0,6,6">
+                        <TextBlock Text="Windows Geri Yüklemeyi Aç" FontSize="11"/>
+                      </Button>
+                      <Button Style="{StaticResource SecondaryButton}"
+                              Command="{Binding OpenSystemProtectionCommand}"
+                              Padding="10,5" Margin="0,0,6,6">
+                        <TextBlock Text="Sistem Koruması" FontSize="11"/>
+                      </Button>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding SystemRestoreStatus}" FontSize="10" FontFamily="Consolas"
+                               Foreground="{DynamicResource AccentLight}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                    <ItemsControl ItemsSource="{Binding SystemRestorePoints}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Padding="8,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+                            <Grid>
+                              <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                              </Grid.ColumnDefinitions>
+                              <StackPanel>
+                                <TextBlock Text="{Binding Description}" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding CreationTime}" FontSize="9" FontFamily="Consolas"
+                                           Foreground="{DynamicResource TextTertiary}"/>
+                              </StackPanel>
+                              <TextBlock Grid.Column="1" Text="{Binding SequenceNumber}" FontSize="10"
+                                         FontFamily="Consolas" Foreground="{DynamicResource TextSecondary}"
+                                         VerticalAlignment="Center"/>
+                            </Grid>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
 
               </StackPanel>
             </ScrollViewer>
@@ -3048,7 +3137,7 @@
                           </LinearGradientBrush>
                         </TextBlock.Foreground>
                       </TextBlock>
-                      <TextBlock Text="v0.8.5 — Teknik Servis Dosya Yedekleme Aracı" FontSize="11"
+                      <TextBlock Text="v1.0.0 — Teknik Servis Dosya Yedekleme Aracı" FontSize="11"
                                  Foreground="{DynamicResource TextTertiary}" FontFamily="Segoe UI" Margin="0,3,0,0"/>
                       <TextBlock Text="Created by M.Mert" FontSize="12"
                                  Foreground="{DynamicResource AccentLight}" FontFamily="Segoe UI"
@@ -3476,6 +3565,20 @@
                                 IsChecked="{Binding SmtpSsl}" VerticalAlignment="Center"/>
                       <TextBlock Text="SMTP SSL/TLS kullan" FontSize="12"
                                  Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"/>
+                    </DockPanel>
+                    <Separator/>
+                    <DockPanel Margin="16,13">
+                      <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}"
+                              Command="{Binding TestNotificationsCommand}"
+                              Padding="14,6" Height="34">
+                        <TextBlock Text="Test Gönder" FontSize="12" FontWeight="SemiBold"/>
+                      </Button>
+                      <StackPanel>
+                        <TextBlock Text="Bildirim testi" FontSize="13" FontWeight="Medium"
+                                   Foreground="{DynamicResource TextPrimary}" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Webhook ve SMTP ayarlarını gerçek yedek almadan doğrula"
+                                   FontSize="11" Foreground="{DynamicResource TextTertiary}" FontFamily="Segoe UI"/>
+                      </StackPanel>
                     </DockPanel>
                   </StackPanel>
                 </Border>

@@ -1,16 +1,23 @@
 using System.IO;
-using System.Diagnostics;
 using ICSharpCode.SharpZipLib.Zip;
 
 namespace ItchyBackup.Services;
 
 public class RestoreOptions
 {
-    public string SourceBackupPath { get; set; } = "";  // Yedek klasörü veya .zip
-    public string TargetPath { get; set; } = "";        // Geri yüklenecek konum
+    public string SourceBackupPath { get; set; } = "";
+    public string TargetPath { get; set; } = "";
     public string? ZipPassword { get; set; }
     public bool Overwrite { get; set; } = false;
-    public List<string> SelectedRelativePaths { get; set; } = new(); // Boşsa tümü
+    public RestoreConflictPolicy ConflictPolicy { get; set; } = RestoreConflictPolicy.Skip;
+    public List<string> SelectedRelativePaths { get; set; } = new();
+}
+
+public enum RestoreConflictPolicy
+{
+    Skip,
+    Overwrite,
+    Rename
 }
 
 public class RestoreProgress
@@ -50,9 +57,10 @@ public class RestoreEngine
             await RestoreFromFolderAsync(src);
         else
             throw new FileNotFoundException("Yedek konumu bulunamadı: " + src);
+
+        await WriteRestoreReportAsync();
     }
 
-    /// <summary>Yedek içindeki dosya/klasör yapısını listeler (kısmi geri yükleme için).</summary>
     public static List<RestoreItem> ListBackupContents(string backupPath, string? zipPassword = null)
     {
         var items = new List<RestoreItem>();
@@ -76,8 +84,7 @@ public class RestoreEngine
         {
             foreach (var f in Directory.EnumerateFiles(backupPath, "*", SearchOption.AllDirectories))
             {
-                if (f.EndsWith("checksums.sha256") || Path.GetFileName(f).StartsWith("backup_log_"))
-                    continue;
+                if (IsMetadataFile(f)) continue;
                 var rel = Path.GetRelativePath(backupPath, f);
                 long size = 0;
                 try { size = new FileInfo(f).Length; } catch { }
@@ -95,7 +102,7 @@ public class RestoreEngine
     private async Task RestoreFromFolderAsync(string sourceFolder)
     {
         var allFiles = Directory.GetFiles(sourceFolder, "*", SearchOption.AllDirectories)
-            .Where(f => !f.EndsWith("checksums.sha256") && !Path.GetFileName(f).StartsWith("backup_log_"))
+            .Where(f => !IsMetadataFile(f))
             .ToList();
 
         if (_options.SelectedRelativePaths.Any())
@@ -119,8 +126,8 @@ public class RestoreEngine
             _ct.ThrowIfCancellationRequested();
             var rel = Path.GetRelativePath(sourceFolder, src);
             var dest = Path.Combine(_options.TargetPath, rel);
-
-            if (File.Exists(dest) && !_options.Overwrite)
+            dest = ResolveConflictDestination(dest, rel);
+            if (string.IsNullOrEmpty(dest))
             {
                 _state.Skipped.Add(rel);
                 continue;
@@ -151,7 +158,7 @@ public class RestoreEngine
 
             var entries = new List<ZipEntry>();
             foreach (ZipEntry e in zip)
-                if (!e.IsDirectory) entries.Add(e);
+                if (!e.IsDirectory && !IsMetadataPath(e.Name)) entries.Add(e);
 
             if (_options.SelectedRelativePaths.Any())
             {
@@ -170,8 +177,8 @@ public class RestoreEngine
             {
                 _ct.ThrowIfCancellationRequested();
                 var dest = Path.Combine(_options.TargetPath, entry.Name);
-
-                if (File.Exists(dest) && !_options.Overwrite)
+                dest = ResolveConflictDestination(dest, entry.Name);
+                if (string.IsNullOrEmpty(dest))
                 {
                     _state.Skipped.Add(entry.Name);
                     continue;
@@ -217,6 +224,58 @@ public class RestoreEngine
         }
     }
 
+    private string ResolveConflictDestination(string dest, string displayPath)
+    {
+        if (!File.Exists(dest)) return dest;
+        var policy = _options.Overwrite ? RestoreConflictPolicy.Overwrite : _options.ConflictPolicy;
+        if (policy == RestoreConflictPolicy.Overwrite) return dest;
+        if (policy == RestoreConflictPolicy.Skip) return "";
+
+        var dir = Path.GetDirectoryName(dest) ?? _options.TargetPath;
+        var name = Path.GetFileNameWithoutExtension(dest);
+        var ext = Path.GetExtension(dest);
+        for (var i = 1; i < 1000; i++)
+        {
+            var candidate = Path.Combine(dir, $"{name}_geri_yuklenen_{i}{ext}");
+            if (!File.Exists(candidate)) return candidate;
+        }
+
+        _state.Errors.Add($"{displayPath}: yeniden adlandırma hedefi üretilemedi");
+        return "";
+    }
+
+    private async Task WriteRestoreReportAsync()
+    {
+        try
+        {
+            var reportPath = Path.Combine(_options.TargetPath, $"restore_report_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+            var lines = new List<string>
+            {
+                "Itchy Backup Restore Raporu",
+                $"Tarih: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
+                $"Kaynak: {_options.SourceBackupPath}",
+                $"Hedef: {_options.TargetPath}",
+                $"Dosya: {_state.CompletedFiles}/{_state.TotalFiles}",
+                $"Atlanan: {_state.Skipped.Count}",
+                $"Hata: {_state.Errors.Count}",
+                ""
+            };
+            if (_state.Skipped.Count > 0)
+            {
+                lines.Add("Atlanan dosyalar:");
+                lines.AddRange(_state.Skipped.Take(300));
+                lines.Add("");
+            }
+            if (_state.Errors.Count > 0)
+            {
+                lines.Add("Hatalar:");
+                lines.AddRange(_state.Errors.Take(300));
+            }
+            await File.WriteAllLinesAsync(reportPath, lines, _ct);
+        }
+        catch { }
+    }
+
     private RestoreProgress Clone() => new()
     {
         CurrentFile = _state.CurrentFile,
@@ -227,6 +286,18 @@ public class RestoreEngine
         Errors = _state.Errors.ToList(),
         Skipped = _state.Skipped.ToList()
     };
+
+    private static bool IsMetadataFile(string path) => IsMetadataPath(Path.GetFileName(path));
+
+    private static bool IsMetadataPath(string path)
+    {
+        var name = Path.GetFileName(path.Replace('/', '\\'));
+        return name.Equals("checksums.sha256", StringComparison.OrdinalIgnoreCase)
+            || name.Equals(BackupManifestService.ManifestFileName, StringComparison.OrdinalIgnoreCase)
+            || name.Equals("backup_report.html", StringComparison.OrdinalIgnoreCase)
+            || name.Equals("system_info.txt", StringComparison.OrdinalIgnoreCase)
+            || name.StartsWith("backup_log_", StringComparison.OrdinalIgnoreCase);
+    }
 }
 
 public partial class RestoreItem : CommunityToolkit.Mvvm.ComponentModel.ObservableObject

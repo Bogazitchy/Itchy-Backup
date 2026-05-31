@@ -190,6 +190,21 @@ public class BackupEngine
         // Bilgisayar bilgi dosyası
         await WriteSystemInfoAsync(backupFolder);
 
+        Result.Success = _state.Errors.Count == 0;
+        Result.Elapsed = _sw.Elapsed;
+        Result.TotalCategories = _state.TotalItems;
+        Result.FilesCopied = _state.FilesCopied;
+        Result.FilesSkipped = _state.FilesSkipped;
+        Result.FilesUnchanged = _state.FilesUnchanged;
+        Result.Errors = _state.Errors.ToList();
+        Result.Warnings = _state.Warnings.ToList();
+        Result.IsIncremental = _options.IsIncremental;
+        Result.IncrementalBase = _incrementalBase != null ? Path.GetFileName(_incrementalBase) : "";
+
+        Report("Manifest yazılıyor...", "Doğrulama");
+        await BackupManifestService.WriteAsync(backupFolder, _options, Result, Result.IncrementalBase, _ct);
+        LogService.Info("Yedek manifesti yazıldı.");
+
         // Checksum
         if (_options.VerifyChecksum)
         {
@@ -236,16 +251,7 @@ public class BackupEngine
         if (_options.UseNetworkCredentials && NetworkShareHelper.IsUncPath(_options.DestinationRoot))
             NetworkShareHelper.Disconnect(_options.DestinationRoot);
 
-        Result.Success = _state.Errors.Count == 0;
         Result.Elapsed = _sw.Elapsed;
-        Result.TotalCategories = _state.TotalItems;
-        Result.FilesCopied = _state.FilesCopied;
-        Result.FilesSkipped = _state.FilesSkipped;
-        Result.FilesUnchanged = _state.FilesUnchanged;
-        Result.Errors = _state.Errors.ToList();
-        Result.Warnings = _state.Warnings.ToList();
-        Result.IsIncremental = _options.IsIncremental;
-        Result.IncrementalBase = _incrementalBase != null ? Path.GetFileName(_incrementalBase) : "";
         Result.ReportPath = await BackupReportService.WriteHtmlReportAsync(Result, _options, backupFolder);
 
         LogService.Info($"=== Tamamlandı. Süre: {_sw.Elapsed:mm\\:ss} Dosya: {_state.FilesCopied} Değişmedi: {_state.FilesUnchanged} Hata: {_state.Errors.Count} ===");
@@ -262,6 +268,7 @@ public class BackupEngine
             ? $"Artımlı{(_incrementalBase != null ? $" (baz: {Path.GetFileName(_incrementalBase)})" : " (baz yok → tam)") }"
             : "Tam";
         var info = $@"# Itchy Backup - Sistem Bilgisi
+Uygulama Sürümü: {AppInfo.DisplayVersion}
 Tarih: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
 Bilgisayar Adı: {Environment.MachineName}
 Kullanıcı Adı: {Environment.UserName}

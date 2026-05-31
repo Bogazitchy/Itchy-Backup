@@ -20,17 +20,21 @@ public partial class MainViewModel
     public ObservableCollection<AvailableBackup> AvailableBackups { get; } = new();
     public ObservableCollection<RestoreItem> RestoreItems { get; } = new();
     public ObservableCollection<BackupFolderItem> RestoreFolders { get; } = new();
+    public ObservableCollection<SystemRestorePointInfo> SystemRestorePoints { get; } = new();
 
     [ObservableProperty] private AvailableBackup? _selectedBackupForRestore;
     [ObservableProperty] private string _restoreTargetPath = "";
     [ObservableProperty] private string _restoreZipPassword = "";
     [ObservableProperty] private bool _restoreOverwrite = false;
+    [ObservableProperty] private int _restoreConflictPolicyIndex = 0;
     [ObservableProperty] private bool _restorePartial = false;
     [ObservableProperty] private bool _isRestoring = false;
     [ObservableProperty] private double _restoreProgressPercent = 0;
     [ObservableProperty] private string _restoreProgressText = "Hazır";
     [ObservableProperty] private string _restoreCurrentFile = "";
     [ObservableProperty] private string _restorePreviewText = "Önizleme bekleniyor";
+    [ObservableProperty] private string _systemRestoreDescription = $"Itchy Backup v1 - {DateTime.Now:yyyy-MM-dd HH:mm}";
+    [ObservableProperty] private string _systemRestoreStatus = "Windows sistem geri yükleme hazır.";
 
     private CancellationTokenSource? _restoreCts;
 
@@ -242,6 +246,12 @@ public partial class MainViewModel
             TargetPath = RestoreTargetPath,
             ZipPassword = RestoreZipPassword,
             Overwrite = RestoreOverwrite,
+            ConflictPolicy = RestoreConflictPolicyIndex switch
+            {
+                1 => RestoreConflictPolicy.Overwrite,
+                2 => RestoreConflictPolicy.Rename,
+                _ => RestoreConflictPolicy.Skip
+            },
             SelectedRelativePaths = RestorePartial ? GetSelectedFilePaths() : new List<string>()
         };
 
@@ -280,6 +290,50 @@ public partial class MainViewModel
     }
 
     [RelayCommand] public void CancelRestore() => _restoreCts?.Cancel();
+
+    [RelayCommand]
+    public async Task CreateSystemRestorePointAsync()
+    {
+        try
+        {
+            SystemRestoreStatus = "Sistem geri yükleme noktası oluşturuluyor...";
+            var result = await SystemRestoreService.CreateRestorePointAsync(SystemRestoreDescription, CancellationToken.None);
+            SystemRestoreStatus = result;
+            await LoadSystemRestorePointsAsync();
+            System.Windows.MessageBox.Show(result, "Itchy Backup",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            SystemRestoreStatus = ex.Message;
+            System.Windows.MessageBox.Show(ex.Message, "Sistem Geri Yükleme",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+        }
+    }
+
+    [RelayCommand]
+    public async Task LoadSystemRestorePointsAsync()
+    {
+        try
+        {
+            SystemRestorePoints.Clear();
+            foreach (var point in await SystemRestoreService.ListRestorePointsAsync(CancellationToken.None))
+                SystemRestorePoints.Add(point);
+            SystemRestoreStatus = SystemRestorePoints.Count == 0
+                ? "Geri yükleme noktası bulunamadı veya Sistem Koruması kapalı."
+                : $"{SystemRestorePoints.Count} geri yükleme noktası listelendi.";
+        }
+        catch (Exception ex)
+        {
+            SystemRestoreStatus = ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    public void OpenWindowsSystemRestore() => SystemRestoreService.OpenSystemRestore();
+
+    [RelayCommand]
+    public void OpenSystemProtection() => SystemRestoreService.OpenSystemProtection();
 
     [RelayCommand]
     public void SelectAllRestoreItems()

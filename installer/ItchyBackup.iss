@@ -1,12 +1,12 @@
 [Setup]
 AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 AppName=Itchy Backup
-AppVersion=0.8.5
+AppVersion=1.0.0
 AppPublisher=M.Mert - Itchy Tech
 DefaultDirName={autopf}\Itchy Backup
 DefaultGroupName=Itchy Backup
 OutputDir=..\build\output
-OutputBaseFilename=ItchyBackup_v0.8.5_Setup
+OutputBaseFilename=ItchyBackup_v1.0.0_Setup
 SetupIconFile=..\src\ItchyBackup\Resources\Icons\app.ico
 Compression=lzma2/ultra64
 SolidCompression=yes

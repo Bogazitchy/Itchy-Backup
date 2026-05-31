@@ -51,6 +51,26 @@ public static class ProfileService
         if (File.Exists(path)) File.Delete(path);
     }
 
+    public static void Export(BackupProfile profile, string targetPath)
+    {
+        var json = JsonConvert.SerializeObject(profile, Formatting.Indented);
+        File.WriteAllText(targetPath, json);
+        LogService.Info($"Profil dışa aktarıldı: {profile.ProfileName}");
+    }
+
+    public static BackupProfile Import(string sourcePath)
+    {
+        var json = File.ReadAllText(sourcePath);
+        var profile = JsonConvert.DeserializeObject<BackupProfile>(json)
+            ?? throw new InvalidDataException("Profil dosyası okunamadı.");
+        if (string.IsNullOrWhiteSpace(profile.ProfileName))
+            throw new InvalidDataException("Profil adı boş olamaz.");
+
+        Save(profile);
+        LogService.Info($"Profil içe aktarıldı: {profile.ProfileName}");
+        return profile;
+    }
+
     public static string GetProfileDir() => ProfileDir;
 
     public static void EnsureDefaultProfiles()
