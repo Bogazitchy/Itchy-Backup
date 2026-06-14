@@ -174,9 +174,6 @@ Müşteri yalnızca alıcı adresini girer. Gönderici hesabı bir kez **Ayarlar
 | Güvenlik | `STARTTLS` |
 | Kimlik doğrulama | Açık |
 
-> [!CAUTION]
-> SMTP parolasını kaynak koda, profile veya GitHub deposuna eklemeyin. Uygulama parolayı yalnızca mevcut Windows kullanıcısı için DPAPI ile koruyarak yerel ayarlarda saklar.
-
 ## Teknik Mimari
 
 ```text
