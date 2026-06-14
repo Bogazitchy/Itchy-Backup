@@ -25,9 +25,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _smtpHost = "";
     [ObservableProperty] private int _smtpPort = 587;
     [ObservableProperty] private bool _smtpSsl = true;
-    [ObservableProperty] private string _smtpUsername = "";
+    [ObservableProperty] private string _smtpUsername = "info@itchy.com.tr";
     [ObservableProperty] private string _smtpPassword = "";
-    [ObservableProperty] private string _emailFrom = "";
+    [ObservableProperty] private string _emailFrom = "info@itchy.com.tr";
     [ObservableProperty] private string _emailTo = "";
 
     public SettingsViewModel() => Load();
@@ -53,9 +53,9 @@ public partial class SettingsViewModel : ObservableObject
             SmtpHost = s.SmtpHost;
             SmtpPort = s.SmtpPort;
             SmtpSsl = s.SmtpSsl;
-            SmtpUsername = s.SmtpUsername;
+            SmtpUsername = string.IsNullOrWhiteSpace(s.SmtpUsername) ? "info@itchy.com.tr" : s.SmtpUsername;
             SmtpPassword = SecretService.Unprotect(s.SmtpPassword);
-            EmailFrom = s.EmailFrom;
+            EmailFrom = string.IsNullOrWhiteSpace(s.EmailFrom) ? "info@itchy.com.tr" : s.EmailFrom;
             EmailTo = s.EmailTo;
         }
         catch { }
@@ -107,9 +107,9 @@ public partial class SettingsViewModel : ObservableObject
         public string SmtpHost { get; set; } = "";
         public int SmtpPort { get; set; } = 587;
         public bool SmtpSsl { get; set; } = true;
-        public string SmtpUsername { get; set; } = "";
+        public string SmtpUsername { get; set; } = "info@itchy.com.tr";
         public string SmtpPassword { get; set; } = "";
-        public string EmailFrom { get; set; } = "";
+        public string EmailFrom { get; set; } = "info@itchy.com.tr";
         public string EmailTo { get; set; } = "";
     }
 }

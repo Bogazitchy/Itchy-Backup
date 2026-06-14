@@ -6,14 +6,19 @@ Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme ve ge
   <img src="src/ItchyBackup/Resources/Icons/app-logo.png" width="520" alt="Itchy Backup Logo">
 </p>
 
-![Version](https://img.shields.io/badge/version-v1.0.0-007A4D?style=flat-square)
+![Version](https://img.shields.io/badge/version-v1.5.0-007A4D?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)
 
-## v1.0 Özeti
+## v1.5 Özeti
 
 - Yeni Itchy Backup logosu, uygulama ikonu ve zümrüt yeşili marka teması
 - Baştan tasarlanan teknik servis konsolu: sabit navigasyon, iki kolonlu yedek çalışma alanı ve ayrı geri yükleme merkezi
+- İkonlu ve katlanabilir yedek kategorileri
+- Yatay kaydırılabilir kayıtlı profil şeridi
+- Rotasyon için saklanacak yedek sayısı ve gün sınırı kontrolleri
+- Yeni saat/dakika zamanlayıcı seçicisi
+- `info@itchy.com.tr` üzerinden müşteriye e-posta gönderme akışı
 - `backup_manifest.json` ile yedek kimliği, seçilen öğeler, dosya listesi ve meta bilgiler
 - SHA-256 doğrulama, HTML servis raporu ve restore raporu
 - Güçlendirilmiş geri yükleme: kısmi restore, çakışma politikası, ZIP parola desteği
@@ -94,7 +99,7 @@ Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme ve ge
 - İki yedeği karşılaştırma
 - Windows toast bildirimi
 - Webhook bildirimi
-- SMTP e-posta bildirimi ve test butonu
+- `info@itchy.com.tr` gönderen hesabıyla müşteriye SMTP e-posta bildirimi ve doğrulanabilir test gönderimi
 
 ### Arayüz
 
@@ -112,6 +117,15 @@ Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme ve ge
 - Göz ikonlu parola göster/gizle kontrolleri
 - Webhook ve SMTP alanlarında açık, alan üstü bilgi etiketleri
 - Teknik servis akışına uygun yoğun, tutarlı ve okunabilir düzen
+
+### Müşteri E-postası Kurulumu
+
+Müşteri ana ekranda yalnızca alıcı e-posta adresini girer. Gönderici hesabı ilk kurulumda Ayarlar > Bildirimler > Gönderici hesabı kurulumu bölümünden yapılandırılır.
+
+- Gönderen/kullanıcı adı: `info@itchy.com.tr`
+- SMTP sunucusu ve port: e-posta sağlayıcınızın verdiği değerler
+- SMTP veya uygulama parolası: Windows kullanıcı hesabına bağlı DPAPI korumasıyla yerel olarak saklanır
+- SSL/TLS: sağlayıcının gereksinimine göre etkinleştirilir
 
 ## Kurulum
 

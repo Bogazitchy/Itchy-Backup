@@ -126,9 +126,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _smtpHost = "";
     [ObservableProperty] private int _smtpPort = 587;
     [ObservableProperty] private bool _smtpSsl = true;
-    [ObservableProperty] private string _smtpUsername = "";
+    [ObservableProperty] private string _smtpUsername = "info@itchy.com.tr";
     [ObservableProperty] private string _smtpPassword = "";
-    [ObservableProperty] private string _emailFrom = "";
+    [ObservableProperty] private string _emailFrom = "info@itchy.com.tr";
     [ObservableProperty] private string _emailTo = "";
 
     private bool _suppressThemeApply;
@@ -994,11 +994,29 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public async Task TestNotificationsAsync()
     {
-        await NotificationService.SendExternalAsync(BuildNotificationOptions(),
-            "Itchy Backup test bildirimi",
-            $"Bildirim altyapısı çalışıyor. Bilgisayar: {Environment.MachineName}, kullanıcı: {Environment.UserName}");
+        var options = BuildNotificationOptions();
+        const string title = "Itchy Backup test bildirimi";
+        var message = $"Itchy Backup bildirim sistemi çalışıyor.\nBilgisayar: {Environment.MachineName}\nKullanıcı: {Environment.UserName}";
+
+        if (EnableEmailNotifications)
+        {
+            var result = await NotificationService.TestEmailAsync(options, title, message);
+            if (!result.Success)
+            {
+                System.Windows.MessageBox.Show(result.Message, "E-posta Gönderilemedi",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return;
+            }
+        }
+
+        if (EnableWebhookNotifications && !string.IsNullOrWhiteSpace(WebhookUrl))
+            await NotificationService.SendExternalAsync(options, title, message, includeEmail: false);
+
         NotificationService.ShowSuccess("Itchy Backup", "Test bildirimi gönderildi.");
-        System.Windows.MessageBox.Show("Test bildirimi gönderildi. Webhook/SMTP ayarlarınız doğruysa dış bildirim de ulaşmış olmalı.",
+        System.Windows.MessageBox.Show(
+            EnableEmailNotifications
+                ? $"Test e-postası {EmailTo} adresine info@itchy.com.tr üzerinden gönderildi."
+                : "Etkin bildirim kanallarına test bildirimi gönderildi.",
             "Itchy Backup", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
     }
 

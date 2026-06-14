@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.5.0 - Arayüz ve İş Akışı Güncellemesi
+
+- Yedek kategorileri ikonlu ve katlanabilir hale getirildi.
+- Kaydedilmiş profiller yedek ekranına taşınarak yatay kaydırılabilir profil şeridi oluşturuldu.
+- Rotasyon seçeneklerine yedek sayısı ve gün sınırı girişleri eklendi.
+- Zamanlayıcı saat seçimi kontrollü saat/dakika seçiciyle yenilendi.
+- Ayarlar ekranındaki GitHub bağlantısı küçük ikon düğmesine dönüştürüldü.
+- Müşteri e-postası akışı `info@itchy.com.tr` gönderen hesabına göre sadeleştirildi.
+- Uygulama, kurulum ve paket sürümü `v1.5.0` olarak güncellendi.
+
 ## v1.0.0 - Tam Sürüm
 
 - Uygulama sürümü `v1.0.0` olarak güncellendi.
