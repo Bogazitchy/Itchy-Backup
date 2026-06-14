@@ -2,13 +2,13 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
   <!-- ── Glass Dark Palette ─────────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="BgPrimary"      Color="#07110D"/>
-  <SolidColorBrush x:Key="BgSecondary"    Color="#081A14"/>
-  <SolidColorBrush x:Key="BgTertiary"     Color="#0D241C"/>
-  <SolidColorBrush x:Key="BgQuaternary"   Color="#123228"/>
+  <SolidColorBrush x:Key="BgPrimary"      Color="#111315"/>
+  <SolidColorBrush x:Key="BgSecondary"    Color="#181B1E"/>
+  <SolidColorBrush x:Key="BgTertiary"     Color="#202428"/>
+  <SolidColorBrush x:Key="BgQuaternary"   Color="#292E33"/>
   <LinearGradientBrush x:Key="BgCard" StartPoint="0,0" EndPoint="0,1">
-    <GradientStop Color="#0D281F" Offset="0"/>
-    <GradientStop Color="#061711" Offset="1"/>
+    <GradientStop Color="#202428" Offset="0"/>
+    <GradientStop Color="#181B1E" Offset="1"/>
   </LinearGradientBrush>
 
   <!-- ── Itchy Green Accent ─────────────────────────────────────────────── -->
@@ -32,14 +32,14 @@
   <SolidColorBrush x:Key="Info"           Color="#74B9FF"/>
 
   <!-- ── Text ───────────────────────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="TextPrimary"    Color="#E8E8F0"/>
-  <SolidColorBrush x:Key="TextSecondary"  Color="#9898B0"/>
-  <SolidColorBrush x:Key="TextTertiary"   Color="#5A5A72"/>
-  <SolidColorBrush x:Key="TextMuted"      Color="#3A3A50"/>
+  <SolidColorBrush x:Key="TextPrimary"    Color="#F2F4F5"/>
+  <SolidColorBrush x:Key="TextSecondary"  Color="#B2B8BD"/>
+  <SolidColorBrush x:Key="TextTertiary"   Color="#747C83"/>
+  <SolidColorBrush x:Key="TextMuted"      Color="#4C5359"/>
 
   <!-- ── Borders ────────────────────────────────────────────────────────── -->
-  <SolidColorBrush x:Key="BorderBrush"        Color="#123B2C"/>
-  <SolidColorBrush x:Key="BorderHoverBrush"   Color="#176044"/>
+  <SolidColorBrush x:Key="BorderBrush"        Color="#30363B"/>
+  <SolidColorBrush x:Key="BorderHoverBrush"   Color="#4A555D"/>
 
   <!-- ── Glass Effects ─────────────────────────────────────────────────── -->
   <SolidColorBrush x:Key="GlassBorder"        Color="#22FFFFFF"/>
@@ -64,14 +64,14 @@
 
   <!-- ── Runtime Theme Brushes (ThemeService bu kaynakları override eder) ── -->
   <LinearGradientBrush x:Key="WindowBgBrush" StartPoint="0,0" EndPoint="1,1">
-    <GradientStop Color="#06120E" Offset="0"/>
-    <GradientStop Color="#07110D" Offset="0.5"/>
-    <GradientStop Color="#082018" Offset="1"/>
+    <GradientStop Color="#111315" Offset="0"/>
+    <GradientStop Color="#141719" Offset="0.5"/>
+    <GradientStop Color="#171B1E" Offset="1"/>
   </LinearGradientBrush>
   <LinearGradientBrush x:Key="TitleBarBrush" StartPoint="0,0" EndPoint="0,1">
-    <GradientStop Color="#0A1F18" Offset="0"/>
-    <GradientStop Color="#081A14" Offset="1"/>
+    <GradientStop Color="#1B1F22" Offset="0"/>
+    <GradientStop Color="#181B1E" Offset="1"/>
   </LinearGradientBrush>
-  <SolidColorBrush x:Key="WindowBorderBrush" Color="#006B43"/>
+  <SolidColorBrush x:Key="WindowBorderBrush" Color="#343B40"/>
 
 </ResourceDictionary>

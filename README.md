@@ -13,6 +13,7 @@ Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme ve ge
 ## v1.0 Özeti
 
 - Yeni Itchy Backup logosu, uygulama ikonu ve zümrüt yeşili marka teması
+- Baştan tasarlanan teknik servis konsolu: sabit navigasyon, iki kolonlu yedek çalışma alanı ve ayrı geri yükleme merkezi
 - `backup_manifest.json` ile yedek kimliği, seçilen öğeler, dosya listesi ve meta bilgiler
 - SHA-256 doğrulama, HTML servis raporu ve restore raporu
 - Güçlendirilmiş geri yükleme: kısmi restore, çakışma politikası, ZIP parola desteği
@@ -97,14 +98,20 @@ Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme ve ge
 
 ### Arayüz
 
-- Dark, Light ve sade Servis teması
-- Logo paletine uyarlanmış zümrüt yeşili ana tema
+- Baştan tasarlanmış, masaüstü kullanımına odaklı teknik servis konsolu
+- Sabit sol navigasyon ve aynı ekranda erişilebilen profil iş akışları
+- Kaynak seçimi ile yedek ayarlarını yan yana sunan iki kolonlu çalışma alanı
+- Dosya geri yükleme ile Windows Sistem Geri Yükleme araçlarını birleştiren geri yükleme merkezi
+- İşlem özeti, ön kontrol, profil kaydetme ve yedek başlatma için sabit alt eylem çubuğu
+- Nötr grafit koyu tema, temiz açık tema ve sade Servis teması
+- Logo paletine uyarlanmış zümrüt yeşili vurgu rengi
 - Accent renk seçimi
-- Tek pencere navigasyon
-- Hazır yedek profilleri sol profil listesinde
-- Yedek öncesi kontrol paneli
+- Hazır ve kullanıcı tarafından kaydedilen profillerin sol profil listesinde yönetimi
+- Özel klasör ekleme, profil içe/dışa aktarma, düzenleme ve silme için hızlı komutlar
+- Yedek öncesi kontrol, canlı ilerleme ve işlem iptali
 - Göz ikonlu parola göster/gizle kontrolleri
-- Teknik servis akışına uygun yoğun ama okunabilir düzen
+- Webhook ve SMTP alanlarında açık, alan üstü bilgi etiketleri
+- Teknik servis akışına uygun yoğun, tutarlı ve okunabilir düzen
 
 ## Kurulum
 

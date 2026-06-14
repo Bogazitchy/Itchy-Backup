@@ -82,7 +82,7 @@
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Root" Property="Background" Value="#7D6DF0"/>
+              <Setter TargetName="Root" Property="Background" Value="#00945F"/>
               <Setter TargetName="Root" Property="Effect">
                 <Setter.Value>
                   <DropShadowEffect Color="#007A4D" BlurRadius="20" ShadowDepth="0" Opacity="0.65"/>
@@ -90,7 +90,7 @@
               </Setter>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-              <Setter TargetName="Root" Property="Background" Value="#5A4BC7"/>
+              <Setter TargetName="Root" Property="Background" Value="#005F3C"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
               <Setter TargetName="Root" Property="Background" Value="{DynamicResource BgQuaternary}"/>
@@ -107,8 +107,8 @@
     <Setter Property="Background">
       <Setter.Value>
         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-          <GradientStop Color="#5748D5" Offset="0"/>
-          <GradientStop Color="#7B6CF0" Offset="1"/>
+          <GradientStop Color="#005F3C" Offset="0"/>
+          <GradientStop Color="#00945F" Offset="1"/>
         </LinearGradientBrush>
       </Setter.Value>
     </Setter>
@@ -153,8 +153,8 @@
               <Setter TargetName="Root" Property="Background">
                 <Setter.Value>
                   <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#6757E8" Offset="0"/>
-                    <GradientStop Color="#9180FF" Offset="1"/>
+                    <GradientStop Color="#007A4D" Offset="0"/>
+                    <GradientStop Color="#00B875" Offset="1"/>
                   </LinearGradientBrush>
                 </Setter.Value>
               </Setter>
