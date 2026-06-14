@@ -22,7 +22,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _enableWebhookNotifications = false;
     [ObservableProperty] private string _webhookUrl = "";
     [ObservableProperty] private bool _enableEmailNotifications = false;
-    [ObservableProperty] private string _smtpHost = "";
+    [ObservableProperty] private string _smtpHost = "mail.itchy.com.tr";
     [ObservableProperty] private int _smtpPort = 587;
     [ObservableProperty] private bool _smtpSsl = true;
     [ObservableProperty] private string _smtpUsername = "info@itchy.com.tr";
@@ -50,7 +50,7 @@ public partial class SettingsViewModel : ObservableObject
             EnableWebhookNotifications = s.EnableWebhookNotifications;
             WebhookUrl = s.WebhookUrl;
             EnableEmailNotifications = s.EnableEmailNotifications;
-            SmtpHost = s.SmtpHost;
+            SmtpHost = string.IsNullOrWhiteSpace(s.SmtpHost) ? "mail.itchy.com.tr" : s.SmtpHost;
             SmtpPort = s.SmtpPort;
             SmtpSsl = s.SmtpSsl;
             SmtpUsername = string.IsNullOrWhiteSpace(s.SmtpUsername) ? "info@itchy.com.tr" : s.SmtpUsername;
@@ -104,7 +104,7 @@ public partial class SettingsViewModel : ObservableObject
         public bool EnableWebhookNotifications { get; set; }
         public string WebhookUrl { get; set; } = "";
         public bool EnableEmailNotifications { get; set; }
-        public string SmtpHost { get; set; } = "";
+        public string SmtpHost { get; set; } = "mail.itchy.com.tr";
         public int SmtpPort { get; set; } = 587;
         public bool SmtpSsl { get; set; } = true;
         public string SmtpUsername { get; set; } = "info@itchy.com.tr";

@@ -334,7 +334,6 @@
                   <Grid.RowDefinitions>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                   </Grid.RowDefinitions>
                   <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="16,0">
@@ -353,25 +352,12 @@
                       </StackPanel>
                     </Grid>
                   </Border>
-                  <ItemsControl Grid.Row="1" ItemsSource="{Binding BackupPresets}" Margin="12,10,12,4">
-                    <ItemsControl.ItemsPanel>
-                      <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <Button Style="{StaticResource MiniButton}"
-                                Command="{Binding DataContext.ApplyPresetCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="{Binding}" Margin="0,0,5,5"
-                                ToolTip="{Binding Description}">
-                          <TextBlock Text="{Binding Name}"/>
-                        </Button>
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                  <Grid Grid.Row="2" Margin="12,2,12,7">
+                  <Grid Grid.Row="1" Margin="12,9,12,8">
                     <Grid.ColumnDefinitions>
                       <ColumnDefinition Width="Auto"/>
+                      <ColumnDefinition Width="26"/>
                       <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="26"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
                       <TextBlock Text="PROFİLLER" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
@@ -380,7 +366,11 @@
                         <TextBlock Text="+" FontSize="13"/>
                       </Button>
                     </StackPanel>
-                    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto"
+                    <Button Grid.Column="1" Style="{StaticResource MiniButton}" Padding="2"
+                            Click="ProfilesScrollLeft_Click" ToolTip="Önceki profiller">
+                      <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
+                    </Button>
+                    <ScrollViewer x:Name="ProfilesScrollViewer" Grid.Column="2" HorizontalScrollBarVisibility="Visible"
                                   VerticalScrollBarVisibility="Disabled" PanningMode="HorizontalOnly">
                       <ItemsControl ItemsSource="{Binding SavedProfiles}">
                         <ItemsControl.ItemsPanel>
@@ -420,8 +410,12 @@
                         </ItemsControl.ItemTemplate>
                       </ItemsControl>
                     </ScrollViewer>
+                    <Button Grid.Column="3" Style="{StaticResource MiniButton}" Padding="2"
+                            Click="ProfilesScrollRight_Click" ToolTip="Sonraki profiller">
+                      <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
+                    </Button>
                   </Grid>
-                  <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" Margin="10,4,8,10">
+                  <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="10,4,8,10">
                     <ItemsControl ItemsSource="{Binding Categories}">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:BackupCategory}">
@@ -677,13 +671,18 @@
                             <Style.Triggers><DataTrigger Binding="{Binding UseNetworkCredentials}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
                           </Style>
                         </StackPanel.Style>
-                        <TextBlock Text="KULLANICI / DOMAIN" Style="{StaticResource FieldLabel}"/>
                         <Grid Margin="0,0,0,6">
                           <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="6"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                          <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding NetworkUsername}" Height="32"/>
-                          <TextBox Grid.Column="2" Style="{StaticResource ItchyTextBox}" Text="{Binding NetworkDomain}" Height="32"/>
+                          <StackPanel>
+                            <TextBlock Text="AĞ KULLANICI ADI" Style="{StaticResource FieldLabel}"/>
+                            <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding NetworkUsername}" Height="32"/>
+                          </StackPanel>
+                          <StackPanel Grid.Column="2">
+                            <TextBlock Text="ETKİ ALANI / DOMAIN" Style="{StaticResource FieldLabel}"/>
+                            <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding NetworkDomain}" Height="32"/>
+                          </StackPanel>
                         </Grid>
-                        <TextBlock Text="AĞ PAROLASI" Style="{StaticResource FieldLabel}"/>
+                        <TextBlock Text="AĞ HESABI PAROLASI" Style="{StaticResource FieldLabel}"/>
                         <Grid>
                           <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="6"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                           <PasswordBox x:Name="NetworkPasswordBox" PasswordChanged="NetworkPasswordBox_PasswordChanged"
@@ -1036,45 +1035,28 @@
                             SelectedValue="{Binding SchedulerProfile}" Height="34" Margin="0,0,0,14"/>
                   <TextBlock Text="SAAT" Style="{StaticResource FieldLabel}"/>
                   <Border Background="{DynamicResource BgTertiary}" BorderBrush="{DynamicResource BorderBrush}"
-                          BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,14">
+                          BorderThickness="1" CornerRadius="6" Padding="14,12" Margin="0,0,0,14">
                     <Grid>
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="32"/>
+                        <ColumnDefinition Width="34"/>
                         <ColumnDefinition Width="*"/>
                       </Grid.ColumnDefinitions>
-                      <Grid>
-                        <Grid.RowDefinitions><RowDefinition Height="28"/><RowDefinition Height="46"/><RowDefinition Height="28"/></Grid.RowDefinitions>
-                        <Button Style="{StaticResource MiniButton}" Command="{Binding IncrementHourCommand}" Padding="4" ToolTip="Saati artır">
-                          <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
-                        </Button>
-                        <TextBlock Grid.Row="1" Text="{Binding SchedulerHour, StringFormat={}{0:00}}"
-                                   FontSize="26" FontFamily="Consolas" FontWeight="SemiBold"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextPrimary}"/>
-                        <Button Grid.Row="2" Style="{StaticResource MiniButton}" Command="{Binding DecrementHourCommand}" Padding="4" ToolTip="Saati azalt">
-                          <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
-                        </Button>
-                      </Grid>
-                      <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text=":" FontSize="26" FontFamily="Consolas" HorizontalAlignment="Center"
-                                   Foreground="{DynamicResource TextSecondary}"/>
-                        <TextBlock Text="SAAT" FontSize="7" HorizontalAlignment="Center"
-                                   Foreground="{DynamicResource TextMuted}"/>
+                      <StackPanel>
+                        <TextBlock Text="SAAT" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                        <ComboBox Style="{StaticResource ItchyComboBox}" ItemsSource="{Binding SchedulerHours}"
+                                  SelectedItem="{Binding SchedulerHour}" Height="46" FontSize="20"
+                                  FontFamily="Consolas" HorizontalContentAlignment="Center"/>
                       </StackPanel>
-                      <Grid Grid.Column="2">
-                        <Grid.RowDefinitions><RowDefinition Height="28"/><RowDefinition Height="46"/><RowDefinition Height="28"/></Grid.RowDefinitions>
-                        <Button Style="{StaticResource MiniButton}" Command="{Binding IncrementMinuteCommand}" Padding="4" ToolTip="Dakikayı artır">
-                          <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
-                        </Button>
-                        <TextBlock Grid.Row="1" Text="{Binding SchedulerMinute, StringFormat={}{0:00}}"
-                                   FontSize="26" FontFamily="Consolas" FontWeight="SemiBold"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextPrimary}"/>
-                        <Button Grid.Row="2" Style="{StaticResource MiniButton}" Command="{Binding DecrementMinuteCommand}" Padding="4" ToolTip="Dakikayı azalt">
-                          <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
-                        </Button>
-                      </Grid>
+                      <TextBlock Grid.Column="1" Text=":" FontSize="28" FontFamily="Consolas"
+                                 HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,6"
+                                 Foreground="{DynamicResource TextSecondary}"/>
+                      <StackPanel Grid.Column="2">
+                        <TextBlock Text="DAKİKA" Style="{StaticResource FieldLabel}" HorizontalAlignment="Center"/>
+                        <ComboBox Style="{StaticResource ItchyComboBox}" ItemsSource="{Binding SchedulerMinutes}"
+                                  SelectedItem="{Binding SchedulerMinute}" Height="46" FontSize="20"
+                                  FontFamily="Consolas" HorizontalContentAlignment="Center"/>
+                      </StackPanel>
                     </Grid>
                   </Border>
                   <TextBlock Text="GÜNLER" Style="{StaticResource FieldLabel}"/>

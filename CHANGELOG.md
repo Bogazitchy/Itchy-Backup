@@ -4,8 +4,11 @@
 
 - Yedek kategorileri ikonlu ve katlanabilir hale getirildi.
 - Kaydedilmiş profiller yedek ekranına taşınarak yatay kaydırılabilir profil şeridi oluşturuldu.
+- Profil şeridine görünür kaydırma çubuğu ile sağ/sol gezinme düğmeleri eklendi.
+- Hazır şablon düğmeleri kaldırılarak profil seçimi tek bir alanda toplandı.
 - Rotasyon seçeneklerine yedek sayısı ve gün sınırı girişleri eklendi.
-- Zamanlayıcı saat seçimi kontrollü saat/dakika seçiciyle yenilendi.
+- Zamanlayıcı saat seçimi saat ve dakika açılır listeleriyle yenilendi.
+- Ağ kimlik bilgisi alanları ayrı ve açıklayıcı başlıklarla düzenlendi.
 - Ayarlar ekranındaki GitHub bağlantısı küçük ikon düğmesine dönüştürüldü.
 - Müşteri e-postası akışı `info@itchy.com.tr` gönderen hesabına göre sadeleştirildi.
 - Uygulama, kurulum ve paket sürümü `v1.5.0` olarak güncellendi.

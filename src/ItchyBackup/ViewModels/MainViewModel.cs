@@ -123,7 +123,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _enableWebhookNotifications = false;
     [ObservableProperty] private string _webhookUrl = "";
     [ObservableProperty] private bool _enableEmailNotifications = false;
-    [ObservableProperty] private string _smtpHost = "";
+    [ObservableProperty] private string _smtpHost = "mail.itchy.com.tr";
     [ObservableProperty] private int _smtpPort = 587;
     [ObservableProperty] private bool _smtpSsl = true;
     [ObservableProperty] private string _smtpUsername = "info@itchy.com.tr";
@@ -162,6 +162,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private int _schedulerHour = 2;
     [ObservableProperty] private int _schedulerMinute = 0;
     [ObservableProperty] private string _schedulerProfile = "";
+    public IReadOnlyList<int> SchedulerHours { get; } = Enumerable.Range(0, 24).ToList();
+    public IReadOnlyList<int> SchedulerMinutes { get; } = Enumerable.Range(0, 60).ToList();
 
     partial void OnSchedulerHourChanged(int value)
         => SchedulerTime = $"{value:D2}:{SchedulerMinute:D2}";

@@ -123,7 +123,8 @@ Teknik servis ortamları için geliştirilmiş kapsamlı Windows yedekleme ve ge
 Müşteri ana ekranda yalnızca alıcı e-posta adresini girer. Gönderici hesabı ilk kurulumda Ayarlar > Bildirimler > Gönderici hesabı kurulumu bölümünden yapılandırılır.
 
 - Gönderen/kullanıcı adı: `info@itchy.com.tr`
-- SMTP sunucusu ve port: e-posta sağlayıcınızın verdiği değerler
+- SMTP sunucusu: `mail.itchy.com.tr`
+- SMTP portu: `587` (`STARTTLS`)
 - SMTP veya uygulama parolası: Windows kullanıcı hesabına bağlı DPAPI korumasıyla yerel olarak saklanır
 - SSL/TLS: sağlayıcının gereksinimine göre etkinleştirilir
 

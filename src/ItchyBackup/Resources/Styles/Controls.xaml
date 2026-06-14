@@ -24,6 +24,12 @@
         </ControlTemplate>
       </Setter.Value>
     </Setter>
+    <Style.Triggers>
+      <Trigger Property="Orientation" Value="Horizontal">
+        <Setter Property="Width" Value="Auto"/>
+        <Setter Property="Height" Value="7"/>
+      </Trigger>
+    </Style.Triggers>
   </Style>
 
   <!-- ══ CheckBox ══════════════════════════════════════════════════════════ -->

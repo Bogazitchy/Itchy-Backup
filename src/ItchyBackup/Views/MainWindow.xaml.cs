@@ -103,6 +103,14 @@ public partial class MainWindow : Window
         });
     }
 
+    private void ProfilesScrollLeft_Click(object sender, RoutedEventArgs e)
+        => ProfilesScrollViewer.ScrollToHorizontalOffset(
+            Math.Max(0, ProfilesScrollViewer.HorizontalOffset - 220));
+
+    private void ProfilesScrollRight_Click(object sender, RoutedEventArgs e)
+        => ProfilesScrollViewer.ScrollToHorizontalOffset(
+            ProfilesScrollViewer.HorizontalOffset + 220);
+
     private void NetworkPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
     {
         if (DataContext is MainViewModel vm && sender is System.Windows.Controls.PasswordBox box)

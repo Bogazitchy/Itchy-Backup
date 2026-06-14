@@ -157,7 +157,7 @@ public class NotificationOptions
     public bool EnableWebhook { get; set; }
     public string WebhookUrl { get; set; } = "";
     public bool EnableEmail { get; set; }
-    public string SmtpHost { get; set; } = "";
+    public string SmtpHost { get; set; } = "mail.itchy.com.tr";
     public int SmtpPort { get; set; } = 587;
     public bool SmtpSsl { get; set; } = true;
     public string SmtpUsername { get; set; } = "";
