@@ -4,7 +4,7 @@
 
 - Yedek kategorileri ikonlu ve katlanabilir hale getirildi.
 - Kaydedilmiş profiller yedek ekranına taşınarak yatay kaydırılabilir profil şeridi oluşturuldu.
-- Profil şeridine görünür kaydırma çubuğu ile sağ/sol gezinme düğmeleri eklendi.
+- Profil şeridi, tüm profil sayılarına uyum sağlayan tam genişlik açılır profil seçiciye dönüştürüldü.
 - Hazır şablon düğmeleri kaldırılarak profil seçimi tek bir alanda toplandı.
 - Rotasyon seçeneklerine yedek sayısı ve gün sınırı girişleri eklendi.
 - Zamanlayıcı saat seçimi saat ve dakika açılır listeleriyle yenilendi.

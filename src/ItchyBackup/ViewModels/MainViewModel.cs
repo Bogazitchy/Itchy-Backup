@@ -23,6 +23,7 @@ public partial class MainViewModel : ObservableObject
     public ObservableCollection<PreflightCheckItem> PreflightChecks { get; } = new();
     public ObservableCollection<BackupPreset> BackupPresets { get; } = new();
     public ObservableCollection<CompareEntry> CompareEntries { get; } = new();
+    [ObservableProperty] private BackupProfile? _selectedQuickProfile;
 
     // Panel navigasyon
     [ObservableProperty] private ActivePanel _activePanel = ActivePanel.Backup;
@@ -252,9 +253,12 @@ public partial class MainViewModel : ObservableObject
 
     private void LoadProfiles()
     {
+        var selectedName = SelectedQuickProfile?.ProfileName;
         SavedProfiles.Clear();
         foreach (var p in ProfileService.LoadAll())
             SavedProfiles.Add(p);
+        SelectedQuickProfile = SavedProfiles.FirstOrDefault(p => p.ProfileName == selectedName)
+            ?? SavedProfiles.FirstOrDefault();
     }
 
     private void LoadPresetTemplates()
@@ -640,6 +644,34 @@ public partial class MainViewModel : ObservableObject
             foreach (var item in cat.Items)
                 item.IsSelected = ids.Contains(item.Id);
         UpdateSummary();
+    }
+
+    [RelayCommand]
+    public void ApplySelectedProfile()
+    {
+        if (SelectedQuickProfile != null)
+            LoadProfile(SelectedQuickProfile);
+    }
+
+    [RelayCommand]
+    public void EditSelectedProfile()
+    {
+        if (SelectedQuickProfile != null)
+            EditProfile(SelectedQuickProfile);
+    }
+
+    [RelayCommand]
+    public void ExportSelectedProfile()
+    {
+        if (SelectedQuickProfile != null)
+            ExportProfile(SelectedQuickProfile);
+    }
+
+    [RelayCommand]
+    public void DeleteSelectedProfile()
+    {
+        if (SelectedQuickProfile != null)
+            DeleteProfile(SelectedQuickProfile);
     }
 
     [RelayCommand]

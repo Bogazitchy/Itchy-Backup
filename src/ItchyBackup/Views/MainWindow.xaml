@@ -352,69 +352,60 @@
                       </StackPanel>
                     </Grid>
                   </Border>
-                  <Grid Grid.Row="1" Margin="12,9,12,8">
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="Auto"/>
-                      <ColumnDefinition Width="26"/>
-                      <ColumnDefinition Width="*"/>
-                      <ColumnDefinition Width="26"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
-                      <TextBlock Text="PROFİLLER" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
-                      <Button Style="{StaticResource MiniButton}" Command="{Binding ImportProfileCommand}"
-                              ToolTip="Profil içe aktar" Margin="7,0,0,0">
-                        <TextBlock Text="+" FontSize="13"/>
+                  <Border Grid.Row="1" Margin="12,9,12,8" Padding="10,8"
+                          Background="{DynamicResource BgTertiary}" BorderBrush="{DynamicResource BorderBrush}"
+                          BorderThickness="1" CornerRadius="5">
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="7"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="34"/>
+                        <ColumnDefinition Width="34"/>
+                        <ColumnDefinition Width="34"/>
+                        <ColumnDefinition Width="34"/>
+                      </Grid.ColumnDefinitions>
+                      <StackPanel>
+                        <TextBlock Text="YEDEK PROFİLİ" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox Style="{StaticResource ItchyComboBox}" ItemsSource="{Binding SavedProfiles}"
+                                  SelectedItem="{Binding SelectedQuickProfile}" Height="36">
+                          <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                              <TextBlock Text="{Binding ProfileName}"/>
+                            </DataTemplate>
+                          </ComboBox.ItemTemplate>
+                        </ComboBox>
+                      </StackPanel>
+                      <Button Grid.Column="2" Style="{StaticResource PrimaryButton}" Padding="14,10"
+                              Command="{Binding ApplySelectedProfileCommand}" VerticalAlignment="Bottom">
+                        <StackPanel Orientation="Horizontal">
+                          <TextBlock Text="" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"/>
+                          <TextBlock Text="Uygula"/>
+                        </StackPanel>
                       </Button>
-                    </StackPanel>
-                    <Button Grid.Column="1" Style="{StaticResource MiniButton}" Padding="2"
-                            Click="ProfilesScrollLeft_Click" ToolTip="Önceki profiller">
-                      <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
-                    </Button>
-                    <ScrollViewer x:Name="ProfilesScrollViewer" Grid.Column="2" HorizontalScrollBarVisibility="Visible"
-                                  VerticalScrollBarVisibility="Disabled" PanningMode="HorizontalOnly">
-                      <ItemsControl ItemsSource="{Binding SavedProfiles}">
-                        <ItemsControl.ItemsPanel>
-                          <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                          <DataTemplate DataType="{x:Type models:BackupProfile}">
-                            <Border Background="{DynamicResource BgTertiary}" BorderBrush="{DynamicResource BorderBrush}"
-                                    BorderThickness="1" CornerRadius="4" Margin="0,0,6,2" Padding="3">
-                              <StackPanel Orientation="Horizontal">
-                                <Button Style="{StaticResource MiniButton}" Padding="8,4"
-                                        Command="{Binding DataContext.LoadProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding}" ToolTip="{Binding LastUsed}">
-                                  <TextBlock Text="{Binding ProfileName}" FontSize="9" FontWeight="SemiBold"/>
-                                </Button>
-                                <Button Background="Transparent" BorderThickness="0" Width="22"
-                                        Command="{Binding DataContext.EditProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding}" ToolTip="Düzenle">
-                                  <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="9"
-                                             Foreground="{DynamicResource AccentLight}"/>
-                                </Button>
-                                <Button Background="Transparent" BorderThickness="0" Width="22"
-                                        Command="{Binding DataContext.ExportProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding}" ToolTip="Dışa aktar">
-                                  <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="9"
-                                             Foreground="{DynamicResource TextSecondary}"/>
-                                </Button>
-                                <Button Background="Transparent" BorderThickness="0" Width="22"
-                                        Command="{Binding DataContext.DeleteProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding}" ToolTip="Sil">
-                                  <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="9"
-                                             Foreground="{DynamicResource Danger}"/>
-                                </Button>
-                              </StackPanel>
-                            </Border>
-                          </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                      </ItemsControl>
-                    </ScrollViewer>
-                    <Button Grid.Column="3" Style="{StaticResource MiniButton}" Padding="2"
-                            Click="ProfilesScrollRight_Click" ToolTip="Sonraki profiller">
-                      <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
-                    </Button>
-                  </Grid>
+                      <Button Grid.Column="4" Style="{StaticResource MiniButton}" Padding="0" Height="36"
+                              Command="{Binding EditSelectedProfileCommand}" ToolTip="Seçili profili düzenle"
+                              VerticalAlignment="Bottom">
+                        <TextBlock Text="" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource AccentLight}"/>
+                      </Button>
+                      <Button Grid.Column="5" Style="{StaticResource MiniButton}" Padding="0" Height="36"
+                              Command="{Binding ExportSelectedProfileCommand}" ToolTip="Seçili profili dışa aktar"
+                              VerticalAlignment="Bottom">
+                        <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
+                      </Button>
+                      <Button Grid.Column="6" Style="{StaticResource MiniButton}" Padding="0" Height="36"
+                              Command="{Binding ImportProfileCommand}" ToolTip="Profil içe aktar"
+                              VerticalAlignment="Bottom">
+                        <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
+                      </Button>
+                      <Button Grid.Column="7" Style="{StaticResource MiniButton}" Padding="0" Height="36"
+                              Command="{Binding DeleteSelectedProfileCommand}" ToolTip="Seçili profili sil"
+                              VerticalAlignment="Bottom">
+                        <TextBlock Text="" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource Danger}"/>
+                      </Button>
+                    </Grid>
+                  </Border>
                   <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="10,4,8,10">
                     <ItemsControl ItemsSource="{Binding Categories}">
                       <ItemsControl.ItemTemplate>
