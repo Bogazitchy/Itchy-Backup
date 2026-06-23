@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -65,6 +66,29 @@ public partial class MainWindow : Window
             cat.SetAllSelected(cat.MasterChecked != true);
     }
 
+    private void CategoryHeader_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (e.OriginalSource is DependencyObject source && IsInsideInteractiveControl(source))
+            return;
+
+        if (sender is FrameworkElement { DataContext: BackupCategory category })
+        {
+            category.IsExpanded = !category.IsExpanded;
+            e.Handled = true;
+        }
+    }
+
+    private static bool IsInsideInteractiveControl(DependencyObject source)
+    {
+        for (var current = source; current != null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current is System.Windows.Controls.Primitives.ButtonBase or System.Windows.Controls.CheckBox)
+                return true;
+        }
+
+        return false;
+    }
+
     private async void ThemeToggle_Click(object sender, RoutedEventArgs e)
     {
         if (_themeAnimating) return;
@@ -121,12 +145,6 @@ public partial class MainWindow : Window
             vm.RestoreZipPassword = box.Password;
     }
 
-    private void SmtpPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is MainViewModel vm && sender is System.Windows.Controls.PasswordBox box)
-            vm.SmtpPassword = box.Password;
-    }
-
     private void NetworkPasswordReveal_Click(object sender, RoutedEventArgs e)
         => TogglePasswordReveal(NetworkPasswordBox, NetworkPasswordRevealBox);
 
@@ -135,9 +153,6 @@ public partial class MainWindow : Window
 
     private void RestoreZipPasswordReveal_Click(object sender, RoutedEventArgs e)
         => TogglePasswordReveal(RestoreZipPasswordBox, RestoreZipPasswordRevealBox);
-
-    private void SmtpPasswordReveal_Click(object sender, RoutedEventArgs e)
-        => TogglePasswordReveal(SmtpPasswordBox, SmtpPasswordRevealBox);
 
     private static void TogglePasswordReveal(System.Windows.Controls.PasswordBox passwordBox, System.Windows.Controls.TextBox revealBox)
     {

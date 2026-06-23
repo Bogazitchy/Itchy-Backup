@@ -65,7 +65,7 @@
         </Border>
       </Border>
 
-      <TextBlock Text="v1.5.0" FontSize="10" FontFamily="Consolas"
+      <TextBlock Text="v1.6.0" FontSize="10" FontFamily="Consolas"
                  Foreground="#5A5A72" HorizontalAlignment="Center" Margin="0,14,0,0"/>
     </StackPanel>
   </Border>

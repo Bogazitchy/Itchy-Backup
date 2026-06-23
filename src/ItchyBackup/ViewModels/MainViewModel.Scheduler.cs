@@ -11,4 +11,20 @@ public partial class MainViewModel
     [RelayCommand] public void ToggleFri() { SchedFri = !SchedFri; }
     [RelayCommand] public void ToggleSat() { SchedSat = !SchedSat; }
     [RelayCommand] public void ToggleSun() { SchedSun = !SchedSun; }
+
+    [RelayCommand]
+    public void BrowseSchedulerDestination()
+    {
+        using var dialog = new System.Windows.Forms.FolderBrowserDialog
+        {
+            Description = "Zamanlayıcı yedek hedef klasörünü seçin",
+            UseDescriptionForTitle = true,
+            SelectedPath = string.IsNullOrWhiteSpace(SchedulerDestinationPath)
+                ? DestinationPath
+                : SchedulerDestinationPath
+        };
+
+        if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            SchedulerDestinationPath = dialog.SelectedPath;
+    }
 }

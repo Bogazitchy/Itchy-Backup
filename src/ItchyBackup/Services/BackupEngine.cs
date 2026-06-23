@@ -110,9 +110,17 @@ public class BackupEngine
 
         LogService.InitializeForBackup(backupFolder);
         LogService.Info("=== Itchy Backup başladı ===");
+        LogService.Info($"Sürüm: {AppInfo.DisplayVersion}");
         LogService.Info($"Hedef: {backupFolder}");
         LogService.Info($"Bilgisayar: {Environment.MachineName} | Kullanıcı: {Environment.UserName}");
-        LogService.Info($"ZIP: {_options.UseZip}, Şifre: {_options.UsePassword}, VSS: {_options.UseVss}");
+        LogService.Info($"Seçenekler: ZIP={_options.UseZip}, ZIP parola={_options.UsePassword}, VSS={_options.UseVss}, Checksum={_options.VerifyChecksum}, Artımlı={_options.IsIncremental}, Sıkıştırma={_options.CompressionLevel}");
+        LogService.Info($"Rotasyon: {_options.RotationPolicy}, SonN={_options.RotationKeepLastN}, Gün={_options.RotationDeleteOlderThanDays}");
+        LogService.Info($"Ek hedef sayısı: {_options.AdditionalDestinations.Count}");
+        foreach (var extraDestination in _options.AdditionalDestinations)
+            LogService.Info($"Ek hedef: {extraDestination}");
+        LogService.Info($"Kaynak sayısı: {_options.SelectedItems.Count}");
+        foreach (var selectedItem in _options.SelectedItems)
+            LogService.Info($"Kaynak: [{selectedItem.Parent?.Name}] {selectedItem.Label} -> {selectedItem.Path}");
 
         _state.TotalItems = _options.SelectedItems.Count;
         _state.TotalBytes = await EstimateTotalSizeAsync();
@@ -164,8 +172,14 @@ public class BackupEngine
 
             try
             {
+                var beforeCopied = _state.FilesCopied;
+                var beforeSkipped = _state.FilesSkipped;
+                var beforeUnchanged = _state.FilesUnchanged;
+                var beforeBytes = _state.CopiedBytes;
+
+                LogService.Info($"KAYNAK BAŞLADI: {item.Label} | Kategori={item.Parent?.Name} | Kaynak={item.Path}");
                 await BackupItemAsync(item, workFolder, vss);
-                LogService.Info($"OK: {item.Label}");
+                LogService.Info($"OK: {item.Label} | Kopyalanan={_state.FilesCopied - beforeCopied}, Değişmeyen={_state.FilesUnchanged - beforeUnchanged}, Atlanan={_state.FilesSkipped - beforeSkipped}, Veri={DiskSpaceChecker.FormatBytes(_state.CopiedBytes - beforeBytes)}");
             }
             catch (OperationCanceledException) { throw; }
             catch (Exception ex)
@@ -254,7 +268,9 @@ public class BackupEngine
         Result.Elapsed = _sw.Elapsed;
         Result.ReportPath = await BackupReportService.WriteHtmlReportAsync(Result, _options, backupFolder);
 
-        LogService.Info($"=== Tamamlandı. Süre: {_sw.Elapsed:mm\\:ss} Dosya: {_state.FilesCopied} Değişmedi: {_state.FilesUnchanged} Hata: {_state.Errors.Count} ===");
+        LogService.Info($"Rapor: {Result.ReportPath}");
+        LogService.Info($"Log dosyası: {LogService.GetLogPath()}");
+        LogService.Info($"=== Tamamlandı. Süre: {_sw.Elapsed:mm\\:ss} Dosya: {_state.FilesCopied} Değişmedi: {_state.FilesUnchanged} Atlandı: {_state.FilesSkipped} Veri: {DiskSpaceChecker.FormatBytes(_state.CopiedBytes)} Hata: {_state.Errors.Count} Uyarı: {_state.Warnings.Count} ===");
 
         NotificationService.ShowSuccess("Itchy Backup",
             $"Yedekleme tamamlandı!\n{_state.TotalItems} kategori • {_state.FilesCopied} dosya • {_state.Errors.Count} hata • {_sw.Elapsed:mm\\:ss}");
@@ -372,6 +388,7 @@ Kategori Sayısı: {_options.SelectedItems.Count}
                     if (File.Exists(baseCopy) && IsUnchanged(file.FullName, baseCopy))
                     {
                         lock (_stateLock) { _state.FilesUnchanged++; _state.CopiedBytes += file.Length; }
+                        LogService.Info($"DEĞİŞMEDİ: {file.FullName} | Baz={baseCopy} | Boyut={DiskSpaceChecker.FormatBytes(file.Length)}");
                         return;
                     }
                 }
@@ -442,6 +459,9 @@ Kategori Sayısı: {_options.SelectedItems.Count}
                 }
             }
             lock (_stateLock) { _state.FilesCopied++; }
+            var length = 0L;
+            try { length = new FileInfo(src).Length; } catch { }
+            LogService.Info($"KOPYALANDI: {src} -> {dest} | Kategori={category} | Boyut={DiskSpaceChecker.FormatBytes(length)}");
             UpdateSpeed();
         }
         catch (IOException ex) when (ex.Message.Contains("used by another"))

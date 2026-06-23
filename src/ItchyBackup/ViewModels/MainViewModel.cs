@@ -163,6 +163,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private int _schedulerHour = 2;
     [ObservableProperty] private int _schedulerMinute = 0;
     [ObservableProperty] private string _schedulerProfile = "";
+    [ObservableProperty] private string _schedulerDestinationPath = "";
     public IReadOnlyList<int> SchedulerHours { get; } = Enumerable.Range(0, 24).ToList();
     public IReadOnlyList<int> SchedulerMinutes { get; } = Enumerable.Range(0, 60).ToList();
 
@@ -299,7 +300,11 @@ public partial class MainViewModel : ObservableObject
         var p = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "ItchyBackup", "last_dest.txt");
-        if (File.Exists(p)) DestinationPath = File.ReadAllText(p).Trim();
+        if (File.Exists(p))
+        {
+            DestinationPath = File.ReadAllText(p).Trim();
+            SchedulerDestinationPath = DestinationPath;
+        }
     }
 
     private void SaveLastDestination()
@@ -354,6 +359,8 @@ public partial class MainViewModel : ObservableObject
         if (d.ShowDialog() == System.Windows.Forms.DialogResult.OK)
         {
             DestinationPath = d.SelectedPath;
+            if (string.IsNullOrWhiteSpace(SchedulerDestinationPath))
+                SchedulerDestinationPath = d.SelectedPath;
             SaveLastDestination();
         }
     }
@@ -564,6 +571,13 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand] public void CancelBackup() => _cts?.Cancel();
 
     [RelayCommand]
+    public void CreateProfile()
+    {
+        EditingProfile = null;
+        SaveProfile();
+    }
+
+    [RelayCommand]
     public void SaveProfile()
     {
         var dialog = new Views.SaveProfileDialog(EditingProfile?.ProfileName, EditingProfile?.Icon)
@@ -601,8 +615,11 @@ public partial class MainViewModel : ObservableObject
             ProfileService.Delete(oldName);
 
         ProfileService.Save(profile);
+        var savedName = profile.ProfileName;
         EditingProfile = null;
         LoadProfiles();
+        SelectedQuickProfile = SavedProfiles.FirstOrDefault(p => p.ProfileName == savedName)
+            ?? SelectedQuickProfile;
     }
 
     [RelayCommand]
@@ -656,8 +673,11 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void EditSelectedProfile()
     {
-        if (SelectedQuickProfile != null)
-            EditProfile(SelectedQuickProfile);
+        if (SelectedQuickProfile == null) return;
+
+        LoadProfile(SelectedQuickProfile);
+        EditingProfile = SelectedQuickProfile;
+        SaveProfile();
     }
 
     [RelayCommand]
@@ -875,14 +895,23 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        CreateScheduledTask(days, SchedulerTime, SchedulerProfile);
-        SchedulerStatus = $"Aktif — {string.Join(", ", days)} saat {SchedulerTime}";
+        if (string.IsNullOrWhiteSpace(SchedulerDestinationPath))
+        {
+            System.Windows.MessageBox.Show("Yedeklerin kaydedileceği hedef klasörü seçin.", "Zamanlayıcı",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        Directory.CreateDirectory(SchedulerDestinationPath);
+
+        CreateScheduledTask(days, SchedulerTime, SchedulerProfile, SchedulerDestinationPath);
+        SchedulerStatus = $"Aktif — {string.Join(", ", days)} saat {SchedulerTime} • {SchedulerDestinationPath}";
         System.Windows.MessageBox.Show(
-            $"Zamanlayıcı oluşturuldu!\n\nGünler: {string.Join(", ", days)}\nSaat: {SchedulerTime}\nProfil: {SchedulerProfile}",
+            $"Zamanlayıcı oluşturuldu!\n\nGünler: {string.Join(", ", days)}\nSaat: {SchedulerTime}\nProfil: {SchedulerProfile}\nHedef: {SchedulerDestinationPath}",
             "Zamanlayıcı", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
     }
 
-    private void CreateScheduledTask(List<string> days, string time, string profile)
+    private void CreateScheduledTask(List<string> days, string time, string profile, string destinationPath)
     {
         try
         {
@@ -896,14 +925,14 @@ public partial class MainViewModel : ObservableObject
             foreach (var day in days)
             {
                 var taskName = $"ItchyBackup_{day}";
-                var args = $"/create /f /tn \"{taskName}\" /tr \"\\\"{exePath}\\\" --autobackup \\\"{profile}\\\"\" /sc weekly /d {day} /st {timeStr} /rl HIGHEST";
+                var args = $"/create /f /tn \"{taskName}\" /tr \"\\\"{exePath}\\\" --autobackup \\\"{profile}\\\" --destination \\\"{destinationPath}\\\"\" /sc weekly /d {day} /st {timeStr} /rl HIGHEST";
                 var psi = new System.Diagnostics.ProcessStartInfo("schtasks", args)
                 {
                     CreateNoWindow = true, UseShellExecute = false
                 };
                 System.Diagnostics.Process.Start(psi)?.WaitForExit();
             }
-            LogService.Info($"Zamanlayıcı oluşturuldu: {string.Join(",", days)} {timeStr}");
+            LogService.Info($"Zamanlayıcı oluşturuldu: {string.Join(",", days)} {timeStr} -> {destinationPath}");
         }
         catch (Exception ex)
         {
@@ -957,6 +986,8 @@ public partial class MainViewModel : ObservableObject
         StartupService.SetEnabled(StartWithWindows);
         if (!string.IsNullOrEmpty(DefaultDestination) && string.IsNullOrEmpty(DestinationPath))
             DestinationPath = DefaultDestination;
+        if (!string.IsNullOrEmpty(DefaultDestination) && string.IsNullOrEmpty(SchedulerDestinationPath))
+            SchedulerDestinationPath = DefaultDestination;
         System.Windows.MessageBox.Show("Ayarlar kaydedildi.", "Itchy Backup",
             System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
     }
@@ -1014,6 +1045,8 @@ public partial class MainViewModel : ObservableObject
         ThemeService.Apply(ThemeName, AccentColor);
         if (string.IsNullOrEmpty(DestinationPath) && !string.IsNullOrEmpty(DefaultDestination))
             DestinationPath = DefaultDestination;
+        if (string.IsNullOrEmpty(SchedulerDestinationPath) && !string.IsNullOrEmpty(DestinationPath))
+            SchedulerDestinationPath = DestinationPath;
     }
 
     [RelayCommand]

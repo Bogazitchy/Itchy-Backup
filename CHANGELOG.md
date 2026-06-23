@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.6.0 - Profil, Zamanlayıcı ve Log Güncellemesi
+
+- Yedek kaynaklarında kategori başlığına tıklayınca kategori açılıp kapanır hale getirildi.
+- Profil yönetimi yeniden ele alındı; `+` butonu artık yeni profil oluşturuyor.
+- Seçili profil düzenleme akışı yeniden adlandırma ve mevcut ayarları güncelleme için doğrudan dialog açacak şekilde düzeltildi.
+- Profil içe aktarma, dışa aktarma, silme ve uygulama komutları ayrı aksiyonlar olarak korunup netleştirildi.
+- Zamanlayıcı ekranına yedek hedef klasörü alanı ve klasör seçme komutu eklendi.
+- Windows Görev Zamanlayıcısı komutu artık profil ile birlikte hedef klasörü de uygulamaya geçiriyor.
+- `--autobackup` çalışma modu tamamlandı; zamanlayıcıdan açılan uygulama arayüz göstermeden profili çalıştırıp yedek alabiliyor.
+- Müşteri e-postası ekranından gönderen SMTP hesap kurulumu kaldırıldı; kullanıcı yalnızca alıcı e-posta adresini giriyor.
+- Uygulama logları detaylandırıldı; sürüm, sistem, hedef, seçenekler, kaynak listesi, kategori özetleri, dosya kopyalama/değişmedi/atlandı bilgileri ve rapor yolu kayıt altına alınıyor.
+- Uygulama, kurulum ve paket sürümü `v1.6.0` olarak güncellendi.
+
 ## v1.5.0 - Arayüz ve İş Akışı Güncellemesi
 
 - Yedek kategorileri ikonlu ve katlanabilir hale getirildi.

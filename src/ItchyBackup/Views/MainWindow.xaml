@@ -135,7 +135,7 @@
 
           <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
             <Border Background="{DynamicResource AccentSubtle}" CornerRadius="3" Padding="7,3">
-              <TextBlock Text="v1.5.0" FontSize="9" FontFamily="Consolas"
+              <TextBlock Text="v1.6.0" FontSize="9" FontFamily="Consolas"
                          Foreground="{DynamicResource AccentLight}"/>
             </Border>
             <TextBlock Text="Teknik servis yedekleme konsolu" Margin="10,0,0,0"
@@ -365,6 +365,7 @@
                         <ColumnDefinition Width="34"/>
                         <ColumnDefinition Width="34"/>
                         <ColumnDefinition Width="34"/>
+                        <ColumnDefinition Width="34"/>
                       </Grid.ColumnDefinitions>
                       <StackPanel>
                         <TextBlock Text="YEDEK PROFİLİ" Style="{StaticResource FieldLabel}"/>
@@ -385,21 +386,27 @@
                         </StackPanel>
                       </Button>
                       <Button Grid.Column="4" Style="{StaticResource MiniButton}" Padding="0" Height="36"
-                              Command="{Binding EditSelectedProfileCommand}" ToolTip="Seçili profili düzenle"
+                              Command="{Binding CreateProfileCommand}" ToolTip="Yeni profil oluştur"
+                              VerticalAlignment="Bottom">
+                        <TextBlock Text="+" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentLight}"/>
+                      </Button>
+                      <Button Grid.Column="5" Style="{StaticResource MiniButton}" Padding="0" Height="36"
+                              Command="{Binding EditSelectedProfileCommand}" ToolTip="Seçili profili düzenle / yeniden adlandır"
                               VerticalAlignment="Bottom">
                         <TextBlock Text="" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource AccentLight}"/>
                       </Button>
-                      <Button Grid.Column="5" Style="{StaticResource MiniButton}" Padding="0" Height="36"
+                      <Button Grid.Column="6" Style="{StaticResource MiniButton}" Padding="0" Height="36"
                               Command="{Binding ExportSelectedProfileCommand}" ToolTip="Seçili profili dışa aktar"
                               VerticalAlignment="Bottom">
                         <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
                       </Button>
-                      <Button Grid.Column="6" Style="{StaticResource MiniButton}" Padding="0" Height="36"
+                      <Button Grid.Column="7" Style="{StaticResource MiniButton}" Padding="0" Height="36"
                               Command="{Binding ImportProfileCommand}" ToolTip="Profil içe aktar"
                               VerticalAlignment="Bottom">
                         <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
                       </Button>
-                      <Button Grid.Column="7" Style="{StaticResource MiniButton}" Padding="0" Height="36"
+                      <Button Grid.Column="8" Style="{StaticResource MiniButton}" Padding="0" Height="36"
                               Command="{Binding DeleteSelectedProfileCommand}" ToolTip="Seçili profili sil"
                               VerticalAlignment="Bottom">
                         <TextBlock Text="" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource Danger}"/>
@@ -413,7 +420,8 @@
                           <Border Margin="0,0,0,6" Background="{DynamicResource BgTertiary}"
                                   BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4">
                             <StackPanel>
-                              <Grid Height="44" Margin="10,0">
+                              <Grid Height="44" Margin="10,0" Cursor="Hand"
+                                    MouseLeftButtonUp="CategoryHeader_MouseLeftButtonUp">
                                 <Grid.ColumnDefinitions>
                                   <ColumnDefinition Width="22"/>
                                   <ColumnDefinition Width="28"/>
@@ -1024,6 +1032,16 @@
                   <ComboBox Style="{StaticResource ItchyComboBox}" ItemsSource="{Binding SavedProfiles}"
                             DisplayMemberPath="ProfileName" SelectedValuePath="ProfileName"
                             SelectedValue="{Binding SchedulerProfile}" Height="34" Margin="0,0,0,14"/>
+                  <TextBlock Text="YEDEK HEDEFİ" Style="{StaticResource FieldLabel}"/>
+                  <Grid Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding SchedulerDestinationPath}"
+                             Height="34" ToolTip="Zamanlayıcı çalıştığında yedeklerin yazılacağı klasör"/>
+                    <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Padding="12,8"
+                            Command="{Binding BrowseSchedulerDestinationCommand}">
+                      <TextBlock Text="Seç"/>
+                    </Button>
+                  </Grid>
                   <TextBlock Text="SAAT" Style="{StaticResource FieldLabel}"/>
                   <Border Background="{DynamicResource BgTertiary}" BorderBrush="{DynamicResource BorderBrush}"
                           BorderThickness="1" CornerRadius="6" Padding="14,12" Margin="0,0,0,14">
@@ -1175,43 +1193,6 @@
                         </Button>
                       </StackPanel>
                     </Border>
-                    <Expander Header="Gönderici hesabı kurulumu" Foreground="{DynamicResource TextSecondary}"
-                              FontSize="10" Margin="0,0,0,4">
-                      <StackPanel Margin="0,10,0,0">
-                        <TextBlock Text="Bu alan yalnızca info@itchy.com.tr hesabı ilk kez kurulurken doldurulur."
-                                   FontSize="9" TextWrapping="Wrap" Foreground="{DynamicResource TextTertiary}" Margin="0,0,0,8"/>
-                        <Grid Margin="0,0,0,6">
-                          <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="6"/><ColumnDefinition Width="90"/></Grid.ColumnDefinitions>
-                          <StackPanel>
-                            <TextBlock Text="SMTP SUNUCUSU" Style="{StaticResource FieldLabel}"/>
-                            <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding SmtpHost}" Height="32"/>
-                          </StackPanel>
-                          <StackPanel Grid.Column="2">
-                            <TextBlock Text="PORT" Style="{StaticResource FieldLabel}"/>
-                            <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding SmtpPort}" Height="32"/>
-                          </StackPanel>
-                        </Grid>
-                        <TextBlock Text="KULLANICI ADI" Style="{StaticResource FieldLabel}"/>
-                        <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding SmtpUsername}" Height="32" Margin="0,0,0,6"/>
-                        <TextBlock Text="SMTP / UYGULAMA PAROLASI" Style="{StaticResource FieldLabel}"/>
-                        <Grid Margin="0,0,0,6">
-                          <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="6"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                          <PasswordBox x:Name="SmtpPasswordBox" PasswordChanged="SmtpPasswordBox_PasswordChanged"
-                                       Background="{DynamicResource BgQuaternary}" Foreground="{DynamicResource TextPrimary}"
-                                       BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Height="32" Padding="8,3"/>
-                          <TextBox x:Name="SmtpPasswordRevealBox" Style="{StaticResource ItchyTextBox}"
-                                   Text="{Binding SmtpPassword}" Height="32" Visibility="Collapsed"/>
-                          <Button Grid.Column="2" Style="{StaticResource MiniButton}" Click="SmtpPasswordReveal_Click">
-                            <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
-                          </Button>
-                        </Grid>
-                        <TextBlock Text="GÖNDEREN ADRESİ" Style="{StaticResource FieldLabel}"/>
-                        <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding EmailFrom}" Height="32" Margin="0,0,0,6"/>
-                        <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding SmtpSsl}" Margin="0,4,0,4">
-                          <TextBlock Text="SSL/TLS kullan"/>
-                        </CheckBox>
-                      </StackPanel>
-                    </Expander>
                   </StackPanel>
                 </Border>
               </Grid>
@@ -1281,7 +1262,7 @@
       <Border Grid.Row="2" Background="{DynamicResource BgSecondary}"
               BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
         <Grid Margin="12,0">
-          <TextBlock Text="Itchy Backup v1.5.0" FontSize="9" FontFamily="Consolas"
+          <TextBlock Text="Itchy Backup v1.6.0" FontSize="9" FontFamily="Consolas"
                      Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"/>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
             <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentLight}" Margin="0,0,6,0"/>

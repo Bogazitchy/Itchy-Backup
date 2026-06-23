@@ -1,5 +1,7 @@
 using ItchyBackup.Models;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Win32;
 
 namespace ItchyBackup.Services;
@@ -166,9 +168,12 @@ public static class CategoryBuilder
     {
         var name = Path.GetFileName(path.TrimEnd('\\', '/'));
         if (string.IsNullOrEmpty(name)) name = path;
+        var normalizedPath = Path.GetFullPath(path).TrimEnd('\\', '/').ToUpperInvariant();
+        var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(normalizedPath)))[..12].ToLowerInvariant();
+
         return new BackupItem
         {
-            Id = $"custom_{Guid.NewGuid():N}",
+            Id = $"custom_{hash}",
             Label = name,
             Path = path,
             IsDetected = Directory.Exists(path) || File.Exists(path)
