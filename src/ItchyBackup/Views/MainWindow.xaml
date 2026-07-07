@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:ItchyBackup.ViewModels"
         xmlns:models="clr-namespace:ItchyBackup.Models"
+        xmlns:services="clr-namespace:ItchyBackup.Services"
         Title="Itchy Backup" Width="1280" Height="820"
         MinWidth="1060" MinHeight="700"
         WindowStyle="None" AllowsTransparency="True"
@@ -135,7 +136,7 @@
 
           <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
             <Border Background="{DynamicResource AccentSubtle}" CornerRadius="3" Padding="7,3">
-              <TextBlock Text="v1.6.0" FontSize="9" FontFamily="Consolas"
+              <TextBlock Text="v1.7.0" FontSize="9" FontFamily="Consolas"
                          Foreground="{DynamicResource AccentLight}"/>
             </Border>
             <TextBlock Text="Teknik servis yedekleme konsolu" Margin="10,0,0,0"
@@ -181,6 +182,22 @@
                        FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextMuted}"/>
 
             <StackPanel Grid.Row="1">
+              <Button Style="{StaticResource NavButton}" Command="{Binding OpenDashboardCommand}">
+                <Grid>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="28"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Border Width="3" Height="22" CornerRadius="2" Background="{DynamicResource Accent}"
+                          HorizontalAlignment="Left" Margin="-12,0,0,0">
+                    <Border.Style>
+                      <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers><DataTrigger Binding="{Binding IsPanelDashboard}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                      </Style>
+                    </Border.Style>
+                  </Border>
+                  <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                  <TextBlock Grid.Column="1" Text="Dashboard" FontSize="12" VerticalAlignment="Center"/>
+                </Grid>
+              </Button>
               <Button Style="{StaticResource NavButton}" Command="{Binding OpenBackupCommand}">
                 <Grid>
                   <Grid.ColumnDefinitions><ColumnDefinition Width="28"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
@@ -245,6 +262,22 @@
                   <TextBlock Grid.Column="1" Text="Zamanlayıcı" FontSize="12" VerticalAlignment="Center"/>
                 </Grid>
               </Button>
+              <Button Style="{StaticResource NavButton}" Command="{Binding OpenLogsCommand}">
+                <Grid>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="28"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Border Width="3" Height="22" CornerRadius="2" Background="{DynamicResource Accent}"
+                          HorizontalAlignment="Left" Margin="-12,0,0,0">
+                    <Border.Style>
+                      <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers><DataTrigger Binding="{Binding IsPanelLogs}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                      </Style>
+                    </Border.Style>
+                  </Border>
+                  <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="15"/>
+                  <TextBlock Grid.Column="1" Text="Loglar" FontSize="12" VerticalAlignment="Center"/>
+                </Grid>
+              </Button>
               <Button Style="{StaticResource NavButton}" Command="{Binding OpenSettingsCommand}">
                 <Grid>
                   <Grid.ColumnDefinitions><ColumnDefinition Width="28"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
@@ -279,6 +312,97 @@
 
         <!-- Content -->
         <Grid Grid.Column="1" Background="{DynamicResource BgPrimary}">
+
+          <!-- DASHBOARD -->
+          <Grid Margin="20">
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers><DataTrigger Binding="{Binding IsPanelDashboard}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="14"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+            <Grid>
+              <StackPanel>
+                <TextBlock Text="Kontrol Merkezi" FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                <TextBlock Text="{Binding DashboardStatus}" FontSize="11" Foreground="{DynamicResource TextTertiary}" Margin="0,4,0,0"/>
+              </StackPanel>
+              <Button HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource SecondaryButton}"
+                      Command="{Binding RefreshDashboardCommand}">
+                <TextBlock Text="Yenile"/>
+              </Button>
+            </Grid>
+            <Grid Grid.Row="2">
+              <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+              <ItemsControl ItemsSource="{Binding DashboardCards}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="4"/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Style="{StaticResource ShellCard}" Margin="0,0,10,0" Padding="14">
+                      <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="34"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Width="28" Height="28" CornerRadius="5" Background="{DynamicResource AccentSubtle}">
+                          <TextBlock Text="{Binding Icon}" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                     Foreground="{DynamicResource AccentLight}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1">
+                          <TextBlock Text="{Binding Title}" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextMuted}"/>
+                          <TextBlock Text="{Binding Value}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"
+                                     TextTrimming="CharacterEllipsis"/>
+                          <TextBlock Text="{Binding Detail}" FontSize="9" Foreground="{DynamicResource TextTertiary}"
+                                     TextWrapping="Wrap" MaxHeight="34"/>
+                        </StackPanel>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="1.1*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="1*"/></Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Style="{StaticResource ShellCard}">
+                  <StackPanel>
+                    <TextBlock Text="Hızlı İşlemler" Style="{StaticResource SectionTitle}" Margin="0,0,0,14"/>
+                    <UniformGrid Columns="2" Rows="2">
+                      <Button Style="{StaticResource PrimaryButton}" Command="{Binding OpenBackupCommand}" Margin="0,0,8,8"><TextBlock Text="Yeni Yedek"/></Button>
+                      <Button Style="{StaticResource SecondaryButton}" Command="{Binding OpenRestoreCommand}" Margin="0,0,0,8"><TextBlock Text="Geri Yükle"/></Button>
+                      <Button Style="{StaticResource SecondaryButton}" Command="{Binding OpenSchedulerCommand}" Margin="0,0,8,0"><TextBlock Text="Zamanlayıcı"/></Button>
+                      <Button Style="{StaticResource SecondaryButton}" Command="{Binding OpenLogsCommand}"><TextBlock Text="Logları Aç"/></Button>
+                    </UniformGrid>
+                    <Separator Margin="0,16"/>
+                    <TextBlock Text="Servis akışı için öneri: önce yedek testi, sonra rapor kontrolü, son olarak gerekirse müşteri e-postası."
+                               FontSize="10" Foreground="{DynamicResource TextTertiary}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource ShellCard}" Padding="0">
+                  <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="48"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Border Padding="16,0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                      <TextBlock Text="Son Yedekler" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
+                    </Border>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                      <ItemsControl ItemsSource="{Binding BackupHistory}" Margin="10">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <Border Background="{DynamicResource BgTertiary}" CornerRadius="4" Padding="10,8" Margin="0,0,0,6">
+                              <StackPanel>
+                                <TextBlock Text="{Binding FolderName}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding Summary}" FontSize="9" Foreground="{DynamicResource TextTertiary}"/>
+                              </StackPanel>
+                            </Border>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </ScrollViewer>
+                  </Grid>
+                </Border>
+              </Grid>
+            </Grid>
+          </Grid>
 
           <!-- BACKUP -->
           <Grid Margin="20">
@@ -570,6 +694,35 @@
                         </ItemsControl.ItemTemplate>
                       </ItemsControl>
 
+                      <Border Background="{DynamicResource BgTertiary}" BorderBrush="{DynamicResource BorderBrush}"
+                              BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,12">
+                        <StackPanel>
+                          <DockPanel Margin="0,0,0,8">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource MiniButton}" Command="{Binding AddSelectedProfileToQueueCommand}">
+                              <TextBlock Text="+ Kuyruk"/>
+                            </Button>
+                            <TextBlock Text="YEDEK KUYRUĞU" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
+                          </DockPanel>
+                          <ItemsControl ItemsSource="{Binding BackupQueue}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate>
+                                <DockPanel Margin="0,0,0,4">
+                                  <Button DockPanel.Dock="Right" Style="{StaticResource MiniButton}"
+                                          Command="{Binding DataContext.RemoveQueuedProfileCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                          CommandParameter="{Binding}">
+                                    <TextBlock Text="Sil"/>
+                                  </Button>
+                                  <TextBlock Text="{Binding ProfileName}" FontSize="10" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                                </DockPanel>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                          <Button Style="{StaticResource SecondaryButton}" Command="{Binding RunBackupQueueCommand}" Margin="0,6,0,0">
+                            <TextBlock Text="Kuyruğu Başlat"/>
+                          </Button>
+                        </StackPanel>
+                      </Border>
+
                       <Separator Margin="0,2,0,12"/>
                       <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding UseZip}" Margin="0,0,0,9">
                         <TextBlock Text="ZIP paketi oluştur" FontSize="11"/>
@@ -818,8 +971,31 @@
                             <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
                           </Button>
                           <TextBlock Text="{Binding RestorePreviewText}" FontSize="9" FontFamily="Consolas"
-                                     Foreground="{DynamicResource AccentLight}" TextWrapping="Wrap"/>
+                                      Foreground="{DynamicResource AccentLight}" TextWrapping="Wrap"/>
                         </DockPanel>
+                      </Border>
+
+                      <Border Background="{DynamicResource AccentSubtle}" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+                        <StackPanel>
+                          <DockPanel Margin="0,0,0,6">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource MiniButton}"
+                                    Command="{Binding ValidateSelectedBackupCommand}">
+                              <TextBlock Text="Test Et"/>
+                            </Button>
+                            <TextBlock Text="{Binding BackupValidationSummary}" FontSize="9" FontFamily="Consolas"
+                                       Foreground="{DynamicResource AccentLight}" TextWrapping="Wrap"/>
+                          </DockPanel>
+                          <ProgressBar Style="{StaticResource ItchyProgressBar}" Value="{Binding BackupValidationScore}" Maximum="100" Height="6" Margin="0,0,0,6"/>
+                          <ItemsControl ItemsSource="{Binding BackupValidationIssues}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate>
+                                <TextBlock FontSize="8" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap">
+                                  <Run Text="{Binding Severity}"/><Run Text=": "/><Run Text="{Binding Message}"/>
+                                </TextBlock>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </StackPanel>
                       </Border>
 
                       <DockPanel Margin="0,0,0,8">
@@ -834,9 +1010,9 @@
                         <TextBlock Text="GERİ YÜKLENECEK KLASÖRLER" Style="{StaticResource FieldLabel}"
                                    VerticalAlignment="Center"/>
                       </DockPanel>
-                      <ItemsControl ItemsSource="{Binding RestoreFolders}">
-                        <ItemsControl.ItemTemplate>
-                          <DataTemplate>
+                      <TreeView ItemsSource="{Binding RestoreFolders}" Background="Transparent" BorderThickness="0">
+                        <TreeView.Resources>
+                          <HierarchicalDataTemplate DataType="{x:Type services:BackupFolderItem}" ItemsSource="{Binding Children}">
                             <Grid Margin="0,0,0,6">
                               <Grid.ColumnDefinitions><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                               <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding IsSelected}"/>
@@ -845,11 +1021,11 @@
                                 <TextBlock Text="{Binding SubText}" FontSize="8" FontFamily="Consolas" Foreground="{DynamicResource TextTertiary}"/>
                               </StackPanel>
                               <TextBlock Grid.Column="2" Text="{Binding SizeText}" FontSize="9" FontFamily="Consolas"
-                                         Foreground="{DynamicResource TextSecondary}"/>
+                                         Foreground="{DynamicResource TextSecondary}" Margin="12,0,0,0"/>
                             </Grid>
-                          </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                      </ItemsControl>
+                          </HierarchicalDataTemplate>
+                        </TreeView.Resources>
+                      </TreeView>
                     </StackPanel>
                   </ScrollViewer>
                   <Border Grid.Row="2" Padding="14,10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
@@ -1085,17 +1261,109 @@
               </Border>
               <Border Grid.Column="2" Style="{StaticResource ShellCard}">
                 <StackPanel>
-                  <TextBlock Text="Durum" Style="{StaticResource SectionTitle}" Margin="0,0,0,12"/>
+                  <DockPanel Margin="0,0,0,12">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource MiniButton}" Command="{Binding RefreshScheduledTasksCommand}">
+                      <TextBlock Text="Yenile"/>
+                    </Button>
+                    <TextBlock Text="Görev Yönetimi" Style="{StaticResource SectionTitle}"/>
+                  </DockPanel>
                   <Border Background="{DynamicResource AccentSubtle}" CornerRadius="4" Padding="12">
                     <TextBlock Text="{Binding SchedulerStatus}" FontSize="11" FontFamily="Consolas"
                                Foreground="{DynamicResource AccentLight}" TextWrapping="Wrap"/>
                   </Border>
-                  <Separator Margin="0,16"/>
-                  <TextBlock Text="Görevler en yüksek yetkiyle oluşturulur. VSS, sürücü ve sistem konumları için uygulamanın yönetici yetkisine ihtiyacı olabilir."
-                             TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource TextTertiary}"/>
+                  <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="360" Margin="0,12,0,0">
+                    <ItemsControl ItemsSource="{Binding ScheduledTasks}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Background="{DynamicResource BgTertiary}" CornerRadius="4" Padding="10,8" Margin="0,0,0,6">
+                            <Grid>
+                              <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                              <StackPanel>
+                                <TextBlock Text="{Binding TaskName}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding Summary}" FontSize="8" Foreground="{DynamicResource TextTertiary}" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding LastResult}" FontSize="8" FontFamily="Consolas" Foreground="{DynamicResource TextMuted}"/>
+                              </StackPanel>
+                              <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Style="{StaticResource MiniButton}" Margin="0,0,5,0"
+                                        Command="{Binding DataContext.RunScheduledTaskCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}">
+                                  <TextBlock Text="Test"/>
+                                </Button>
+                                <Button Style="{StaticResource MiniButton}"
+                                        Command="{Binding DataContext.DeleteScheduledTaskCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}">
+                                  <TextBlock Text="Sil"/>
+                                </Button>
+                              </StackPanel>
+                            </Grid>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </ScrollViewer>
                 </StackPanel>
               </Border>
             </Grid>
+          </Grid>
+
+          <!-- LOGS -->
+          <Grid Margin="20">
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers><DataTrigger Binding="{Binding IsPanelLogs}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+            <Grid>
+              <StackPanel>
+                <TextBlock Text="Log Merkezi" FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                <TextBlock Text="Uygulama ve yedekleme kayıtlarını filtreleyin, hata ve uyarıları hızlıca bulun."
+                           FontSize="11" Foreground="{DynamicResource TextTertiary}" Margin="0,4,0,0"/>
+              </StackPanel>
+              <Button HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource SecondaryButton}"
+                      Command="{Binding OpenLogFolderCommand}">
+                <TextBlock Text="Klasörü Aç"/>
+              </Button>
+            </Grid>
+            <Border Grid.Row="2" Style="{StaticResource ShellCard}" Padding="0">
+              <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="58"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Border Padding="14,10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                  <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="180"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <ComboBox Style="{StaticResource ItchyComboBox}" SelectedIndex="{Binding LogLevelFilterIndex}" Height="34">
+                      <ComboBoxItem Content="Tümü"/>
+                      <ComboBoxItem Content="Hata"/>
+                      <ComboBoxItem Content="Uyarı"/>
+                      <ComboBoxItem Content="Bilgi"/>
+                    </ComboBox>
+                    <TextBox Grid.Column="2" Style="{StaticResource ItchyTextBox}" Text="{Binding LogFilterText, UpdateSourceTrigger=PropertyChanged}"
+                             Height="34" ToolTip="Log içinde ara"/>
+                    <Button Grid.Column="4" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshLogsCommand}" Padding="12,8">
+                      <TextBlock Text="Yenile"/>
+                    </Button>
+                  </Grid>
+                </Border>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                  <ItemsControl ItemsSource="{Binding LogEntries}" Margin="10">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Background="{DynamicResource BgTertiary}" CornerRadius="4" Padding="10,7" Margin="0,0,0,5">
+                          <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="76"/><ColumnDefinition Width="62"/><ColumnDefinition Width="*"/><ColumnDefinition Width="130"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Time}" FontSize="9" FontFamily="Consolas" Foreground="{DynamicResource TextTertiary}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Level}" FontSize="9" FontFamily="Consolas" Foreground="{DynamicResource AccentLight}"/>
+                            <TextBlock Grid.Column="2" Text="{Binding Message}" FontSize="10" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap"/>
+                            <TextBlock Grid.Column="3" Text="{Binding SourceFile}" FontSize="8" FontFamily="Consolas" Foreground="{DynamicResource TextMuted}" TextAlignment="Right"/>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+              </Grid>
+            </Border>
           </Grid>
 
           <!-- SETTINGS -->
@@ -1143,6 +1411,22 @@
                           <TextBlock Text="" FontFamily="Segoe MDL2 Assets"/>
                         </Button>
                       </Grid>
+                      <Separator Margin="0,14"/>
+                      <TextBlock Text="RAPOR BİLGİLERİ" Style="{StaticResource FieldLabel}"/>
+                      <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel>
+                          <TextBlock Text="MÜŞTERİ ADI" Style="{StaticResource FieldLabel}"/>
+                          <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding CustomerName}" Height="32"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                          <TextBlock Text="TEKNİSYEN" Style="{StaticResource FieldLabel}"/>
+                          <TextBox Style="{StaticResource ItchyTextBox}" Text="{Binding TechnicianName}" Height="32"/>
+                        </StackPanel>
+                      </Grid>
+                      <CheckBox Style="{StaticResource ItchyCheckBox}" IsChecked="{Binding PrivacyModeReports}">
+                        <TextBlock Text="Müşteri raporunda kişisel yolları gizle"/>
+                      </CheckBox>
                     </StackPanel>
                   </Border>
                   <Border Style="{StaticResource ShellCard}">
@@ -1262,7 +1546,7 @@
       <Border Grid.Row="2" Background="{DynamicResource BgSecondary}"
               BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
         <Grid Margin="12,0">
-          <TextBlock Text="Itchy Backup v1.6.0" FontSize="9" FontFamily="Consolas"
+          <TextBlock Text="Itchy Backup v1.7.0" FontSize="9" FontFamily="Consolas"
                      Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"/>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
             <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentLight}" Margin="0,0,6,0"/>

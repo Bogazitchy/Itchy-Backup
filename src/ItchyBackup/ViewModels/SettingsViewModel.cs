@@ -29,6 +29,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _smtpPassword = "";
     [ObservableProperty] private string _emailFrom = "info@itchy.com.tr";
     [ObservableProperty] private string _emailTo = "";
+    [ObservableProperty] private bool _privacyModeReports = true;
+    [ObservableProperty] private string _customerName = "";
+    [ObservableProperty] private string _technicianName = "";
 
     public SettingsViewModel() => Load();
 
@@ -57,6 +60,9 @@ public partial class SettingsViewModel : ObservableObject
             SmtpPassword = SecretService.Unprotect(s.SmtpPassword);
             EmailFrom = string.IsNullOrWhiteSpace(s.EmailFrom) ? "info@itchy.com.tr" : s.EmailFrom;
             EmailTo = s.EmailTo;
+            PrivacyModeReports = s.PrivacyModeReports;
+            CustomerName = s.CustomerName;
+            TechnicianName = s.TechnicianName;
         }
         catch { }
     }
@@ -86,6 +92,9 @@ public partial class SettingsViewModel : ObservableObject
                 SmtpPassword = SecretService.Protect(SmtpPassword),
                 EmailFrom = EmailFrom,
                 EmailTo = EmailTo,
+                PrivacyModeReports = PrivacyModeReports,
+                CustomerName = CustomerName,
+                TechnicianName = TechnicianName,
             }, Formatting.Indented));
         }
         catch { }
@@ -111,5 +120,8 @@ public partial class SettingsViewModel : ObservableObject
         public string SmtpPassword { get; set; } = "";
         public string EmailFrom { get; set; } = "info@itchy.com.tr";
         public string EmailTo { get; set; } = "";
+        public bool PrivacyModeReports { get; set; } = true;
+        public string CustomerName { get; set; } = "";
+        public string TechnicianName { get; set; } = "";
     }
 }

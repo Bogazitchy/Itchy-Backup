@@ -14,10 +14,14 @@ public static class BackupReportService
             ? (result.Warnings.Count == 0 ? "Başarılı" : "Başarılı, uyarılı")
             : "Hatalı";
 
+        var healthScore = Math.Max(0, 100 - result.Errors.Count * 35 - result.Warnings.Count * 10);
         var rows = new[]
         {
             ("Durum", status),
-            ("Yedek yolu", result.BackupPath),
+            ("Sağlık puanı", $"{healthScore}/100"),
+            ("Müşteri", string.IsNullOrWhiteSpace(options.CustomerName) ? "-" : options.CustomerName),
+            ("Teknisyen", string.IsNullOrWhiteSpace(options.TechnicianName) ? "-" : options.TechnicianName),
+            ("Yedek yolu", Mask(result.BackupPath, options.PrivacyMode)),
             ("Süre", result.Elapsed.ToString(@"mm\:ss")),
             ("Kategori", result.TotalCategories.ToString()),
             ("Kopyalanan dosya", result.FilesCopied.ToString()),
@@ -29,8 +33,8 @@ public static class BackupReportService
             ("Şifreleme", options.UsePassword ? "Açık" : "Kapalı"),
             ("Checksum", result.VerificationReport?.Summary ?? "Yok"),
             ("Manifest", manifest != null ? $"{manifest.FileCount} dosya kaydı" : "Yok"),
-            ("Bilgisayar", Environment.MachineName),
-            ("Kullanıcı", Environment.UserName),
+            ("Bilgisayar", options.PrivacyMode ? MaskMachine(Environment.MachineName) : Environment.MachineName),
+            ("Kullanıcı", options.PrivacyMode ? "Windows kullanıcısı" : Environment.UserName),
         };
 
         var sb = new StringBuilder();
@@ -52,7 +56,7 @@ public static class BackupReportService
         {
             sb.AppendLine("<h2>Seçilen Öğeler</h2><table><thead><tr><th>Kategori</th><th>Öğe</th><th>Kaynak</th></tr></thead><tbody>");
             foreach (var item in manifest.SelectedItems)
-                sb.AppendLine($"<tr><td>{WebUtility.HtmlEncode(item.Category)}</td><td>{WebUtility.HtmlEncode(item.Label)}</td><td>{WebUtility.HtmlEncode(item.SourcePath)}</td></tr>");
+                sb.AppendLine($"<tr><td>{WebUtility.HtmlEncode(item.Category)}</td><td>{WebUtility.HtmlEncode(item.Label)}</td><td>{WebUtility.HtmlEncode(Mask(item.SourcePath, options.PrivacyMode))}</td></tr>");
             sb.AppendLine("</tbody></table>");
         }
 
@@ -60,7 +64,7 @@ public static class BackupReportService
         {
             sb.AppendLine("<h2>Doğrulama Sorunları</h2><table><thead><tr><th>Durum</th><th>Dosya</th><th>Hata</th></tr></thead><tbody>");
             foreach (var entry in result.VerificationReport.Entries.Where(e => e.Status != VerificationStatus.Valid).Take(200))
-                sb.AppendLine($"<tr><td>{WebUtility.HtmlEncode(entry.StatusText)}</td><td>{WebUtility.HtmlEncode(entry.FilePath)}</td><td>{WebUtility.HtmlEncode(entry.ErrorMessage)}</td></tr>");
+                sb.AppendLine($"<tr><td>{WebUtility.HtmlEncode(entry.StatusText)}</td><td>{WebUtility.HtmlEncode(Mask(entry.FilePath, options.PrivacyMode))}</td><td>{WebUtility.HtmlEncode(entry.ErrorMessage)}</td></tr>");
             sb.AppendLine("</tbody></table>");
         }
 
@@ -69,4 +73,17 @@ public static class BackupReportService
         await File.WriteAllTextAsync(path, sb.ToString(), Encoding.UTF8);
         return path;
     }
+
+    private static string Mask(string value, bool enabled)
+    {
+        if (!enabled || string.IsNullOrWhiteSpace(value)) return value;
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (!string.IsNullOrWhiteSpace(userProfile))
+            value = value.Replace(userProfile, @"Kullanıcı", StringComparison.OrdinalIgnoreCase);
+        value = value.Replace(Environment.UserName, "Kullanıcı", StringComparison.OrdinalIgnoreCase);
+        return value;
+    }
+
+    private static string MaskMachine(string value)
+        => string.IsNullOrWhiteSpace(value) ? "" : $"{value[..Math.Min(3, value.Length)]}***";
 }

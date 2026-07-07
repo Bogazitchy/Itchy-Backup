@@ -119,7 +119,8 @@ public partial class App : System.Windows.Application
                 RotationPolicy = profile.RotationPolicy,
                 RotationKeepLastN = profile.RotationKeepLastN,
                 RotationDeleteOlderThanDays = profile.RotationDeleteOlderThanDays,
-                ParallelCopyThreads = 4
+                ParallelCopyThreads = 4,
+                PrivacyMode = true
             };
 
             var engine = new BackupEngine(options, null, CancellationToken.None);

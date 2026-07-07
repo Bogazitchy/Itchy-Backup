@@ -28,6 +28,9 @@ public class BackupOptions
     public int RotationKeepLastN { get; set; } = 5;
     public int RotationDeleteOlderThanDays { get; set; } = 30;
     public int ParallelCopyThreads { get; set; } = 4;
+    public bool PrivacyMode { get; set; } = false;
+    public string CustomerName { get; set; } = "";
+    public string TechnicianName { get; set; } = "";
 }
 
 public class BackupResult

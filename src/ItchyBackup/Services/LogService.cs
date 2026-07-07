@@ -5,6 +5,7 @@ namespace ItchyBackup.Services;
 public static class LogService
 {
     private static string _logPath = "";
+    private static string _logDir = "";
     private static readonly object _lock = new();
 
     public static void Initialize(string? customPath = null)
@@ -13,11 +14,13 @@ public static class LogService
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "ItchyBackup", "Logs");
         Directory.CreateDirectory(logDir);
+        _logDir = logDir;
         _logPath = Path.Combine(logDir, $"itchy_{DateTime.Now:yyyy-MM-dd}.log");
     }
 
     public static void InitializeForBackup(string backupFolder)
     {
+        _logDir = backupFolder;
         _logPath = Path.Combine(backupFolder, $"backup_log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
     }
 
@@ -41,4 +44,16 @@ public static class LogService
     }
 
     public static string GetLogPath() => _logPath;
+    public static string GetLogDirectory() => !string.IsNullOrWhiteSpace(_logDir)
+        ? _logDir
+        : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ItchyBackup", "Logs");
+
+    public static IEnumerable<string> GetRecentLogFiles(int take = 8)
+    {
+        var appLogDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ItchyBackup", "Logs");
+        if (!Directory.Exists(appLogDir)) return Array.Empty<string>();
+        return Directory.GetFiles(appLogDir, "*.log")
+            .OrderByDescending(File.GetLastWriteTime)
+            .Take(take);
+    }
 }

@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.7.0 - Kontrol Merkezi ve Servis Akışı Güncellemesi
+
+- Uygulama açılışına Dashboard/Kontrol Merkezi eklendi.
+- Dashboard; son yedek, hedef klasör, zamanlayıcı ve son log uyarılarını kartlar halinde gösteriyor.
+- Yedekleme ekranına profil bazlı yedek kuyruğu eklendi.
+- Seçili profiller kuyruğa alınabiliyor, kuyruk sırayla çalıştırılabiliyor ve tamamlanan profil listeden düşüyor.
+- Zamanlayıcı ekranına görev yönetimi eklendi; Itchy Backup görevleri listeleniyor, test çalıştırılabiliyor ve silinebiliyor.
+- Program içi Log Merkezi eklendi; loglar hata/uyarı/bilgi filtresi ve metin aramasıyla izlenebiliyor.
+- Geri yükleme ekranındaki klasör seçimi ağaç görünümüne dönüştürüldü.
+- Yedek Testi eklendi; seçili yedek için manifest, checksum, ZIP açılabilirliği, rapor ve içerik kontrollerinden sağlık puanı üretiliyor.
+- HTML rapora sağlık puanı, müşteri adı, teknisyen adı ve gizlilik modu eklendi.
+- Ayarlara müşteri/teknisyen rapor bilgileri ve müşteri raporunda kişisel yolları gizleme seçeneği eklendi.
+- Uygulama, kurulum ve paket sürümü `v1.7.0` olarak güncellendi.
+
 ## v1.6.0 - Profil, Zamanlayıcı ve Log Güncellemesi
 
 - Yedek kaynaklarında kategori başlığına tıklayınca kategori açılıp kapanır hale getirildi.

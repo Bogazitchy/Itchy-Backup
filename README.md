@@ -6,7 +6,7 @@
 
 Profiller, doğrulama, zamanlama, raporlama ve Windows kurtarma araçları tek bir masaüstü uygulamasında.
 
-[![Sürüm](https://img.shields.io/badge/sürüm-v1.6.0-008A57?style=for-the-badge)](https://github.com/Bogazitchy/Itchy-Backup/releases)
+[![Sürüm](https://img.shields.io/badge/sürüm-v1.7.0-008A57?style=for-the-badge)](https://github.com/Bogazitchy/Itchy-Backup/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows_10%2F11-0078D4?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/Bogazitchy/Itchy-Backup/releases)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![WPF](https://img.shields.io/badge/arayüz-WPF-1F6FEB?style=for-the-badge)](src/ItchyBackup/Views)
@@ -39,7 +39,9 @@ Profiller, doğrulama, zamanlama, raporlama ve Windows kurtarma araçları tek b
 
 ### Yedekleme Çalışma Alanı
 
+- Açılış kontrol merkezi: son yedek, hedef durumu, zamanlayıcı ve son log uyarıları
 - Tam genişlik profil seçici; yeni profil, yeniden adlandırma, düzenleme, içe/dışa aktarma ve silme komutları
+- Profil bazlı yedek kuyruğu ve sırayla çalıştırma
 - İkonlu, katlanabilir yedek kategorileri; kategori başlığına tıklayarak hızlı aç/kapat
 - Hedef, ZIP, AES-256, VSS, checksum, artımlı yedek ve rotasyon ayarları
 - Çoklu hedef ve UNC/SMB ağ hesabı desteği
@@ -92,7 +94,8 @@ Profiller, doğrulama, zamanlama, raporlama ve Windows kurtarma araçları tek b
 ### ♻️ Geri Yükleme
 
 - Klasör veya şifreli ZIP yedeğinden geri yükleme
-- Kısmi klasör seçimi ve işlem önizlemesi
+- Ağaç görünümlü kısmi klasör seçimi ve işlem önizlemesi
+- Yedek sağlık testi: manifest, checksum, ZIP açılabilirliği ve rapor kontrolleri
 - Var olan dosyalar için **atla**, **üzerine yaz** veya **yeni isim oluştur**
 - Geri yükleme ilerlemesi ve iptal desteği
 - İşlem sonunda `restore_report_*.txt` raporu
@@ -102,7 +105,7 @@ Profiller, doğrulama, zamanlama, raporlama ve Windows kurtarma araçları tek b
 
 - Hazır profiller: **Hızlı Format**, **Standart Servis**, **Muhasebe PC**, **Tarayıcı Kurtarma**, **Tam Kullanıcı**
 - Kullanıcı profili oluşturma, yeniden adlandırma, güncelleme, silme, içe ve dışa aktarma
-- Windows Görev Zamanlayıcısı entegrasyonu ve zamanlanmış yedek hedef klasörü seçimi
+- Windows Görev Zamanlayıcısı entegrasyonu, zamanlanmış yedek hedef klasörü seçimi ve görev yönetimi
 - Artımlı yedekleme ve temel yedek seçimi
 - Birden fazla hedefe kopyalama
 - Son `N` yedeği saklama veya belirli günden eski yedekleri silme
@@ -110,10 +113,11 @@ Profiller, doğrulama, zamanlama, raporlama ve Windows kurtarma araçları tek b
 
 ### 📊 İzleme ve Raporlama
 
+- Program içi Log Merkezi; hata/uyarı/bilgi filtreleme ve arama
 - Detaylı dosya/kategori logları, uygulama başlangıç/çıkış izleri ve zamanlayıcı yedek kayıtları
 - Canlı ilerleme, aktarım hızı ve tahmini süre
 - Dosya, kategori, boyut, hata ve uyarı özeti
-- HTML teknik servis/müşteri raporu
+- Sağlık puanlı HTML teknik servis/müşteri raporu ve kişisel yol gizleme modu
 - Geçmiş yedeklerde checksum doğrulama
 - İki yedeğin içerik karşılaştırması
 - Windows toast, webhook ve SMTP bildirimi
@@ -135,7 +139,7 @@ flowchart LR
 ### Hazır Paket
 
 1. [Releases](https://github.com/Bogazitchy/Itchy-Backup/releases) sayfasını açın.
-2. `ItchyBackup_v1.6.0_Setup.exe` veya portable sürümü indirin.
+2. `ItchyBackup_v1.7.0_Setup.exe` veya portable sürümü indirin.
 3. VSS, sürücü dışa aktarımı, Wi-Fi profilleri ve sistem geri yükleme özellikleri için uygulamayı **yönetici olarak** çalıştırın.
 4. Bir profil seçin, yedek hedefini belirleyin ve ön kontrolü çalıştırın.
 
@@ -215,7 +219,7 @@ Windows Task Scheduler · VSS · `pnputil` · `netsh` · Windows System Restore
 
 <img src="src/ItchyBackup/Resources/Icons/app-emblem.png" width="72" alt="Itchy Backup simgesi">
 
-**Itchy Backup v1.6.0**
+**Itchy Backup v1.7.0**
 
 Teknik servis iş akışları için geliştirildi.
 

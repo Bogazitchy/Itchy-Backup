@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace ItchyBackup.ViewModels;
 
-public enum ActivePanel { Backup, History, Scheduler, Settings, Restore, Result }
+public enum ActivePanel { Dashboard, Backup, History, Scheduler, Logs, Settings, Restore, Result }
 
 public partial class MainViewModel : ObservableObject
 {
@@ -23,27 +23,35 @@ public partial class MainViewModel : ObservableObject
     public ObservableCollection<PreflightCheckItem> PreflightChecks { get; } = new();
     public ObservableCollection<BackupPreset> BackupPresets { get; } = new();
     public ObservableCollection<CompareEntry> CompareEntries { get; } = new();
+    public ObservableCollection<BackupProfile> BackupQueue { get; } = new();
     [ObservableProperty] private BackupProfile? _selectedQuickProfile;
 
     // Panel navigasyon
-    [ObservableProperty] private ActivePanel _activePanel = ActivePanel.Backup;
+    [ObservableProperty] private ActivePanel _activePanel = ActivePanel.Dashboard;
+    public bool IsPanelDashboard => ActivePanel == ActivePanel.Dashboard;
     public bool IsPanelBackup    => ActivePanel == ActivePanel.Backup;
     public bool IsPanelHistory   => ActivePanel == ActivePanel.History;
     public bool IsPanelScheduler => ActivePanel == ActivePanel.Scheduler;
+    public bool IsPanelLogs      => ActivePanel == ActivePanel.Logs;
     public bool IsPanelSettings  => ActivePanel == ActivePanel.Settings;
     public bool IsPanelRestore   => ActivePanel == ActivePanel.Restore;
     public bool IsPanelResult    => ActivePanel == ActivePanel.Result;
 
     partial void OnActivePanelChanged(ActivePanel value)
     {
+        OnPropertyChanged(nameof(IsPanelDashboard));
         OnPropertyChanged(nameof(IsPanelBackup));
         OnPropertyChanged(nameof(IsPanelHistory));
         OnPropertyChanged(nameof(IsPanelScheduler));
+        OnPropertyChanged(nameof(IsPanelLogs));
         OnPropertyChanged(nameof(IsPanelSettings));
         OnPropertyChanged(nameof(IsPanelRestore));
         OnPropertyChanged(nameof(IsPanelResult));
         if (value == ActivePanel.History) LoadBackupHistory();
         if (value == ActivePanel.Restore) LoadAvailableBackups();
+        if (value == ActivePanel.Dashboard) RefreshDashboard();
+        if (value == ActivePanel.Logs) RefreshLogs();
+        if (value == ActivePanel.Scheduler) RefreshScheduledTasks();
     }
 
     // Yedek seçenekleri
@@ -131,6 +139,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _smtpPassword = "";
     [ObservableProperty] private string _emailFrom = "info@itchy.com.tr";
     [ObservableProperty] private string _emailTo = "";
+    [ObservableProperty] private bool _privacyModeReports = true;
+    [ObservableProperty] private string _customerName = "";
+    [ObservableProperty] private string _technicianName = "";
 
     private bool _suppressThemeApply;
 
@@ -230,12 +241,15 @@ public partial class MainViewModel : ObservableObject
         LoadProfiles();
         LoadLastDestination();
         LoadSettings();
+        RefreshDashboard();
     }
 
     // ── Navigasyon ──────────────────────────────────────────────────────────
+    [RelayCommand] public void OpenDashboard() { ActivePanel = ActivePanel.Dashboard; }
     [RelayCommand] public void OpenBackup()    { ActivePanel = ActivePanel.Backup; }
     [RelayCommand] public void OpenHistory()   { ActivePanel = ActivePanel.History; }
     [RelayCommand] public void OpenScheduler() { ActivePanel = ActivePanel.Scheduler; }
+    [RelayCommand] public void OpenLogs()      { ActivePanel = ActivePanel.Logs; }
     [RelayCommand] public void OpenSettings()  { ActivePanel = ActivePanel.Settings; }
     [RelayCommand] public void OpenRestore()   { ActivePanel = ActivePanel.Restore; }
     [RelayCommand] public void CloseResult()   { ShowResultReport = false; ActivePanel = ActivePanel.Backup; }
@@ -480,6 +494,9 @@ public partial class MainViewModel : ObservableObject
             RotationKeepLastN        = RotationKeepLastN,
             RotationDeleteOlderThanDays = RotationDeleteOlderThanDays,
             ParallelCopyThreads      = 4,
+            PrivacyMode              = PrivacyModeReports,
+            CustomerName              = CustomerName,
+            TechnicianName            = TechnicianName,
         };
 
         var progress = new Progress<BackupProgress>(p =>
@@ -569,6 +586,40 @@ public partial class MainViewModel : ObservableObject
     };
 
     [RelayCommand] public void CancelBackup() => _cts?.Cancel();
+
+    [RelayCommand]
+    public void AddSelectedProfileToQueue()
+    {
+        if (SelectedQuickProfile == null) return;
+        BackupQueue.Add(SelectedQuickProfile);
+    }
+
+    [RelayCommand]
+    public void RemoveQueuedProfile(BackupProfile? profile)
+    {
+        if (profile != null) BackupQueue.Remove(profile);
+    }
+
+    [RelayCommand]
+    public async Task RunBackupQueueAsync()
+    {
+        if (!BackupQueue.Any())
+        {
+            System.Windows.MessageBox.Show("Kuyrukta profil yok.", "Yedek Kuyruğu",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            return;
+        }
+
+        var queued = BackupQueue.ToList();
+        foreach (var profile in queued)
+        {
+            LoadProfile(profile);
+            if (string.IsNullOrWhiteSpace(DestinationPath) && !string.IsNullOrWhiteSpace(DefaultDestination))
+                DestinationPath = DefaultDestination;
+            await StartBackupAsync();
+            BackupQueue.Remove(profile);
+        }
+    }
 
     [RelayCommand]
     public void CreateProfile()
@@ -981,6 +1032,9 @@ public partial class MainViewModel : ObservableObject
             SmtpPassword = SmtpPassword,
             EmailFrom = EmailFrom,
             EmailTo = EmailTo,
+            PrivacyModeReports = PrivacyModeReports,
+            CustomerName = CustomerName,
+            TechnicianName = TechnicianName,
         };
         vm.Save();
         StartupService.SetEnabled(StartWithWindows);
@@ -1014,6 +1068,9 @@ public partial class MainViewModel : ObservableObject
             SmtpPassword = SmtpPassword,
             EmailFrom = EmailFrom,
             EmailTo = EmailTo,
+            PrivacyModeReports = PrivacyModeReports,
+            CustomerName = CustomerName,
+            TechnicianName = TechnicianName,
         };
         vm.Save();
         StartupService.SetEnabled(StartWithWindows);
@@ -1038,6 +1095,9 @@ public partial class MainViewModel : ObservableObject
         SmtpPassword = vm.SmtpPassword;
         EmailFrom = vm.EmailFrom;
         EmailTo = vm.EmailTo;
+        PrivacyModeReports = vm.PrivacyModeReports;
+        CustomerName = vm.CustomerName;
+        TechnicianName = vm.TechnicianName;
         _suppressThemeApply = true;
         ThemeName   = vm.ThemeName;
         AccentColor = vm.AccentColor == "#6C5CE7" ? "#007A4D" : vm.AccentColor;
